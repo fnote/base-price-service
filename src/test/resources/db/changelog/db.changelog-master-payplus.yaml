@@ -1,0 +1,157 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Rohana Kumara
+      changes:
+        - sql:
+            comment: Create the database if not exists
+            dbms: mysql
+            endDelimiter: ;
+            splitStatements: true
+            sql: >-
+              CREATE DATABASE payplus
+                  WITH
+                  OWNER = postgres
+                  ENCODING = 'UTF8'
+                  CONNECTION LIMIT = -1;
+            stripComments: true
+  - changeSet:
+        id: 2
+        author: Rohana Kumara
+        changes:
+            - sql:
+                  comment: Create the database if not exists
+                  dbms: mysql
+                  endDelimiter: ;
+                  splitStatements: true
+                  sql: >-
+                      CREATE TABLE `users`.`book` (
+                        `id` INT NOT NULL AUTO_INCREMENT,
+                        `author` VARCHAR(45) NOT NULL,
+                        `isbn` VARCHAR(45) NOT NULL,
+                        PRIMARY KEY (`id`),
+                        UNIQUE INDEX `isbn_UNIQUE` (`isbn` ASC) VISIBLE);
+                  stripComments: true
+  - changeSet:
+        id: 3
+        author: Rohana Kumara
+        changes:
+            - sql:
+                  comment: add the name column
+                  dbms: mysql
+                  endDelimiter: ;
+                  splitStatements: true
+                  sql: >-
+                      ALTER TABLE `users`.`book`
+                      ADD COLUMN `name` VARCHAR(45) NULL AFTER `isbn`;
+                  stripComments: true
+  - changeSet:
+          id: 4
+          author: Rohana Kumara
+          changes:
+              - sql:
+                    comment: add the users table
+                    dbms: mysql
+                    endDelimiter: ;
+                    splitStatements: true
+                    sql: >-
+                      CREATE TABLE `users`.`user` (
+                        `id` INT NOT NULL AUTO_INCREMENT,
+                        `username` VARCHAR(45) NOT NULL,
+                        `first_name` VARCHAR(45) NOT NULL,
+                        `last_name` VARCHAR(45) NOT NULL,
+                        PRIMARY KEY (`id`),
+                        UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE);
+                    stripComments: true
+  - changeSet:
+          id: 5
+          author: Rohana Kumara
+          changes:
+              - sql:
+                    comment: add the users table
+                    dbms: mysql
+                    endDelimiter: ;
+                    splitStatements: true
+                    sql: >-
+                      ALTER TABLE `users`.`user`
+                      ADD COLUMN `is_admin` TINYINT NULL AFTER `last_name`;
+                    stripComments: true
+  - changeSet:
+          id: 6
+          author: Rohana Kumara
+          changes:
+              - sql:
+                    comment: add the application users table
+                    dbms: mysql
+                    endDelimiter: ;
+                    splitStatements: true
+                    sql: >-
+                      CREATE TABLE `users`.`application_user` (
+                        `id` INT NOT NULL AUTO_INCREMENT,
+                        `username` VARCHAR(45) NOT NULL,
+                        `password` VARCHAR(100) NOT NULL,
+                        PRIMARY KEY (`id`));
+                    stripComments: true
+  - changeSet:
+          id: 7
+          author: Rohana Kumara
+          changes:
+              - sql:
+                    comment: add the application users roles table
+                    dbms: mysql
+                    endDelimiter: ;
+                    splitStatements: true
+                    sql: >-
+                      CREATE TABLE `users`.`application_user_role` (
+                       `id` INT NOT NULL,
+                       `application_user_id` VARCHAR(45) NOT NULL,
+                       `role_name` VARCHAR(45) NULL,
+                       PRIMARY KEY (`id`));
+                    stripComments: true
+
+
+
+  - changeSet:
+          id: 8
+          author: Rohana Kumara
+          changes:
+              - sql:
+                    comment: add the application users roles table
+                    dbms: mysql
+                    endDelimiter: ;
+                    splitStatements: true
+                    sql: >-
+                      ALTER TABLE `users`.`application_user_role`
+                      CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+                    stripComments: true
+  - changeSet:
+          id: 9
+          author: Rohana Kumara
+          changes:
+              - sql:
+                    comment: add the updated_by and updated_at
+                    dbms: mysql
+                    endDelimiter: ;
+                    splitStatements: true
+                    sql: >-
+                      ALTER TABLE `users`.`book`
+                      ADD COLUMN `updated_by` VARCHAR(45) NOT NULL AFTER `name`,
+                      ADD COLUMN `updated_at` INT NOT NULL AFTER `updated_by`;
+                    stripComments: true
+  - changeSet:
+          id: 10
+          author: Rohana Kumara
+          changes:
+              - sql:
+                    comment: updated the updated_by and updated_at
+                    dbms: mysql
+                    endDelimiter: ;
+                    splitStatements: true
+                    sql: >-
+                      ALTER TABLE `users`.`book`
+                      CHANGE COLUMN `updated_by` `updated_by` VARCHAR(100) NOT NULL ,
+                      CHANGE COLUMN `updated_at` `updated_at` BIGINT(20) NOT NULL ;
+                    stripComments: true
+
+
+
