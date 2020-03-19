@@ -16,7 +16,27 @@ https://github.com/orctom/gradle-archetype-plugin
 * Automated database management using liquibase
 * Secure coding practices
  
+# How to run
+* Create a database named `blueprint` in mysql or postgre
+* Set the below datasource properties as appropriate.(mysql)
+```
+#comment out if postgre
+jdbcUrl=jdbc:mysql://localhost:3306/blueprint?characterEncoding=utf8&useSSL=false
+#Uncomment if postgre
+#jdbcUrl=jdbc:postgresql://localhost:5432/users?characterEncoding=utf8&useSSL=false
+username=root
+password=password
+```
+* Run unit tests `gradle test`
+* Ensure all the tests run 
+* The bluepriint comes with support for both mysql and postgre. Change the database connection parameters as appropriate.
+* eg: postgre datasource.properties
+```dtd
 
+jdbcUrl=jdbc:postgresql://localhost:5432/users?characterEncoding=utf8&useSSL=false
+username=root
+password=password
+```
 # Main Features built into the API Blueprint
 
 # Layered Architecture
@@ -51,7 +71,7 @@ class BookController {
     @ApiOperation(value = "Creates a new book", notes = "Returns the newly created Book with its auto assigned Id", code = 201, response = Book.class)
   
 ```
-### Testing
+### Testing the Controller Layer
 * Uses mock based testing
 * @WebMvcTest and @MockBean tag
 * Required to mock the services layer the controller depends on.
@@ -127,7 +147,7 @@ public class BookServiceImpl implements BookService {
 }
 
 ```
-### Testing
+### Testing the Service Layer
 * Uses real service classes (Minimize the mocking)
 * Tests are transactional and data used for testing rolled back
 * Repository layer is tested as well
@@ -171,9 +191,10 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 }
 ```
 
-### Testing
+### Testing the Repository Layer
 * No tests,assuming all repository layer functionality is covered throght service layer testing
 * If required, one can easily follow the approach for service layer testing for repository layer as well
+* Enable @Transactional in each repository test so that data won`t be persisted after each test run
 
 ## Entities
 * Represents business entities of the system
@@ -197,12 +218,48 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
 
 ## Security
+* Based on spring security
+* `/api-blueprint/sign-up` url to sign up
+* Spring provided `/login` url to sign in
+* JWT token based authentication
+* URL and method level authorization
+  
 
 ### Authentication
 
+See `UserSignUpControllerTest.java and ``UserLoginControllerTest.java` <br>
+Filter `JWTAuthenticationFilter.java`
+
 ### Authorization
 
+See `BookControllerTest` for mocked user based testing<br>
+Filter `JWTAuthorizationFilter.java`
+
 ### Role Based Access
+* URL level authorization
+* eg: See in 
+```dtd
+SpringSecurityConfig.java
+```
+```dtd
+ // Secure the endpoints with authentication and authorization
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.cors().and().csrf().disable().authorizeRequests()
+               .antMatchers(HttpMethod.POST, "/*/*/sign-up").permitAll()
+                //Actual role must be ROLE_USER. This is spring thing
+               .antMatchers(HttpMethod.GET,"/*/*/book**").hasAnyRole("USER","ADMIN")
+               .antMatchers(HttpMethod.POST,"/*/*/book**").hasRole("ADMIN")
+               .anyRequest().authenticated()
+               .and()
+               .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+               .addFilter(new JWTAuthorizationFilter(authenticationManager()))
+                // this disables session creation on Spring Security
+               .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    }
+```
+
+
 
 
 ## Validation and Exception Handling

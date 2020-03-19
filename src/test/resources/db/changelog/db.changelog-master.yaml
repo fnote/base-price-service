@@ -4,7 +4,6 @@ databaseChangeLog:
       author: Rohana Kumara
       changes:
         - createTable:
-            catalogName: users
             columns:
               - column:
                   name: id
@@ -29,7 +28,6 @@ databaseChangeLog:
       author: Rohana Kumara
       changes:
         - addColumn:
-            catalogName: users
             columns:
               - column:
                   name: name
@@ -42,7 +40,6 @@ databaseChangeLog:
       author: Rohana Kumara
       changes:
         - createTable:
-            catalogName: users
             columns:
               - column:
                   name: id
@@ -74,7 +71,6 @@ databaseChangeLog:
       author: Rohana Kumara
       changes:
         - addColumn:
-            catalogName: users
             columns:
               - column:
                   name: is_admin
@@ -87,7 +83,6 @@ databaseChangeLog:
       author: Rohana Kumara
       changes:
         - createTable:
-            catalogName: users
             columns:
               - column:
                   name: id
@@ -112,7 +107,6 @@ databaseChangeLog:
       author: Rohana Kumara
       changes:
         - createTable:
-            catalogName: users
             columns:
               - column:
                   name: id
@@ -136,7 +130,6 @@ databaseChangeLog:
       author: Rohana Kumara
       changes:
         - addAutoIncrement:
-            catalogName: users
             columnDataType: int
             columnName: id
             defaultOnNull: false
@@ -149,7 +142,6 @@ databaseChangeLog:
       author: Rohana Kumara
       changes:
         - addColumn:
-            catalogName: users
             columns:
               - column:
                   name: updated_by
@@ -158,7 +150,6 @@ databaseChangeLog:
                     nullable: false
             tableName: book
         - addColumn:
-            catalogName: users
             columns:
               - column:
                   name: updated_at
@@ -171,12 +162,10 @@ databaseChangeLog:
       author: Rohana Kumara
       changes:
         - modifyDataType:
-            catalogName: users
             columnName: updated_by
             newDataType: VARCHAR(100)
             tableName: book
         - modifyDataType:
-            catalogName: users
             columnName: updated_at
             newDataType: BIGINT
             tableName: book
