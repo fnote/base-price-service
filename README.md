@@ -1,55 +1,157 @@
-# API Blueprint
-This project serves as an API Blueprint to initiate a spring boot based API development with all the commonly required boilerplate included.
-We will use the API Blueprint to derive a template so that we can use a maven archetype like scaffolding tool available for gradle.
-https://github.com/orctom/gradle-archetype-plugin
-
-# What You Will Get
-
-* Layered architecture with controller,service and repository layers
-* JPA based ORM,JPA interceptor to capture cross cutting data requirements such as createdBy,createdAt
-* Database connection pooling
-* Spring security, authentication and authorization 
-* High focus in enabling sustainable and scalable Test Driven Development in all layers 
-* Standard validations and error handling
-* Logging
-* Automated Swagger documentation 
-* Automated database management using liquibase
-* Secure coding practices
- 
-# How to run
-* Create a database named `blueprint` in mysql or postgre
-* Set the below datasource properties as appropriate.(mysql)
-```
-#comment out if postgre
-jdbcUrl=jdbc:mysql://localhost:3306/blueprint?characterEncoding=utf8&useSSL=false
-#Uncomment if postgre
-#jdbcUrl=jdbc:postgresql://localhost:5432/users?characterEncoding=utf8&useSSL=false
-username=root
-password=password
-```
-* Run unit tests `gradle test`
-* Ensure all the tests run 
-* The bluepriint comes with support for both mysql and postgre. Change the database connection parameters as appropriate.
-* eg: postgre datasource.properties
+# How to start up 
+Do the below steps to get the API blueprint up and running entirely in a local developer workstation
+* The API blueprint requires a postgre sql database
+* Create the database:here we name the db as payplus_dev
 ```dtd
-
-jdbcUrl=jdbc:postgresql://localhost:5432/users?characterEncoding=utf8&useSSL=false
-username=root
-password=password
+CREATE DATABASE payplus_dev
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF-8'
+    TEMPLATE template0
+    LC_COLLATE = 'C'
+    LC_CTYPE = 'C'
+    CONNECTION LIMIT = -1;
 ```
-# Main Features built into the API Blueprint
+* Grant required permission to a preferred user: here we name the db user as payplus
+```dtd
+CREATE ROLE payplus NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT LOGIN PASSWORD 'password';
+GRANT ALL ON DATABASE payplus_dev TO payplus;
+GRANT ALL PRIVILEGES ON DATABASE payplus_dev TO payplus;
+GRANT ALL ON DATABASE payplus_dev TO postgres;
 
-# Layered Architecture
+```
+* Set the active profile to local
+```dtd
+export spring_profiles_active=local
+```
+
+* Set all the database parameters appropriately in the application-local.proporties file in the test folder
+```dtd
+#Auth parameters
+resolved.introspect.url=http://10.133.201.10:8080/v1/auth-service/introspect
+
+#database parameters
+resolved.db.jdbcUrl=jdbc:postgresql://localhost:5432/payplus_dev?characterEncoding=utf8&useSSL=false
+resolved.db.username=payplus
+resolved.db.password=password
+```
+* Run the unit tests
+```dtd
+gradle test
+```
+* Running unit tests will bring the databse upto current status before runing the tests
+
+# API Blueprint 
+A template implementation of a microservice based on Spring Boot. This implementation includes commonly required 
+infrastructure for a microservice in Sysco echo system. Using this template will help teams setup a standard micoroservice below
+capabilities.
+
+* Adherence to 12-factor architecture style.
+* Distinct layers for Controller,Service,DAO
+* Ability to do Test Driven Development (TDD) in all the layers. Samples included.
+* AWS SSM based secure application configurations 
+* Ability to have multiple profiles(environments) 
+* Data access via JPA for ORM based data access
+* Data access via JDBCTemplate for complex queries not compatible with ORM
+* Database connection pooling for postgre database
+    * Hikari
+* Ability to capture changes to the entities for audit purposes
+    * JPA interceptors and database triggers
+* Automated database change management
+    * liquibase
+* Sample database with required tables and sample ORM configurations
+    * postgre sql 
+* Standard logging with Correlation Id to identify related log entries
+    * logback
+* Standard validation of entities using built-in annotation & custom annotations 
+    * javax.validation
+* Automated swagger documentation
+
+
+
+ 
+##Application properties
+
+API Blueprint reads all its profile specific properties from AWS parameter store so that all the application properties 
+are managed centrally in a secured environment.All the sensitive parameters are store encrypted.
+
+###AWS Spring Cloud
+API Blueprint users Spring Cloud framework based configuration management. The defaults ```bootstrap.properties``` file 
+has the default configuration required for Spring Cloud.
+```dtd
+cloud.aws.credentials.instanceProfile=false
+cloud.aws.credentials.useDefaultAwsCredentialsChain=true
+cloud.aws.stack.auto=false
+cloud.aws.region.auto=false
+cloud.aws.region.static=us-east-1
+
+aws.paramstore.prefix=/payplus/config
+aws.paramstore.defaultContext=application
+aws.paramstore.profileSeparator=_
+aws.paramstore.failFast=true
+aws.paramstore.name=payplus-api
+aws.paramstore.enabled=true
+
+```
+Note that by default ```aws.paramstore.enabled``` is enabled. So that under default conditions, you need to have the required AWS access to fetch the profile specific properties.
+Above configuration assumes that application will run in ```cloud.aws.region.static=us-east-1``` region.
+
+###AWS Credentials
+API Blueprint requires an AWS connection to read the parameters. So store the AWS token in the file ``` ~/.aws/credentials```.
+In Sysco AWS, credentials get expired every one hour so its required to refresh this file in sufficient a frequency.
+```dtd
+[default]
+aws_access_key_id = xxxxxxxxxxxxx
+aws_secret_access_key = tX4xxxxxxxxxxxxx
+aws_session_token = IQxxxxxxxxxxxxxxx     
+```
+
+###Disable AWS Spring Cloud
+Optionally you can disable AWS parameter store based properties and read them from the local properties file. 
+This is desired only in developer workstation in order to avoid having to refresh AWS credentials.
+Use the spring profile ```local``` for this mode so that ```boostrap-local.properties``` will dictate 
+over the default ```boostrap.properties```
+eg:
+```dtd
+java -jar <jarfilename> -Dspring_profiles_active=local
+```
+
+and ```application-local.properties``` will inject the other required properties.
+
+
+###Recommended Profiles
+
+* local<br>Used when running the application in developer workstation without a vpn connection Sysco AWS cloud
+
+* dev<br>Used when running the application in developer workstation or in cloud environment using the aws cloud based properties related to dev profile.
+
+* qa<br>Used when running the application in a cloud environment using the aws cloud based properties related to qa profile.
+
+* prod<br>Used when running the application in production
+
+###Set active spring profile to enable the required profile based properties
+```dtd
+export spring_profiles_active=dev
+```
+
+
+
+
+
+
+## Features Built into the Framework
+
+## Layered Architecture
 
 ![Image description](./api-achi.png)
 
-## Controller
+### Controller Layer
 
 * Handles the http requests and responses.
-* Uses DTO(data transfer objects) to represent the requests/responses.
-* Handles the url mapping and API versioning
-* Handles exceptions 
-* Handles validations of requests
+* Uses DTO(data transfer objects) to represent the data from/to requests/responses.
+* Handles the url mapping and API versioning.
+* Handles exceptions to enable appropriate error messages.
+* Handles first level of validations of the incoming DTO objects
 * Swagger documentation
 * eg:
 ```dtd
@@ -71,11 +173,11 @@ class BookController {
     @ApiOperation(value = "Creates a new book", notes = "Returns the newly created Book with its auto assigned Id", code = 201, response = Book.class)
   
 ```
-### Testing the Controller Layer
-* Uses mock based testing
-* @WebMvcTest and @MockBean tag
-* Required to mock the services layer the controller depends on.
-* Uses @WithMockUser for authentication/authorization
+#### Testing in the Controller Layer
+* Uses mock based testing.
+* @WebMvcTest and @MockBean tag.
+* Required to mock the services layer as appropriate.
+* Uses @WithMockUser for authentication/authorization.
 * eg:
 ```dtd
 @WebMvcTest(BookController.class)
@@ -120,11 +222,11 @@ class BookControllerTest {
                 .andDo(print());
     }
 ```
-## Service
+### Service Layer
 
 * Main logic layer
-* Transactions enabled
-* Secured with method level annotations
+* Transactions and validations enabled
+* Service layer methods are secured with Spring security 
 * eg:
 ```dtd
 @Service
@@ -147,7 +249,7 @@ public class BookServiceImpl implements BookService {
 }
 
 ```
-### Testing the Service Layer
+#### Testing in the Service Layer
 * Uses real service classes (Minimize the mocking)
 * Tests are transactional and data used for testing rolled back
 * Repository layer is tested as well
@@ -174,7 +276,7 @@ class BookServiceTest {
 ```
 
 
-## Repository
+### The Repository Layer
 
 * Handles all the database or backing service calls 
 * JPA(java persistence API)  based
@@ -191,12 +293,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 }
 ```
 
-### Testing the Repository Layer
+#### Testing
 * No tests,assuming all repository layer functionality is covered throght service layer testing
 * If required, one can easily follow the approach for service layer testing for repository layer as well
-* Enable @Transactional in each repository test so that data won`t be persisted after each test run
 
-## Entities
+### Entities
 * Represents business entities of the system
 * Uses JPA implementation
 * Defines the constraints for the entity fields so validations can be automated
@@ -216,61 +317,26 @@ public interface BookRepository extends JpaRepository<Book, Long> {
       @ISBNFormat(message = "Not a valid ISBN format")
 ```
 
+### DTOs
 
-## Security
-* Based on spring security
-* `/api-blueprint/sign-up` url to sign up
-* Spring provided `/login` url to sign in
-* JWT token based authentication
-* URL and method level authorization
-  
+### Spring Security
 
-### Authentication
+#### Authentication
 
-See `UserSignUpControllerTest.java and ``UserLoginControllerTest.java` <br>
-Filter `JWTAuthenticationFilter.java`
+#### Authorization
 
-### Authorization
+#### Role Based Access
 
-See `BookControllerTest` for mocked user based testing<br>
-Filter `JWTAuthorizationFilter.java`
 
-### Role Based Access
-* URL level authorization
-* eg: See in 
-```dtd
-SpringSecurityConfig.java
-```
-```dtd
- // Secure the endpoints with authentication and authorization
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable().authorizeRequests()
-               .antMatchers(HttpMethod.POST, "/*/*/sign-up").permitAll()
-                //Actual role must be ROLE_USER. This is spring thing
-               .antMatchers(HttpMethod.GET,"/*/*/book**").hasAnyRole("USER","ADMIN")
-               .antMatchers(HttpMethod.POST,"/*/*/book**").hasRole("ADMIN")
-               .anyRequest().authenticated()
-               .and()
-               .addFilter(new JWTAuthenticationFilter(authenticationManager()))
-               .addFilter(new JWTAuthorizationFilter(authenticationManager()))
-                // this disables session creation on Spring Security
-               .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    }
-```
+### Validation and Exception Handling
 
 
 
+### Logging 
 
-## Validation and Exception Handling
+### Swagger API documentation
 
-
-
-## Logging 
-
-## Swagger API documentation
-
-## Secure Coding Practices
+### Secure Coding Practices
 
 
 

@@ -1,62 +1,111 @@
 package com.sysco.payplus.dto;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sysco.payplus.dto.masterdata.BaseOpCoDTO;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
- * Created by IntelliJ IDEA.
- * Author: rohana.kumara@sysco.com
- * Date: 3/13/20
- * Time: 12:54 PM
+ * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 3/13/20 Time: 12:54 PM
  */
-public class ErrorDTO {
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties({"locked", "opCoNumber"})
+public class ErrorDTO extends BaseOpCoDTO {
 
-    public static final String ERROR_CODE_VALIDATION_FAILURE = "1000";
-    public static final String ERROR_CODE_INTERNAL_ERROR = "999";
+  private String code;
+  private String message;
+  private Object errorData;
+  private Object originalData;
 
+  public ErrorDTO(String code) {
+    this.code = code;
+  }
 
-    private static Map<String, String> errorCodes = new HashMap<>();
-    static {
-        errorCodes.put(ERROR_CODE_VALIDATION_FAILURE,"Validation failure");
-        errorCodes.put(ERROR_CODE_INTERNAL_ERROR,"Internal service failure");
+  public ErrorDTO(String code, String message) {
+    this.code = code;
+    this.message = message;
+  }
+
+  public ErrorDTO(String code, String message, Object errorData) {
+    this.code = code;
+    this.message = message;
+    this.errorData = errorData;
+  }
+
+  public ErrorDTO(String code, String message, Object originalData, Object errorData) {
+    this.code = code;
+    this.message = message;
+    this.originalData = originalData;
+    this.errorData = errorData;
+    setOriginalData(originalData);
+  }
+
+  public Object getOriginalData() {
+    return originalData;
+  }
+
+  public void setOriginalData(Object originalData) {
+    if (originalData instanceof BaseOpCoDTO) {
+      setOpCoNumber(((BaseOpCoDTO) originalData).getOpCoNumber());
+    }
+    this.originalData = originalData;
+  }
+
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
+  }
+
+  public Object getErrorData() {
+    return errorData;
+  }
+
+  public void setErrorData(Object errorData) {
+    this.errorData = errorData;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
 
-
-    private String code;
-    private String message;
-    private Object data;
-
-    public ErrorDTO(String code) {
-        this.code = code;
-        message = ErrorDTO.errorCodes.get(code);
-        data="Service team has been informed of the internal service failure";
-    }
-    public ErrorDTO(String code, Object data) {
-        this.code = code;
-        message = ErrorDTO.errorCodes.get(code);
-        this.data = data;
+    if (o == null || getClass() != o.getClass()) {
+      return false;
     }
 
-    public String getCode() {
-        return code;
-    }
+    ErrorDTO errorDTO = (ErrorDTO) o;
 
-    public void setCode(String code) {
-        this.code = code;
-    }
+    return new EqualsBuilder()
+        .appendSuper(super.equals(o))
+        .append(code, errorDTO.code)
+        .append(message, errorDTO.message)
+        .append(errorData, errorDTO.errorData)
+        .append(originalData, errorDTO.originalData)
+        .isEquals();
+  }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
-    }
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder(17, 37)
+        .appendSuper(super.hashCode())
+        .append(code)
+        .append(message)
+        .append(errorData)
+        .append(originalData)
+        .toHashCode();
+  }
 }

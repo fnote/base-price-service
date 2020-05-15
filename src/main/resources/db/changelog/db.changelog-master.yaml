@@ -1,93 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 1
+      id: create_application_user_table
       author: Rohana Kumara
       changes:
         - createTable:
-            catalogName: users
-            columns:
-              - column:
-                  name: id
-                  type: int
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: author
-                  type: VARCHAR(45)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: isbn
-                  type: VARCHAR(45)
-                  constraints:
-                    nullable: false
-            tableName: book
-  - changeSet:
-      id: 2
-      author: Rohana Kumara
-      changes:
-        - addColumn:
-            catalogName: users
-            columns:
-              - column:
-                  name: name
-                  type: varchar(45)
-                  constraints:
-                    nullable: false
-            tableName: book
-  - changeSet:
-      id: 3
-      author: Rohana Kumara
-      changes:
-        - createTable:
-            catalogName: users
-            columns:
-              - column:
-                  name: id
-                  type: int
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: username
-                  type: VARCHAR(45)
-                  constraints:
-                    nullable: false
-                    unique: true
-                    uniqueConstraintName: username_UNIQUE
-              - column:
-                  name: first_name
-                  type: VARCHAR(45)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: last_name
-                  type: VARCHAR(45)
-                  constraints:
-                    nullable: false
-            tableName: user
-  - changeSet:
-      id: 4
-      author: Rohana Kumara
-      changes:
-        - addColumn:
-            catalogName: users
-            columns:
-              - column:
-                  name: is_admin
-                  type: SMALLINT
-                  constraints:
-                    nullable: false
-            tableName: user
-  - changeSet:
-      id: 5
-      author: Rohana Kumara
-      changes:
-        - createTable:
-            catalogName: users
+            tableName: application_user
             columns:
               - column:
                   name: id
@@ -106,17 +23,17 @@ databaseChangeLog:
                   type: VARCHAR(100)
                   constraints:
                     nullable: false
-            tableName: application_user
   - changeSet:
-      id: 6
+      id: create_application_user_role_table
       author: Rohana Kumara
       changes:
         - createTable:
-            catalogName: users
+            tableName: application_user_role
             columns:
               - column:
                   name: id
                   type: int
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -130,53 +47,439 @@ databaseChangeLog:
                   type: VARCHAR(45)
                   constraints:
                     nullable: true
-            tableName: application_user_role
   - changeSet:
-      id: 7
-      author: Rohana Kumara
+      id: create_activation_status_table
+      author: Madushanka Fonseka
       changes:
-        - addAutoIncrement:
-            catalogName: users
-            columnDataType: int
-            columnName: id
-            defaultOnNull: false
-            generationType: ALWAYS
-            incrementBy: 1
-            startWith: 1
-            tableName: application_user_role
-  - changeSet:
-      id: 8
-      author: Rohana Kumara
-      changes:
-        - addColumn:
-            catalogName: users
+        - createTable:
+            tableName: activation_status
             columns:
               - column:
-                  name: updated_by
+                  name: activation_status
+                  type: VARCHAR(15)
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+  - changeSet:
+      id: load_activation_status
+      author: Madushanka Fonseka
+      changes:
+        - loadData:
+            columns:
+              - column:
+                  name: activation_status
+                  type: STRING
+            commentLineStartsWith: A String
+            encoding: UTF-8
+            file: activation_statuses.csv
+            quotchar: ''''
+            relativeToChangelogFile: true
+            separator: ','
+            tableName: activation_status
+            usePreparedStatements: true
+  - changeSet:
+      id: create_timezone_table
+      author: Madushanka Fonseka
+      changes:
+        - createTable:
+            tableName: timezone
+            columns:
+              - column:
+                  name: timezone
+                  type: VARCHAR(15)
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+  - changeSet:
+      id: load_timezones
+      author: Madushanka Fonseka
+      changes:
+        - loadData:
+            columns:
+              - column:
+                  name: timezone
+                  type: STRING
+            commentLineStartsWith: A String
+            encoding: UTF-8
+            file: timezones.csv
+            quotchar: ''''
+            relativeToChangelogFile: true
+            separator: ','
+            tableName: timezone
+            usePreparedStatements: true
+  - changeSet:
+      id: create_opco_table
+      author: Rohana Kumara
+      changes:
+        - createTable:
+            tableName: opco
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  #                  autoIncrement: true
+                  constraints:
+                    #                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: opco_number
+                  type: VARCHAR(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: workday_name
                   type: VARCHAR(45)
                   constraints:
                     nullable: false
-            tableName: book
-        - addColumn:
-            catalogName: users
-            columns:
               - column:
-                  name: updated_at
+                  name: country_code
+                  type: VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: market
+                  type: VARCHAR(20)
+              - column:
+                  name: sap_entity_id
                   type: int
                   constraints:
                     nullable: false
-            tableName: book
+              - column:
+                  name: sus_entity_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: adp_pay_group
+                  type: VARCHAR(45)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: adp_location_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timezone
+                  type: VARCHAR(15)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_timezone
+                    references: timezone(timezone)
+              - column:
+                  name: target_pieces_per_trip
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: active_status
+                  type:  VARCHAR(15)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_active_status
+                    references: activation_status(activation_status)
+              - column:
+                  name: is_locked
+                  type: boolean
+                  valueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_current
+                  type: boolean
+                  valueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: saved_by
+                  type: VARCHAR(45)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: saved_time
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: bigint
+                  defaultValueNumeric: 1
   - changeSet:
-      id: 9
-      author: Rohana Kumara
+      id: add_primary_key_opco
+      author: Pivithuru Amarasinghe
       changes:
-        - modifyDataType:
-            catalogName: users
-            columnName: updated_by
-            newDataType: VARCHAR(100)
-            tableName: book
-        - modifyDataType:
-            catalogName: users
-            columnName: updated_at
-            newDataType: BIGINT
-            tableName: book
+        - addPrimaryKey:
+            clustered: true
+            columnNames: id, version
+            constraintName: pk_opco
+            tableName: opco
+            validate: true
+  - changeSet:
+      id: create_opco_sequence
+      author: Pivithuru Amarasinghe
+      changes:
+        - createSequence:
+            dataType: int
+            incrementBy: 1
+            sequenceName: opco_sequence
+            startValue: 1
+  - changeSet:
+      id: create_fiscal_calendar_table
+      author: Pivithuru Amarasinghe
+      changes:
+        - createTable:
+            tableName: fiscal_calendar
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: opco_number
+                  type: VARCHAR(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cal_date
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: dow
+                  type: VARCHAR(45)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fw_number
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fy_number
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: saved_by
+                  type: VARCHAR(45)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: saved_time
+                  type: bigint
+                  constraints:
+                    nullable: false
+  #Will be replaced by an enum
+  - changeSet:
+      id: create_stop_class_table
+      author: Pivithuru Amarasinghe
+      changes:
+        - createTable:
+            tableName: stop_class
+            columns:
+              - column:
+                  name: stop_class
+                  type: VARCHAR(45)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+  - changeSet:
+      id: load_stop_classes
+      author: Madushanka Fonseka
+      changes:
+        - loadData:
+            columns:
+              - column:
+                  name: stop_class
+                  type: STRING
+            commentLineStartsWith: A String
+            encoding: UTF-8
+            file: stop_classes.csv
+            quotchar: ''''
+            relativeToChangelogFile: true
+            separator: ','
+            tableName: stop_class
+            usePreparedStatements: true
+  - changeSet:
+      id: create_stop_classification_table
+      author: Pivithuru Amarasinghe
+      changes:
+        - createTable:
+            tableName: stop_classification
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  #                  autoIncrement: true
+                  constraints:
+                    #                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: opco_number
+                  type: VARCHAR(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: customer_number
+                  type: VARCHAR(45)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: customer_name
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: stop_class
+                  type: VARCHAR(45)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_stop_class
+                    references: stop_class(stop_class)
+              - column:
+                  name: stop_attributes
+                  type: json
+              - column:
+                  name: is_locked
+                  type: boolean
+                  valueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_current
+                  type: boolean
+                  valueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: saved_by
+                  type: VARCHAR(45)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: saved_time
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: bigint
+                  defaultValueNumeric: 1
+  #                  autoIncrement: true
+  #                  constraints:
+  #                    nullable: false
+  - changeSet:
+      id: add_primary_key_stop_classification
+      author: Pivithuru Amarasinghe
+      changes:
+        - addPrimaryKey:
+            clustered: true
+            columnNames: id, version
+            constraintName: pk_stop_classification
+            tableName: stop_classification
+            validate: true
+  - changeSet:
+      id: create_stop_classification_sequence
+      author: Pivithuru Amarasinghe
+      changes:
+        - createSequence:
+            dataType: int
+            incrementBy: 1
+            sequenceName: stop_classification_sequence
+            startValue: 1
+  - changeSet:
+      id: add_update_opco_trigger_function
+      author: Deshani Geethika
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            endDelimiter: ;
+            path: db/changelog/queries/opco_update_trigger.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+            stripComments: true
+  - changeSet:
+      id: add_opco_update_trigger
+      author: Deshani Geethika
+      changes:
+        - sql:
+            comment: opco_update trigger
+            dbms: postgresql
+            endDelimiter: ;
+            splitStatements: false
+            sql: CREATE TRIGGER opco_update_trigger BEFORE UPDATE ON opco FOR EACH ROW EXECUTE PROCEDURE update_opco_func();
+            stripComments: true
+
+  - changeSet:
+      id: add_audit_table_and_trigger_function
+      author: Sidath Asiri
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            endDelimiter: ;
+            path: db/changelog/queries/audit_trail.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+            stripComments: true
+  - changeSet:
+      id: add_audit_trigger_for_driver_and_opco
+      author: Sidath Asiri
+      changes:
+        - sql:
+            comment: Audit trigger for opco table
+            dbms: postgresql
+            endDelimiter: ;
+            splitStatements: false
+            sql: CREATE TRIGGER opco_audit_trigger AFTER INSERT OR UPDATE OR DELETE ON opco FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();
+            stripComments: true
+  - changeSet:
+      id: add_update_customer_trigger_function
+      author: Umesh Jayasinghe
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            endDelimiter: ;
+            path: db/changelog/queries/customer_update_trigger.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+            stripComments: true
+  - changeSet:
+      id: add_customer_update_trigger
+      author: Umesh Jayasinghe
+      changes:
+        - sql:
+            comment: customer_update trigger
+            dbms: postgresql
+            endDelimiter: ;
+            splitStatements: false
+            sql: CREATE TRIGGER customer_update_trigger BEFORE UPDATE ON stop_classification FOR EACH ROW EXECUTE PROCEDURE update_customer_func();
+            stripComments: true
+  - changeSet:
+      id: add_audit_trigger_for_customers
+      author: Umesh Jayasinghe
+      changes:
+        - sql:
+            comment: Audit trigger for stop classification table
+            dbms: postgresql
+            endDelimiter: ;
+            splitStatements: false
+            sql: CREATE TRIGGER stop_classification_audit_trigger AFTER INSERT OR UPDATE OR DELETE ON stop_classification FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();
+            stripComments: true
+  - changeSet:
+      id: load_financial_calander_date
+      author: Madushanka Fonseka
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            endDelimiter: ;
+            path: db/changelog/queries/load_financial_calendar.sql
+            relativeToChangelogFile: false
+            splitStatements: false
+            stripComments: true
