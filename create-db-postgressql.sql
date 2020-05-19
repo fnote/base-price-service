@@ -9,7 +9,8 @@ CREATE DATABASE payplus_dev
     CONNECTION LIMIT = -1;
 # Create the users and grant permission.
 
-CREATE ROLE payplus NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT LOGIN PASSWORD 'password';
-GRANT ALL ON DATABASE payplus TO payplus;
-GRANT ALL PRIVILEGES ON DATABASE payplus TO payplus;
-GRANT ALL ON DATABASE payplus TO postgres;
+CREATE ROLE payplus_user NOSUPERUSER NOCREATEROLE NOINHERIT LOGIN PASSWORD 'password';
+
+GRANT ALL ON DATABASE payplus_dev TO payplus_user;
+GRANT ALL PRIVILEGES ON DATABASE payplus_dev TO payplus_user;
+GRANT ALL ON DATABASE payplus_dev TO postgres;
