@@ -1,0 +1,17 @@
+package com.sysco.payplus.service.calculation.rules;
+
+import com.sysco.payplus.service.calculation.fact.RouteFact;
+
+dialect  "java"
+
+global org.slf4j.Logger logger;
+
+rule "Per Minute Rate"
+  agenda-group "Stops Pay"
+    when
+      stopsPay: RouteFact(hourlyBaseRate : getHourlyBaseRate())
+    then
+      logger.info("starting per minute rate calculation from hourly base rate {}", hourlyBaseRate);
+      stopsPay.setPerMinuteRate(hourlyBaseRate / 60);
+      logger.info("finished per minute calculation with result {}", stopsPay.getPerMinuteRate());
+end

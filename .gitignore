@@ -3,3 +3,8 @@
 .gradle
 .idea
 .DS_Store
+.java-version
+.project
+.classpath
+.settings/
+bin/
