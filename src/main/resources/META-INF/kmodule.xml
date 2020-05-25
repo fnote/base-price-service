@@ -2,7 +2,7 @@
 <kmodule
   xmlns="http://www.drools.org/xsd/kmodule">
 
-  <kbase packages="com.sysco.payplus.service.calculation.rules">
+  <kbase packages="com.sysco.rps.service.calculation.rules">
     <ksession default="true" name="DefaultKS"/>
   </kbase>
 </kmodule>

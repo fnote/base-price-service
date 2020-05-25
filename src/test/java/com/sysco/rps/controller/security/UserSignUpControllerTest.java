@@ -1,0 +1,66 @@
+package com.sysco.rps.controller.security;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sysco.rps.entity.security.ApplicationUser;
+import com.sysco.rps.service.security.ApplicationUserService;
+import com.sysco.rps.service.security.IntrospectRestClientService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+/**
+ * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 3/16/20 Time: 12:54 PM
+ */
+
+
+@WebMvcTest(UserSignUpController.class)
+@EnableAutoConfiguration
+
+public class UserSignUpControllerTest {
+
+  private final String API_PATH = "/payplus/v1/security/";
+  @MockBean
+  IntrospectRestClientService introspectRestClientService;
+  @Autowired
+  private MockMvc mvc;
+  @MockBean
+  private ApplicationUserService applicationUserService;
+  @MockBean
+  @Qualifier("applicationUserService")
+  private UserDetailsService userDetailsService;
+  @Autowired
+  private UserSignUpController userSignUpController;
+
+  @Test
+  public void contexLoads() throws Exception {
+    assertThat(userSignUpController).isNotNull();
+  }
+
+  @Test
+  public void whenSignUp_returnsOK() throws Exception {
+    ApplicationUser applicationUser = new ApplicationUser();
+    applicationUser.setUsername("rohanaonly");
+    applicationUser.setPassword("gvt123");
+    String applicationUserJson = new ObjectMapper().writeValueAsString(applicationUser);
+
+    //mock the expected response from the service
+    when(applicationUserService.save(applicationUser)).thenReturn(applicationUser);
+    mvc.perform(MockMvcRequestBuilders.post(API_PATH + "/sign-up")
+        .content(applicationUserJson)
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated())
+        .andDo(print());
+  }
+}
