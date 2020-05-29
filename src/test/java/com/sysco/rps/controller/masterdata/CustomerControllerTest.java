@@ -15,8 +15,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -32,59 +30,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableAutoConfiguration
 class CustomerControllerTest {
 
-  private final String API_PATH = "/payplus/v1/master-data";
+  private final String API_PATH = "/ref-price/v1/master-data";
   @MockBean
   IntrospectRestClientService introspectRestClientService;
   @Autowired
   private MockMvc mvc;
   @MockBean
   private CustomerService customerService;
-  @MockBean
-  @Qualifier("applicationUserService")
-  private UserDetailsService userDetailsService;
 
   @Test
-  @DisplayName("PAYP-458 | PAYP-463 | PAYP-467 all endpoints for unauthenticated user")
-  void whenNotAuthenticated_thenForbidden() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get(API_PATH + "/opcos/US0075/customers")
-        .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden())
-        .andDo(print());
-
-    mvc.perform(MockMvcRequestBuilders.get(API_PATH + "/opcos/US0075/customers/11111111")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isForbidden())
-            .andDo(print());
-
-    mvc.perform(MockMvcRequestBuilders.patch(API_PATH + "/opcos/US0075/customers/11111111")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isForbidden())
-            .andDo(print());
-  }
-
-  @Test
-  @DisplayName("PAYP-459 | PAYP-464 | PAYP-468 all endpoints for unauthorized user")
-  @WithMockUser(username = "admin", roles = {"NONE"})
-  void whenNotAuthorized_thenForbidden() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get(API_PATH + "/opcos/US0075/customers")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isForbidden())
-            .andDo(print());
-
-    mvc.perform(MockMvcRequestBuilders.get(API_PATH + "/opcos/US0075/customers/11111111")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isForbidden())
-            .andDo(print());
-
-    mvc.perform(MockMvcRequestBuilders.patch(API_PATH + "/opcos/US0075/customers/11111111")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isForbidden())
-            .andDo(print());
-  }
-
-
-  @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenAPICalls_thenValidSuccessCodes() throws Exception {
     when(customerService.findCustomers(anyString(), any())).thenReturn(new ListResponse<CustomerDTO>());
     when(customerService.findCustomer(anyString(), anyString()))
@@ -113,7 +67,6 @@ class CustomerControllerTest {
 
   @Test
   @DisplayName("PAYP-457 Verify response retrieved by 'Edit' endpoint for invalid request body")
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenUpdateCustomerInvalidRequestBody_thenFailure() throws Exception {
     doAnswer((i) -> null).when(customerService).updateCustomer(anyString(), anyString(), any());
 

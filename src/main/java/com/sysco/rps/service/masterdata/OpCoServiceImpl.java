@@ -19,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,10 +38,8 @@ public class OpCoServiceImpl implements OpCoService {
 
   private static final String ERROR_MESSAGE_OPCO_NOT_FOUND = "OpCo with opco number {0} not found";
 
-  private static final String AUTHORIZE_FOR_ROLE_ADMIN = "hasAnyRole( T(com.sysco.rps.entity.security.Authority).ADMIN )";
 
   @Override
-  @PreAuthorize(AUTHORIZE_FOR_ROLE_ADMIN)
   public OpCoDTO findByOpCoNumber(String opCoNumber) throws RecordNotFoundException {
     logger.info("retrieving opco with opco number {}", opCoNumber);
     OpCo opCo = findOpCoByOpCoNumber(opCoNumber);
@@ -51,7 +48,6 @@ public class OpCoServiceImpl implements OpCoService {
   }
 
   @Override
-  @PreAuthorize(AUTHORIZE_FOR_ROLE_ADMIN)
   public ListResponse<OpCoDTO> findAllOpCos(String countryCode, Pageable pageable) throws RecordNotFoundException {
     logger.info("retrieving opcos with country code {}", countryCode);
     Page<OpCo> opCoList = opCoRepository.findAllByCountryCodeAndIsCurrentTrue(countryCode, pageable);
@@ -62,7 +58,6 @@ public class OpCoServiceImpl implements OpCoService {
   }
 
   @Override
-  @PreAuthorize(AUTHORIZE_FOR_ROLE_ADMIN)
   public OpCoDTO saveOpCo(OpCoDTO opCoDTO) throws ValidationException, DuplicateRecordException {
     opCoValidationService.opCoDTOValidator.validate(opCoDTO);
     logger.info("successfully validated opCoDTO with opco number {}", opCoDTO.getOpCoNumber());
@@ -84,7 +79,6 @@ public class OpCoServiceImpl implements OpCoService {
   }
 
   @Override
-  @PreAuthorize(AUTHORIZE_FOR_ROLE_ADMIN)
   public OpCoDTO updateOpCo(String opCoNumber, OpCoDTO opCoDTO) throws ValidationException, RecordNotFoundException, DuplicateRecordException {
     opCoValidationService.opCoDTOValidator.validate(opCoDTO);
     logger.info("successfully validated opCoDTO with opco number {}", opCoDTO.getOpCoNumber());

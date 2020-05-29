@@ -2,10 +2,8 @@ package com.sysco.rps.dto.masterdata;
 
 import com.sysco.rps.entity.masterdata.OpCo;
 import com.sysco.rps.entity.masterdata.enums.ActivationStatus;
-import com.sysco.rps.entity.masterdata.enums.Currency;
 import com.sysco.rps.entity.masterdata.enums.Market;
 import com.sysco.rps.entity.masterdata.enums.Timezone;
-import com.sysco.rps.entity.masterdata.enums.UnitOfLength;
 import com.sysco.rps.validators.annotations.ValidEnumFormat;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.Max;

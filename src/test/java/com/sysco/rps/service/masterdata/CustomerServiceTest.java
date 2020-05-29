@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
@@ -56,7 +54,6 @@ class CustomerServiceTest {
   @Test
   @Tag("createCustomer")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenCreateCustomerDTO_thenSuccess() throws RecordNotFoundException, ValidationException {
     CustomerDTO expectedCustomerDTO = createCustomerDTO("US0075", "John Smith", "11111111", StopClass.REGULAR, null);
     customerService.createCustomer("US0075", expectedCustomerDTO);
@@ -71,7 +68,6 @@ class CustomerServiceTest {
   @Test
   @Tag("createCustomer")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenCreateCustomerWithoutStopClass_thenSuccessWithDefaultStopClass()
           throws RecordNotFoundException, ValidationException {
     CustomerDTO expectedCustomerDTO = createCustomerDTO("US0075", "John Smith", "11111111", null, null);
@@ -84,7 +80,6 @@ class CustomerServiceTest {
   @Test
   @Tag("createCustomer")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenCreatePremiumCustomerWithStopAttributes_thenSuccess()
           throws RecordNotFoundException, ValidationException {
     List<StopAttribute> stopAttributes = new ArrayList<>();
@@ -101,7 +96,6 @@ class CustomerServiceTest {
   @Test
   @Tag("createCustomer")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenCreateCustomerDTOWithExistingCustomer_thenFail() throws ValidationException {
     CustomerDTO firstCustomerDTO = createCustomerDTO("US0075", "John Smith", "11111111", StopClass.PALLET_REGULAR, null);
     customerService.createCustomer("US0075", firstCustomerDTO);
@@ -117,7 +111,6 @@ class CustomerServiceTest {
   @Test
   @Tag("createCustomer")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenCreateCustomerDTOWithExistingCustomerDifferentOpCo_thenSuccess() throws ValidationException {
     CustomerDTO firstCustomerDTO = createCustomerDTO("US0075", "John Smith", "11111111", StopClass.PALLET_REGULAR, null);
     customerService.createCustomer("US0075", firstCustomerDTO);
@@ -131,7 +124,6 @@ class CustomerServiceTest {
   @Test
   @Tag("createCustomer")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenCreateCustomerDTOWithConstraintViolations_thenFail() throws ValidationException {
     CustomerDTO firstCustomerDTO = createCustomerDTO("US0075", "John Smith", "11111111", StopClass.BACKHAUL, null);
     customerService.createCustomer("US0075", firstCustomerDTO);
@@ -145,21 +137,9 @@ class CustomerServiceTest {
   }
 
   @Test
-  @Tag("createCustomer")
-  @Transactional
-  @WithMockUser(username = "admin", roles = {"Non_ADMIN"})
-  void whenCreateCustomerDTOWithoutPermission_thenFail() throws ValidationException {
-    CustomerDTO firstCustomerDTO = createCustomerDTO("US0075", "John Smith", "11111111", StopClass.REGULAR, null);
-    assertThrows(AccessDeniedException.class, () -> {
-      customerService.createCustomer("US0075", firstCustomerDTO);
-    });
-  }
-
-  @Test
   @Tag("updateCustomer")
   @DisplayName("PAYP-423 Verify response retrieved by 'Edit' endpoint for valid request body")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenUpdateCustomerDTO_thenSuccess() throws RecordNotFoundException, ValidationException {
     CustomerDTO initialCustomerDTO = createCustomerDTO("US0075", "John Smith", "11111111", StopClass.REGULAR, null);
     customerService.createCustomer("US0075", initialCustomerDTO);
@@ -181,7 +161,6 @@ class CustomerServiceTest {
   @Tag("updateCustomer")
   @DisplayName("Verify update the correct customer when same customer number exits in multiple opCos")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenUpdateCustomerDTOWithOpCo_thenSuccess() throws RecordNotFoundException, ValidationException {
     CustomerDTO opco75CustomerDTO = createCustomerDTO("US0075", "John Smith", "11111111", StopClass.PALLET_REGULAR, null);
     CustomerDTO opco85CustomerDTO = createCustomerDTO("US0085", "Carlos", "11111111", StopClass.REGULAR, null);
@@ -210,7 +189,6 @@ class CustomerServiceTest {
   @Tag("updateCustomer")
   @DisplayName("Verify update the customer with stop attributes possible")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenUpdateCustomerDTOWithStopAttributes_thenSuccess() throws RecordNotFoundException, ValidationException {
     // initial customer creation with no stop attributes
     List<StopAttribute> stopAttributes = new ArrayList<>();
@@ -248,7 +226,6 @@ class CustomerServiceTest {
   @Tag("updateCustomer")
   @DisplayName("Verify update the customer from premium level class to regular level class fails when stop attributes not set to empty")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenUpdateCustomerDTOFromPremiumToRegular_thenFail() throws ValidationException {
     // initial customer creation with no stop attributes
     List<StopAttribute> stopAttributes = new ArrayList<>();
@@ -266,7 +243,6 @@ class CustomerServiceTest {
   @Tag("updateCustomer")
   @DisplayName("Verify update the customer from premium level class to regular level class")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenUpdateCustomerDTOFromPremiumToRegular_thenSuccess() throws ValidationException {
     // initial customer creation with no stop attributes
     List<StopAttribute> stopAttributes = new ArrayList<>();
@@ -285,7 +261,6 @@ class CustomerServiceTest {
   @Tag("updateCustomer")
   @DisplayName("PAYP-460 Verify response retrieved by 'Edit' endpoint for invalid OpCo")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenUpdateCustomerDTONotExisting_thenFail() throws ValidationException {
     CustomerDTO initialCustomerDTO = createCustomerDTO("US0075", "John Smith", "11111111", StopClass.REGULAR, null);
     customerService.createCustomer("US0075", initialCustomerDTO);
@@ -347,7 +322,6 @@ class CustomerServiceTest {
   @Tag("findCustomers")
   @DisplayName("PAYP-466 Verify response retrieved by 'Get By OpCo' endpoint for a valid OpCo")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenFindAllCustomersWithValidOpCo() throws RecordNotFoundException {
     createCustomers();
     List<CustomerDTO> customersUS75 = customerService.findCustomers("US0010", PageRequest.of(0, 10)).getItems();
@@ -358,7 +332,6 @@ class CustomerServiceTest {
   @DisplayName("PAYP-469 Verify response retrieved by 'Get By OpCo' endpoint for invalid OpCo")
   @Tag("findCustomers")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenFindAllCustomersWithInValidOpCo() {
     createCustomers();
     assertThrows(RecordNotFoundException.class, () -> {
@@ -370,7 +343,6 @@ class CustomerServiceTest {
   @DisplayName("PAYP-462 Verify response retrieved by 'Get By Customer ID' endpoint for a valid customer Id")
   @Tag("findCustomer")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenFindCustomerWithValidOpCo() throws RecordNotFoundException {
     createCustomers();
     CustomerDTO customerDTO = customerService.findCustomer("US0010", "11111111");
@@ -382,7 +354,6 @@ class CustomerServiceTest {
   @DisplayName("Find customer with null/empty stop attribute")
   @Tag("findCustomer")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenFindCustomerWithNullEmptyStopAttributes() throws RecordNotFoundException {
     createCustomers();
     // stop attributes null
@@ -398,7 +369,6 @@ class CustomerServiceTest {
   @DisplayName("PAYP-465 Verify response retrieved by 'Get By Customer ID' endpoint for invalid Customer Id")
   @Tag("findCustomer")
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenFindCustomerWithInvaliCustomer() {
     createCustomers();
     assertThrows(RecordNotFoundException.class, () -> {

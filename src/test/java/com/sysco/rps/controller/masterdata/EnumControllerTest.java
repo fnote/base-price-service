@@ -11,8 +11,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -30,20 +28,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableAutoConfiguration
 class EnumControllerTest {
 
-  private final String API_PATH = "/payplus/v1/master-data/enums";
+  private final String API_PATH = "/ref-price/v1/master-data/enums";
   @Autowired
   private MockMvc mvc;
 
-  @MockBean
-  @Qualifier("applicationUserService")
-  private UserDetailsService userDetailsService;
   @MockBean
   IntrospectRestClientService introspectRestClientService;
 
 
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenGetActivationStatuses_thenListOfKeyValueDTOsOfActivationStatuses() throws Exception {
     List<KeyValueDTO> dtoList = Stream.of(ActivationStatus.values()).
         map(c -> new KeyValueDTO(c.name(), c.getValue())).
@@ -62,7 +56,6 @@ class EnumControllerTest {
 
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenGetTimezones_thenListOfKeyValueDTOsOfTimezones() throws Exception {
     List<KeyValueDTO> dtoList = Stream.of(Timezone.values()).
         map(c -> new KeyValueDTO(c.name(), c.getValue())).
@@ -79,7 +72,6 @@ class EnumControllerTest {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenGetUnitsOfLength_thenListOfKeyValueDTOsOfUnitsOfLength() throws Exception {
     List<KeyValueDTO> dtoList = Stream.of(UnitOfLength.values()).
         map(c -> new KeyValueDTO(c.name(), c.getValue())).
@@ -96,7 +88,6 @@ class EnumControllerTest {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenGetMarkets_thenListOfKeyValueDTOsOfMarkets() throws Exception {
     List<KeyValueDTO> dtoList = Stream.of(Market.values()).
         map(c -> new KeyValueDTO(c.name(), c.getValue())).
@@ -116,7 +107,6 @@ class EnumControllerTest {
 
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenGetStopClasses_thenListOfKeyValueDTOsOfStopClasses() throws Exception {
     List<KeyValueDTO> dtoList = Stream.of(StopClass.values()).
         map(c -> new KeyValueDTO(c.name(), c.getValue())).

@@ -10,7 +10,6 @@ import java.text.MessageFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -30,8 +29,6 @@ public class FiscalCalendarServiceImpl implements FiscalCalendarService {
   @Autowired
   FiscalCalendarRepository fiscalCalendarRepository;
 
-  @PreAuthorize("hasAnyRole( T(com.sysco.rps.entity.security.Authority).PREP ," +
-      " T(com.sysco.rps.entity.security.Authority).ADMIN )")
   @Override
   public FiscalCalendar findByCalDate(Date date) throws RecordNotFoundException {
     logger.info("retrieving fiscal calendar with date {}", date);
@@ -44,8 +41,6 @@ public class FiscalCalendarServiceImpl implements FiscalCalendarService {
     return fiscalCalendar;
   }
 
-  @PreAuthorize("hasAnyRole( T(com.sysco.rps.entity.security.Authority).PREP ," +
-      " T(com.sysco.rps.entity.security.Authority).ADMIN )")
   @Override
   public List<FiscalCalendarDTO> findAll(Integer opCoNumber, Integer fyNumber) throws RecordNotFoundException {
     logger.info("retrieving fiscal calendar records with opco number {} for fiscal year {}", opCoNumber, fyNumber);
@@ -61,11 +56,6 @@ public class FiscalCalendarServiceImpl implements FiscalCalendarService {
     return fiscalCalendarDTOList;
   }
 
-  @PreAuthorize("hasAnyRole( "
-      + " T(com.sysco.rps.entity.security.Authority).PREP ,"
-      + " T(com.sysco.rps.entity.security.Authority).ADMIN  ,"
-      + " T(com.sysco.rps.entity.security.Authority).APPROVER ,"
-      + " T(com.sysco.rps.entity.security.Authority).REPORT_ACCESS )")
   @Override
   public List<FiscalCalendarDTO> findAllByYearAndWeek(Integer fyNumber, Integer fwNumber) throws RecordNotFoundException {
     logger.info("retrieving fiscal calendar records for fiscal year {} and week {}", fyNumber, fwNumber);

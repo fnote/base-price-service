@@ -10,7 +10,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 3/16/20 Time: 12:54 PM
@@ -52,10 +51,6 @@ public class Role {
 
   public void setRoleName(String role) {
     this.roleName = role;
-  }
-
-  public GrantedAuthority toGrantedAuthority() {
-    return () -> roleName;
   }
 
 }

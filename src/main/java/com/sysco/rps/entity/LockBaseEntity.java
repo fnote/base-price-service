@@ -1,7 +1,5 @@
 package com.sysco.rps.entity;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PostLoad;
@@ -27,7 +25,6 @@ public abstract class LockBaseEntity extends BaseEntity {
     wasLocked = true;
   }
 
-  @PreAuthorize("hasAnyRole( T(com.sysco.rps.entity.security.Authority).ROLE_ADMIN)")
   public void unlock() {
     this.locked = false;
   }

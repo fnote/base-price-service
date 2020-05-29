@@ -13,8 +13,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
@@ -32,7 +30,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   OpCoService opCoService;
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testFindByOpCoNumber_thenSuccess() throws DuplicateRecordException, ValidationException, RecordNotFoundException {
     OpCoDTO opCoDTO = createOpCoDTO();
@@ -42,7 +39,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testFindAllOpCos_thenSuccess() throws DuplicateRecordException, ValidationException, RecordNotFoundException {
     List<OpCoDTO> opCoDTOList = createOpCoDTOList();
@@ -54,7 +50,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testSaveOpCo_thenSuccess() throws DuplicateRecordException, ValidationException {
     OpCoDTO opCoDTO = createOpCoDTO();
@@ -63,7 +58,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testUpdateOpCo_thenSuccess() throws DuplicateRecordException, ValidationException, RecordNotFoundException, RecordLockedException {
     OpCoDTO opCoDTO = createOpCoDTO();
@@ -75,21 +69,18 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testFindByOpCoNumber_thenRecordNotFoundException() {
     assertThrows(RecordNotFoundException.class, () -> opCoService.findByOpCoNumber("US0001"));
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testFindAllOpCos_thenRecordNotFoundException() {
     assertThrows(RecordNotFoundException.class, () -> opCoService.findAllOpCos("US", null));
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testSaveOpCoWithDuplicateFields_thenDuplicateRecordException() throws DuplicateRecordException, ValidationException {
     OpCoDTO opCoDTO = createOpCoDTO("US0001", "Test 1", 111, 1, "AAA", 111);
@@ -111,7 +102,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testSaveOpCoWithInvalidOpCoNumber_thenValidationException() {
     OpCoDTO opCoDTOWithNullOpCoNumber = createOpCoDTO();
@@ -129,7 +119,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testSaveOpCoWithInvalidWorkdayName_thenValidationException() {
     OpCoDTO opCoDTOWithNullWorkdayName = createOpCoDTO();
@@ -143,7 +132,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testSaveOpCoWithInvalidCountryCode_thenValidationException() {
     OpCoDTO opCoDTOWithNullCountryCode = createOpCoDTO();
@@ -174,7 +162,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testSaveOpCoWithInvalidAdpPayGroup_thenValidationException() {
     OpCoDTO opCoDTOWithNullAdpPayGroup = createOpCoDTO();
@@ -188,7 +175,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testSaveOpCoWithInvalidTargetPiecesPerTrip_thenValidationException() {
     OpCoDTO opCoDTOWithNullTargetPiecesPerTrip = createOpCoDTO();
@@ -210,7 +196,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testSaveOpCoWithOtherInvalidFields_thenValidationException() {
 
@@ -242,7 +227,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testUpdateOpCo_thenRecordNotFoundException() {
     OpCoDTO opCoDTO = createOpCoDTO();
@@ -250,7 +234,6 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @Transactional
   public void testUpdateOpCo_thenDuplicateException() throws DuplicateRecordException, ValidationException {
     OpCoDTO opCoDTO = createOpCoDTO("US0001", "Test 1", 111, 1, "AAA", 111);
@@ -273,22 +256,4 @@ class OpCoServiceTest extends OpCoDTOTestUtil {
     assertThrows(DuplicateRecordException.class, () -> opCoService.updateOpCo("US0002", opCoDTOWithDuplicateAll));
   }
 
-
-  @Test
-  @WithMockUser(username = "admin", roles = {"NONE"})
-  @Transactional
-  public void saveWhenNotAuthorized() {
-    assertThrows(AccessDeniedException.class, () -> {
-      opCoService.findAllOpCos("US", null);
-    });
-    assertThrows(AccessDeniedException.class, () -> {
-      opCoService.findByOpCoNumber("US0001");
-    });
-    assertThrows(AccessDeniedException.class, () -> {
-      opCoService.saveOpCo(createOpCoDTO());
-    });
-    assertThrows(AccessDeniedException.class, () -> {
-      opCoService.updateOpCo("US0001", createOpCoDTO());
-    });
-  }
 }

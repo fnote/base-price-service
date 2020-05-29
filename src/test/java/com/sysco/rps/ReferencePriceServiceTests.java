@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
-class PlauPlusTests {
+class ReferencePriceServiceTests {
   @Value("${spring.profiles.active}")
   private String activeProfile;
   @Test

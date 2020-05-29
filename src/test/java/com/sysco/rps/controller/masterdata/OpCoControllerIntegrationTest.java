@@ -22,7 +22,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -36,7 +35,7 @@ import javax.transaction.Transactional;
 @DisplayName("Opco Controller Component  Tests")
 public class OpCoControllerIntegrationTest {
 
-  private final String API_PATH = "/payplus/v1/master-data";
+  private final String API_PATH = "/ref-price/v1/master-data";
   @MockBean
   IntrospectRestClientService introspectRestClientService;
   @Autowired
@@ -63,7 +62,6 @@ public class OpCoControllerIntegrationTest {
 
   @Test
   @Transactional
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   @DisplayName("Verify response retrieved by 'Add' endpoint for valid request body")
   public void whenSaveOpCoDTO_thenSuccess() throws Exception {
     OpCoDTO opCoDTO = createOpcoDTO();

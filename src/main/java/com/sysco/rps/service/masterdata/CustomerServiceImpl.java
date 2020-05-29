@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 public class CustomerServiceImpl implements CustomerService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerServiceImpl.class);
-    private static final String ROLES = "hasAnyRole( T(com.sysco.rps.entity.security.Authority).ADMIN)";
 
     @Autowired
     CustomerRepository customerRepository;
@@ -38,7 +36,6 @@ public class CustomerServiceImpl implements CustomerService {
     CustomerValidationService customerValidationService;
 
     @Override
-    @PreAuthorize(ROLES)
     public CustomerDTO createCustomer(String opCoNumber, CustomerDTO customerDTO) throws ValidationException {
         logger.info("creating customer in opCo {} - {}", opCoNumber, customerDTO);
         // validating request
@@ -58,7 +55,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @PreAuthorize(ROLES)
     public void updateCustomer(String opCoNumber, String customerNumber, BaseCustomerDTO baseCustomerDTO)
             throws ValidationException, RecordNotFoundException {
         logger.info("updating customer {} in opCo {} - {}", customerNumber, opCoNumber, baseCustomerDTO);
@@ -83,7 +79,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @PreAuthorize(ROLES)
     public CustomerDTO findCustomer(String opCoNumber, String customerNumber) throws RecordNotFoundException {
         logger.info("getting customer {} in opCo {}", customerNumber, opCoNumber);
         Customer customer = customerRepository.findByOpCoNumberAndCustomerNumberAndIsCurrentTrue(opCoNumber, customerNumber)
@@ -94,7 +89,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @PreAuthorize(ROLES)
     public ListResponse<CustomerDTO> findCustomers(String opCoNumber, Pageable pageable) throws RecordNotFoundException {
         logger.info("getting customers in opCo {}", opCoNumber);
         // validate opCo

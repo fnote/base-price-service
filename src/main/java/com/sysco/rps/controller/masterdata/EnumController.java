@@ -17,7 +17,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 @Controller
-@RequestMapping("/payplus/v1/master-data/enums")
+@RequestMapping("/ref-price/v1/master-data/enums")
 public class EnumController extends AbstractController {
 
 

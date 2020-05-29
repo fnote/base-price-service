@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/payplus/v1/master-data")
+@RequestMapping("/ref-price/v1/master-data")
 @Validated
 public class CustomerController extends AbstractController {
 

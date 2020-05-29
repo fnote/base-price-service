@@ -1,11 +1,11 @@
 package com.sysco.rps.config;
 
 import com.sysco.rps.entity.AuditableEntity;
-import com.sysco.rps.util.AuthenticationUtil;
-import java.io.Serializable;
-import java.util.Date;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 3/17/20 Time: 12:54 PM
@@ -21,7 +21,7 @@ public class JPAInterceptor extends EmptyInterceptor {
       String[] propertyNames,
       Type[] types) {
     if (entity instanceof AuditableEntity) {
-      String user = AuthenticationUtil.getLoggedInUser();
+      String user = "x";
       //Setting object properties does not seem to work,. So we need to change the status for each property name
       for (int i = 0; i < propertyNames.length; i++) {
         if ("savedTime".equals(propertyNames[i])) {

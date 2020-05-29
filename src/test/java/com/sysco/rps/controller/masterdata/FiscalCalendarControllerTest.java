@@ -12,8 +12,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -31,37 +29,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableAutoConfiguration
 class FiscalCalendarControllerTest  {
 
-  private final String API_PATH = "/payplus/v1/master-data";
+  private final String API_PATH = "/ref-price/v1/master-data";
   @MockBean
   IntrospectRestClientService introspectRestClientService;
   @Autowired
   private MockMvc mvc;
   @MockBean
   private FiscalCalendarService fiscalCalendarService;
-  @MockBean
-  @Qualifier("applicationUserService")
-  private UserDetailsService userDetailsService;
 
   @Test
-  void whenNotAuthenticated_thenForbidden() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get(API_PATH + "/opcos/1/calendar/2020")
-        .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden())
-        .andDo(print());
-  }
-
-  @Test
-  @WithMockUser(username = "admin", roles = {"NONE"})
-  void whenNotAuthorized_thenForbidden() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get(API_PATH + "/opcos/1/calendar/2020")
-        .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden())
-        .andDo(print());
-  }
-
-
-  @Test
-  @WithMockUser(username = "admin", roles = {"ADMIN"})
   void whenFindFiscalCalendar_thenFiscalCalendar() throws Exception {
     List<FiscalCalendarDTO> calendarList = new ArrayList<>();
     FiscalCalendar day1 = new FiscalCalendar();
@@ -92,9 +68,6 @@ class FiscalCalendarControllerTest  {
         .andExpect(jsonPath("$[1].dow", is("TUE")))
         .andExpect(jsonPath("$[1].fwNumber", is(50)))
         .andDo(print());
-
-
   }
-
 
 }

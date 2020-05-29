@@ -1,6 +1,5 @@
 package com.sysco.rps.controller;
 
-import static com.sysco.rps.service.exception.ErrorCode.ACCESS_DENIED;
 import static com.sysco.rps.service.exception.ErrorCode.BAD_REQUEST;
 import static com.sysco.rps.service.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 import static com.sysco.rps.service.exception.ErrorCode.NO_HANDLER_FOUND;
@@ -16,7 +15,6 @@ import com.sysco.rps.service.exception.RecordNotFoundException;
 import com.sysco.rps.service.exception.ValidationException;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.security.access.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -25,7 +23,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -72,32 +69,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(value = {RecordLockedException.class})
   protected ResponseEntity<Object> handleRecordLocked(RecordLockedException ex, WebRequest request) {
     return handleExceptionWithoutResponseBody(ex, request, HttpStatus.CONFLICT, RECORD_LOCKED);
-  }
-
-  /**
-   * Handles AccessDeniedException
-   * <p>This method delegates to {@link #handleExceptionInternal}
-   *
-   * @param ex      the exception
-   * @param request the current request
-   * @return a {@code ResponseEntity} instance with HttpStatus of Forbidden - 403
-   */
-  @ExceptionHandler(value = {AccessDeniedException.class})
-  protected ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex, WebRequest request) {
-    return handleExceptionWithoutResponseBody(ex, request, HttpStatus.FORBIDDEN, ACCESS_DENIED);
-  }
-
-  /**
-   * Handles AuthenticationException
-   * <p>This method delegates to {@link #handleExceptionInternal}
-   *
-   * @param ex      the exception
-   * @param request the current request
-   * @return a {@code ResponseEntity} instance with HttpStatus of Unauthorized - 401
-   */
-  @ExceptionHandler(value = {BadCredentialsException.class})
-  protected ResponseEntity<Object> handleUnAuthenticated(BadCredentialsException ex, WebRequest request) {
-    return handleExceptionWithoutResponseBody(ex, request, HttpStatus.UNAUTHORIZED, ACCESS_DENIED);
   }
 
   /**

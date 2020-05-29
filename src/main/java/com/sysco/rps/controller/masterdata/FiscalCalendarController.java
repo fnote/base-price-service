@@ -25,7 +25,7 @@ import java.util.List;
  */
 
 @Controller
-@RequestMapping("/payplus/v1/master-data")
+@RequestMapping("/ref-price/v1/master-data")
 public class FiscalCalendarController {
 
     Logger logger = LoggerFactory.getLogger(FiscalCalendarController.class);

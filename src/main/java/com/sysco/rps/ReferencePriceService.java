@@ -2,19 +2,16 @@ package com.sysco.rps;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
 /**
  * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 3/13/20 Time: 12:54 PM
  */
 @SpringBootApplication
-@EnableGlobalMethodSecurity(
-    prePostEnabled = true)
 
-public class PlauPlus {
+public class ReferencePriceService {
 
   public static void main(String[] args) {
-    SpringApplication.run(PlauPlus.class, args);
+    SpringApplication.run(ReferencePriceService.class, args);
   }
 
 }
