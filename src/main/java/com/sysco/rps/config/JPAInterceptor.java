@@ -21,7 +21,8 @@ public class JPAInterceptor extends EmptyInterceptor {
       String[] propertyNames,
       Type[] types) {
     if (entity instanceof AuditableEntity) {
-      String user = "x";
+      // TODO: Remove if saved_by is not required
+      String user = "SYSTEM";
       //Setting object properties does not seem to work,. So we need to change the status for each property name
       for (int i = 0; i < propertyNames.length; i++) {
         if ("savedTime".equals(propertyNames[i])) {

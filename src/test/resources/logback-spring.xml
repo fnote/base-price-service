@@ -16,10 +16,6 @@
   <logger additivity="false" level="debug" name="org.hibernate.SQL">
     <appender-ref ref="Console"/>
   </logger>
-  <!-- Drools debug log -->
-  <logger additivity="false" level="debug" name="org.drools">
-    <appender-ref ref="Console"/>
-  </logger>
   <!-- LOG "com.sysco" at TRACE level -->
   <property name="LOGS" value="./logs"/>
 
