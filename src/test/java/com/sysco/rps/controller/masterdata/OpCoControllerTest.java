@@ -1,9 +1,5 @@
 package com.sysco.rps.controller.masterdata;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sysco.rps.dto.ListResponse;
 import com.sysco.rps.dto.masterdata.OpCoDTO;
@@ -11,13 +7,9 @@ import com.sysco.rps.dto.masterdata.OpCoDTOTestUtil;
 import com.sysco.rps.service.exception.DuplicateRecordException;
 import com.sysco.rps.service.exception.RecordNotFoundException;
 import com.sysco.rps.service.masterdata.OpCoService;
-import com.sysco.rps.service.security.IntrospectRestClientService;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,14 +18,20 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 @WebMvcTest(OpCoController.class)
 @EnableAutoConfiguration
 class OpCoControllerTest extends OpCoDTOTestUtil {
 
   private final String API_PATH = "/ref-price/v1/master-data";
-  @MockBean
-  IntrospectRestClientService introspectRestClientService;
+
   @Autowired
   private MockMvc mvc;
   @MockBean

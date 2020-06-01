@@ -2,14 +2,15 @@ package com.sysco.rps.controller.masterdata;
 
 
 import com.sysco.rps.dto.masterdata.KeyValueDTO;
-import com.sysco.rps.entity.masterdata.enums.*;
-import com.sysco.rps.service.security.IntrospectRestClientService;
+import com.sysco.rps.entity.masterdata.enums.ActivationStatus;
+import com.sysco.rps.entity.masterdata.enums.Market;
+import com.sysco.rps.entity.masterdata.enums.StopClass;
+import com.sysco.rps.entity.masterdata.enums.Timezone;
+import com.sysco.rps.entity.masterdata.enums.UnitOfLength;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -31,11 +32,6 @@ class EnumControllerTest {
   private final String API_PATH = "/ref-price/v1/master-data/enums";
   @Autowired
   private MockMvc mvc;
-
-  @MockBean
-  IntrospectRestClientService introspectRestClientService;
-
-
 
   @Test
   void whenGetActivationStatuses_thenListOfKeyValueDTOsOfActivationStatuses() throws Exception {

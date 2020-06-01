@@ -3,11 +3,9 @@ package com.sysco.rps.controller.masterdata;
 import com.sysco.rps.dto.masterdata.FiscalCalendarDTO;
 import com.sysco.rps.entity.masterdata.FiscalCalendar;
 import com.sysco.rps.service.masterdata.FiscalCalendarService;
-import com.sysco.rps.service.security.IntrospectRestClientService;
 import com.sysco.rps.util.DateUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -30,8 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class FiscalCalendarControllerTest  {
 
   private final String API_PATH = "/ref-price/v1/master-data";
-  @MockBean
-  IntrospectRestClientService introspectRestClientService;
   @Autowired
   private MockMvc mvc;
   @MockBean
