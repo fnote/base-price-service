@@ -1,7 +1,7 @@
 package com.sysco.rps.service.masterdata;
 
-import com.sysco.rps.dto.ListResponse;
-import com.sysco.rps.dto.masterdata.OpCoDTO;
+import com.sysco.rps.dto.pp.ListResponse;
+import com.sysco.rps.dto.pp.masterdata.OpCoDTO;
 import com.sysco.rps.service.exception.DuplicateRecordException;
 import com.sysco.rps.service.exception.RecordNotFoundException;
 

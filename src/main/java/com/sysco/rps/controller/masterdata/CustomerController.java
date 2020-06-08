@@ -1,8 +1,8 @@
 package com.sysco.rps.controller.masterdata;
 
-import com.sysco.rps.dto.ListResponse;
-import com.sysco.rps.dto.masterdata.BaseCustomerDTO;
-import com.sysco.rps.dto.masterdata.CustomerDTO;
+import com.sysco.rps.dto.pp.ListResponse;
+import com.sysco.rps.dto.pp.masterdata.BaseCustomerDTO;
+import com.sysco.rps.dto.pp.masterdata.CustomerDTO;
 import com.sysco.rps.service.masterdata.CustomerService;
 import com.sysco.rps.service.exception.RecordNotFoundException;
 import com.sysco.rps.service.exception.ValidationException;

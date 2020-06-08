@@ -1,10 +1,10 @@
 package com.sysco.rps.util;
 
-import com.sysco.rps.dto.masterdata.BaseCustomerDTO;
-import com.sysco.rps.dto.masterdata.CustomerDTO;
-import com.sysco.rps.entity.masterdata.Customer;
-import com.sysco.rps.entity.masterdata.enums.StopAttribute;
-import com.sysco.rps.entity.masterdata.enums.StopClass;
+import com.sysco.rps.dto.pp.masterdata.BaseCustomerDTO;
+import com.sysco.rps.dto.pp.masterdata.CustomerDTO;
+import com.sysco.rps.entity.pp.masterdata.Customer;
+import com.sysco.rps.entity.pp.masterdata.enums.StopAttribute;
+import com.sysco.rps.entity.pp.masterdata.enums.StopClass;
 import com.sysco.rps.service.exception.ErrorCode;
 import com.sysco.rps.service.exception.RecordNotFoundException;
 import com.sysco.rps.service.exception.ValidationException;

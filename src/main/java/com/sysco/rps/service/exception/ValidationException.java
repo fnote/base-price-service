@@ -1,6 +1,6 @@
 package com.sysco.rps.service.exception;
 
-import com.sysco.rps.dto.ErrorDTO;
+import com.sysco.rps.dto.pp.ErrorDTO;
 
 /**
  * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 4/1/20 Time: 12:54 PM

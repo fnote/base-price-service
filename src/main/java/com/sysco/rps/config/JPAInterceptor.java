@@ -1,6 +1,6 @@
 package com.sysco.rps.config;
 
-import com.sysco.rps.entity.AuditableEntity;
+import com.sysco.rps.entity.pp.AuditableEntity;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
 

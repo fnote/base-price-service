@@ -1,10 +1,10 @@
 package com.sysco.rps.service.masterdata;
 
-import com.sysco.rps.dto.ListResponse;
-import com.sysco.rps.dto.masterdata.BaseCustomerDTO;
-import com.sysco.rps.dto.masterdata.CustomerDTO;
-import com.sysco.rps.entity.masterdata.Customer;
-import com.sysco.rps.repository.masterdata.CustomerRepository;
+import com.sysco.rps.dto.pp.ListResponse;
+import com.sysco.rps.dto.pp.masterdata.BaseCustomerDTO;
+import com.sysco.rps.dto.pp.masterdata.CustomerDTO;
+import com.sysco.rps.entity.pp.masterdata.Customer;
+import com.sysco.rps.repository.pp.masterdata.CustomerRepository;
 import com.sysco.rps.service.exception.RecordNotFoundException;
 import com.sysco.rps.service.exception.ValidationException;
 import com.sysco.rps.util.CustomerUtil;

@@ -1,6 +1,6 @@
 package com.sysco.rps.entity.exception;
 
-import com.sysco.rps.entity.RawBaseEntity;
+import com.sysco.rps.entity.pp.RawBaseEntity;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

@@ -1,6 +1,6 @@
 package com.sysco.rps.service.masterdata;
 
-import com.sysco.rps.dto.masterdata.OpCoDTO;
+import com.sysco.rps.dto.pp.masterdata.OpCoDTO;
 import com.sysco.rps.service.exception.ValidationException;
 import com.sysco.rps.validators.dto.DataValidator;
 import com.sysco.rps.validators.dto.OpCoDTOValidator;

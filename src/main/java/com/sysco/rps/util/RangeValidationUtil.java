@@ -3,7 +3,7 @@ package com.sysco.rps.util;
 import static com.sysco.rps.service.exception.ErrorCode.RANGE_VALIDATION_FAILURE;
 
 import com.google.common.collect.Range;
-import com.sysco.rps.dto.ErrorDTO;
+import com.sysco.rps.dto.pp.ErrorDTO;
 import com.sysco.rps.service.exception.ValidationException;
 import java.text.MessageFormat;
 import java.util.Comparator;

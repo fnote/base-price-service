@@ -2,8 +2,8 @@ package com.sysco.rps.validators.dto;
 
 import static com.sysco.rps.service.exception.ErrorCode.VALIDATION_FAILURE;
 
-import com.sysco.rps.dto.ErrorDTO;
-import com.sysco.rps.dto.masterdata.OpCoDTO;
+import com.sysco.rps.dto.pp.ErrorDTO;
+import com.sysco.rps.dto.pp.masterdata.OpCoDTO;
 import com.sysco.rps.service.exception.ValidationException;
 import java.text.MessageFormat;
 import java.util.HashMap;

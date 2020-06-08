@@ -1,6 +1,6 @@
 package com.sysco.rps.validators.dto;
 
-import com.sysco.rps.dto.masterdata.BaseGlobalDTO;
+import com.sysco.rps.dto.pp.masterdata.BaseGlobalDTO;
 import com.sysco.rps.service.exception.ValidationException;
 
 public abstract class DTOValidatorImpl<T extends BaseGlobalDTO> implements DataValidator<T, Void, ValidationException> {

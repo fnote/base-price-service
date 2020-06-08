@@ -1,6 +1,6 @@
 package com.sysco.rps.validators.dto;
 
-import com.sysco.rps.dto.masterdata.BaseCustomerDTO;
+import com.sysco.rps.dto.pp.masterdata.BaseCustomerDTO;
 import com.sysco.rps.service.exception.ValidationException;
 import com.sysco.rps.util.CustomValidationUtil;
 import javax.validation.Validator;
