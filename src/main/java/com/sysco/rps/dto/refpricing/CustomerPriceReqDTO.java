@@ -21,6 +21,9 @@ public class CustomerPriceReqDTO {
     @ApiModelProperty(example = "\"1\"")
     private String customerId;
 
+    @ApiModelProperty(example = "\"2022-12-12\"")
+    private String effectiveDate;
+
     public List<String> getSupcs() {
         return supcs;
     }
@@ -37,6 +40,14 @@ public class CustomerPriceReqDTO {
         this.customerId = customerId;
     }
 
+    public String getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(String effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -48,6 +59,7 @@ public class CustomerPriceReqDTO {
         return new EqualsBuilder()
               .append(supcs, that.supcs)
               .append(customerId, that.customerId)
+              .append(effectiveDate, that.effectiveDate)
               .isEquals();
     }
 
@@ -56,6 +68,7 @@ public class CustomerPriceReqDTO {
         return new HashCodeBuilder(17, 37)
               .append(supcs)
               .append(customerId)
+              .append(effectiveDate)
               .toHashCode();
     }
 
@@ -64,6 +77,7 @@ public class CustomerPriceReqDTO {
         return new ToStringBuilder(this)
               .append("supcs", supcs)
               .append("customerId", customerId)
+              .append("effectiveDate", effectiveDate)
               .toString();
     }
 
