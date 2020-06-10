@@ -1,5 +1,6 @@
 package com.sysco.rps.controller.refpricing;
 
+import com.sysco.rps.dto.ResponseWrapper;
 import com.sysco.rps.dto.refpricing.CustomerPrice;
 import com.sysco.rps.dto.refpricing.CustomerPriceReqDTO;
 import com.sysco.rps.repository.refpricing.AsyncMySqlRepo;
@@ -124,11 +125,11 @@ public class RefPricingController {
           @ApiResponse(code = org.apache.http.HttpStatus.SC_CONFLICT, message = "Customer already exists."),
     })
     public @ResponseBody
-    ResponseEntity<List<CustomerPrice>> getCustomerPriceWithDateAsyncRandomCustom(@RequestParam(required = false) Integer supcsCount,
+    ResponseEntity<ResponseWrapper<List<CustomerPrice>>> getCustomerPriceWithDateAsyncRandomCustom(@RequestParam(required = false) Integer supcsCount,
                                                                                   @RequestParam(required = false) Integer supcsPerQuery)
           throws ValidationException {
         LOGGER.info("Entered the ref price handler:getCustomerPrice");
-        List<CustomerPrice> customerPriceList = asyncMySqlRepo.getRandomPricesCustom(supcsCount, supcsPerQuery);
+        ResponseWrapper<List<CustomerPrice>> customerPriceList = asyncMySqlRepo.getRandomPricesCustom(supcsCount, supcsPerQuery);
         return ResponseEntity.status(HttpStatus.OK)
               .body(customerPriceList);
     }
