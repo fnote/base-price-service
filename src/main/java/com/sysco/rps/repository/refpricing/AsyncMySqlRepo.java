@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 public class AsyncMySqlRepo {
 
     @Autowired
-    @Qualifier("jaSqlDataSource")
+    @Qualifier("jAsyncDataSource")
     ConnectionPool<MySQLConnection> jaSqlDataSource;
 
     private static Logger LOGGER = LoggerFactory.getLogger(AsyncMySqlRepo.class);
@@ -39,7 +39,6 @@ public class AsyncMySqlRepo {
         List<String> currentSUPCList = new ArrayList<>();
         Random r = new Random();
         String customerId = "" + r.nextInt(7700);
-
 
         String query1 = getQuery(currentSUPCList, customerId, 4);
         String query2 = getQuery(currentSUPCList, customerId, 4);
@@ -83,6 +82,41 @@ public class AsyncMySqlRepo {
         return summary;
     }
 
+    public List<CustomerPrice> getRandomPricesCustom(Integer supcsCount, Integer supcsPerQuery) {
+        supcsCount = (supcsCount == null || supcsCount == 0) ? 16 : supcsCount;
+        supcsPerQuery = (supcsPerQuery == null || supcsPerQuery == 0) ? 4 : supcsPerQuery;
+
+        List<String> currentSUPCList = new ArrayList<>();
+        Random r = new Random();
+        String customerId = "" + r.nextInt(7700);
+        List<CustomerPrice> customerPriceList = null;
+
+        try {
+
+            if(supcsCount <= supcsPerQuery) {
+
+                String query = getQuery(currentSUPCList, customerId, 16);
+                long singleStart = System.currentTimeMillis();
+
+                customerPriceList = getCustomerPricesThroughSingleQuery(singleStart, query);
+
+                long singleEnd = System.currentTimeMillis();
+
+                LOGGER.info("[LATENCY] SINGLE query execution: [{}]", (singleEnd - singleStart));
+
+            } else {
+
+                List<String> supcList = getRandomValues(89000, currentSUPCList, supcsCount);
+                customerPriceList = getCustomPricesThroughMultipleQueries(customerId, supcsPerQuery, supcList);
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Failed to retrieve custom prices", e);
+        }
+
+        return customerPriceList;
+    }
+
     public List<CustomerPrice> getPrices(CustomerPriceReqDTO customerPriceReqDTO, Integer supcsPerQuery) {
 
         List<String> supcs = customerPriceReqDTO.getSupcs();
@@ -98,52 +132,10 @@ public class AsyncMySqlRepo {
                 long singleStart = System.currentTimeMillis();
 
                 String query = getQuery(customerPriceReqDTO.getCustomerId(), supcs);
-                CompletableFuture<QueryResult> future = jaSqlDataSource.sendPreparedStatement(query);
-                QueryResult queryResult = future.get();
-
-                long singleEnd = System.currentTimeMillis();
-
-                LOGGER.info("[LATENCY] SINGLE query execution: [{}]", (singleEnd - singleStart));
-
-                ResultSet rows = queryResult.getRows();
-
-                customerPriceList = rows.stream().map(row -> {
-                    String supc = row.getString("SUPC");
-                    String priceZone = row.getString("PRICE_ZONE");
-                    String customerId = row.getString("CUSTOMER_ID");
-                    Double price = row.getDouble("PRICE");
-                    Date date = localDateToDate(row.getDate("EFFECTIVE_DATE"));
-                    return new CustomerPrice(supc, priceZone, customerId, price, date);
-                }).collect(Collectors.toList());
+                customerPriceList = getCustomerPricesThroughSingleQuery(singleStart, query);
 
             } else {
-                List<List<String>> partitionedLists = ListUtils.partition(supcs, supcsPerQuery);
-                CompletableFuture<QueryResult>[] futureArray = new CompletableFuture[partitionedLists.size()];
-
-                long multiStart = System.currentTimeMillis();
-
-                for (int i = 0; i < partitionedLists.size(); i++) {
-
-                    String query = getQuery(customerPriceReqDTO.getCustomerId(), partitionedLists.get(i));
-                    futureArray[i] = jaSqlDataSource.sendPreparedStatement(query);
-                }
-
-
-                CompletableFuture<Void> combinedFuture
-                      = CompletableFuture.allOf(futureArray);
-
-                combinedFuture.get();
-
-                long multiEnd = System.currentTimeMillis();
-
-                LOGGER.info("[LATENCY] MULTI query execution: [{}]", (multiEnd - multiStart));
-
-                customerPriceList = Stream.of(futureArray)
-                      .map(CompletableFuture::join)
-                      .map(queryResult -> convertQueryResultsToCustomerPrice(queryResult.getRows()))
-                      .flatMap(List::stream)
-                      .collect(Collectors.toList());
-
+                customerPriceList = getCustomPricesThroughMultipleQueries(customerPriceReqDTO.getCustomerId(), supcsPerQuery, supcs);
             }
 
 
@@ -152,6 +144,59 @@ public class AsyncMySqlRepo {
         }
 
 
+        return customerPriceList;
+    }
+
+    private List<CustomerPrice> getCustomPricesThroughMultipleQueries(String customerId, Integer supcsPerQuery,
+                                                                      List<String> supcs) throws InterruptedException, java.util.concurrent.ExecutionException {
+
+        List<CustomerPrice> customerPriceList;
+
+        List<List<String>> partitionedLists = ListUtils.partition(supcs, supcsPerQuery);
+        CompletableFuture<QueryResult>[] futureArray = new CompletableFuture[partitionedLists.size()];
+
+        long multiStart = System.currentTimeMillis();
+
+        for (int i = 0; i < partitionedLists.size(); i++) {
+            String query = getQuery(customerId, partitionedLists.get(i));
+            futureArray[i] = jaSqlDataSource.sendPreparedStatement(query);
+        }
+
+        CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(futureArray);
+
+        combinedFuture.get();
+
+        long multiEnd = System.currentTimeMillis();
+
+        LOGGER.info("[LATENCY] MULTI query execution: [{}]", (multiEnd - multiStart));
+
+        customerPriceList = Stream.of(futureArray)
+              .map(CompletableFuture::join)
+              .map(queryResult -> convertQueryResultsToCustomerPrice(queryResult.getRows()))
+              .flatMap(List::stream)
+              .collect(Collectors.toList());
+        return customerPriceList;
+    }
+
+    private List<CustomerPrice> getCustomerPricesThroughSingleQuery(long singleStart, String query) throws InterruptedException, java.util.concurrent.ExecutionException {
+        List<CustomerPrice> customerPriceList;
+        CompletableFuture<QueryResult> future = jaSqlDataSource.sendPreparedStatement(query);
+        QueryResult queryResult = future.get();
+
+        long singleEnd = System.currentTimeMillis();
+
+        LOGGER.info("[LATENCY] SINGLE query execution: [{}]", (singleEnd - singleStart));
+
+        ResultSet rows = queryResult.getRows();
+
+        customerPriceList = rows.stream().map(row -> {
+            String supc = row.getString("SUPC");
+            String priceZone = row.getString("PRICE_ZONE");
+            String customerId = row.getString("CUSTOMER_ID");
+            Double price = row.getDouble("PRICE");
+            Date date = localDateToDate(row.getDate("EFFECTIVE_DATE"));
+            return new CustomerPrice(supc, priceZone, customerId, price, date);
+        }).collect(Collectors.toList());
         return customerPriceList;
     }
 

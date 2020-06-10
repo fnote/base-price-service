@@ -28,7 +28,7 @@ public class SwaggerConfig {
         .useDefaultResponseMessages(false)
         .select()
         .apis(RequestHandlerSelectors.any())
-        .paths(Predicates.not(PathSelectors.regex("/health.*|/error.*")))
+        .paths(Predicates.not(PathSelectors.regex("/health.*|/error.*|/ref-price/v1.*")))
         .build()
         .apiInfo(apiInfo());
   }

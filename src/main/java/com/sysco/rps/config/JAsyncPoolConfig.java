@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @Configuration
-public class JaSqlPoolConfig {
+public class JAsyncPoolConfig {
 
     private static String host = "reference-db-mysql-cluster-instance-1-us-east-1b.c6xai0tt38eb.us-east-1.rds.amazonaws.com";
     private static int port = 3306;
@@ -27,9 +27,10 @@ public class JaSqlPoolConfig {
     private static int maxActiveConnections = 60;
 
 
-    @Bean(name = "jaSqlDataSource")
+    @Bean(name = "jAsyncDataSource")
     public ConnectionPool<MySQLConnection> getDataSource() {
 
+        // Not particularly clear why we need to provide host etc in pool config as well
         ConnectionPoolConfiguration poolConfiguration = new ConnectionPoolConfiguration(
               host,
               port,
