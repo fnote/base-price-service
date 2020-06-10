@@ -36,7 +36,7 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerPriceJDBCTemplateRepository.class);
 
     @Autowired()
-    @Qualifier("dataSource")
+    @Qualifier("pricingDataSource")
     public DataSource dataSource;
 
     @PostConstruct
