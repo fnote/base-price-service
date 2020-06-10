@@ -49,7 +49,7 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
     public List<CustomerPrice> getCustomerPrice(CustomerPriceReqDTO customerPriceReqDTO) {
 
         String strQuery = "SELECT p.SUPC, p.PRICE_ZONE, e.CUSTOMER_ID, p.PRICE, p.EFFECTIVE_DATE " +
-              "FROM PA p " +
+              "FROM PA_HIS p " +
               "INNER JOIN EATS_001 e ON p.PRICE_ZONE = e.PRICE_ZONE and p.SUPC = e.SUPC " +
               "WHERE e.CUSTOMER_ID=:customerId and e.SUPC in " +
               "(:supcs) " +
@@ -88,13 +88,13 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
               "SELECT " +
                     "c.CUSTOMER_ID, p.SUPC, p.PRICE_ZONE, p.PRICE, p.EFFECTIVE_DATE " +
                     "FROM " +
-                    "PA_001 p INNER JOIN" +
+                    "PA_HIS p INNER JOIN" +
                     "(SELECT MAX(p.EFFECTIVE_DATE) max_eff_date, p.SUPC, p.PRICE_ZONE, b.CUSTOMER_ID " +
                     "FROM " +
                     "(SELECT e.SUPC, e.PRICE_ZONE, e.CUSTOMER_ID from EATS_001 e " +
                     "where e.CUSTOMER_ID=:customerId and SUPC in (:supcs) ) b " +
                     "INNER JOIN " +
-                    "PA_001 p ON b.SUPC = p.SUPC AND b.PRICE_ZONE = p.PRICE_ZONE " +
+                    "PA_HIS p ON b.SUPC = p.SUPC AND b.PRICE_ZONE = p.PRICE_ZONE " +
                     "WHERE p.EFFECTIVE_DATE <= :maxEffectiveDate " +
                     "GROUP BY p.SUPC)  c " +
                     "ON c.max_eff_date = p.EFFECTIVE_DATE AND c.SUPC = p.SUPC AND c.PRICE_ZONE = p.PRICE_ZONE " +
