@@ -1,21 +1,27 @@
 package com.sysco.rps.repository.refpricing;
 
 import com.github.jasync.sql.db.QueryResult;
+import com.github.jasync.sql.db.ResultSet;
 import com.github.jasync.sql.db.mysql.MySQLConnection;
 import com.github.jasync.sql.db.pool.ConnectionPool;
+import com.sysco.rps.dto.refpricing.CustomerPrice;
 import com.sysco.rps.dto.refpricing.CustomerPriceReqDTO;
 import org.apache.commons.collections4.ListUtils;
+import org.jetbrains.annotations.NotNull;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class AsyncMySqlRepo {
@@ -77,15 +83,14 @@ public class AsyncMySqlRepo {
         return summary;
     }
 
-
-    public String getPrices(CustomerPriceReqDTO customerPriceReqDTO, Integer supcsPerQuery) {
+    public List<CustomerPrice> getPrices(CustomerPriceReqDTO customerPriceReqDTO, Integer supcsPerQuery) {
 
         List<String> supcs = customerPriceReqDTO.getSupcs();
         if (supcsPerQuery == null || supcsPerQuery == 0) {
             supcsPerQuery = supcs.size();
         }
 
-        String summary = "";
+        List<CustomerPrice> customerPriceList = null;
 
         try {
 
@@ -94,11 +99,23 @@ public class AsyncMySqlRepo {
 
                 String query = getQuery(customerPriceReqDTO.getCustomerId(), supcs);
                 CompletableFuture<QueryResult> future = jaSqlDataSource.sendPreparedStatement(query);
-                future.get();
+                QueryResult queryResult = future.get();
 
                 long singleEnd = System.currentTimeMillis();
 
-                summary = summary + "Single : " + (singleEnd - singleStart);
+                LOGGER.info("[LATENCY] SINGLE query execution: [{}]", (singleEnd - singleStart));
+
+                ResultSet rows = queryResult.getRows();
+
+                customerPriceList = rows.stream().map(row -> {
+                    String supc = row.getString("SUPC");
+                    String priceZone = row.getString("PRICE_ZONE");
+                    String customerId = row.getString("CUSTOMER_ID");
+                    Double price = row.getDouble("PRICE");
+                    Date date = localDateToDate(row.getDate("EFFECTIVE_DATE"));
+                    return new CustomerPrice(supc, priceZone, customerId, price, date);
+                }).collect(Collectors.toList());
+
             } else {
                 List<List<String>> partitionedLists = ListUtils.partition(supcs, supcsPerQuery);
                 CompletableFuture<QueryResult>[] futureArray = new CompletableFuture[partitionedLists.size()];
@@ -119,7 +136,13 @@ public class AsyncMySqlRepo {
 
                 long multiEnd = System.currentTimeMillis();
 
-                summary = "Multi : " + (multiEnd - multiStart);
+                LOGGER.info("[LATENCY] MULTI query execution: [{}]", (multiEnd - multiStart));
+
+                customerPriceList = Stream.of(futureArray)
+                      .map(CompletableFuture::join)
+                      .map(queryResult -> convertQueryResultsToCustomerPrice(queryResult.getRows()))
+                      .flatMap(List::stream)
+                      .collect(Collectors.toList());
 
             }
 
@@ -129,9 +152,26 @@ public class AsyncMySqlRepo {
         }
 
 
-        return summary;
+        return customerPriceList;
     }
 
+    @NotNull
+    private List<CustomerPrice> convertQueryResultsToCustomerPrice(ResultSet rows) {
+        return rows.stream().map(row -> {
+            String supc = row.getString("SUPC");
+            String priceZone = row.getString("PRICE_ZONE");
+            String customerId = row.getString("CUSTOMER_ID");
+            Double price = row.getDouble("PRICE");
+            LocalDateTime effectiveDate = row.getDate("EFFECTIVE_DATE");
+            Date date = localDateToDate(effectiveDate);
+            return new CustomerPrice(supc, priceZone, customerId, price, date);
+        }).collect(Collectors.toList());
+    }
+
+    // from  LocalDate to java.sql.Date:
+    private static java.sql.Date localDateToDate(LocalDateTime ld) {
+        return new Date(ld.toDateTime().getMillis());
+    }
 
     private String getQuery(List<String> currentSUPCList, String customerId, int countToGenerate) {
         List<String> supcList = getRandomValues(89000, currentSUPCList, countToGenerate);

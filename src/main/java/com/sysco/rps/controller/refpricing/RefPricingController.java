@@ -168,11 +168,11 @@ public class RefPricingController {
           @ApiResponse(code = org.apache.http.HttpStatus.SC_CONFLICT, message = "Customer already exists."),
     })
     public @ResponseBody
-    ResponseEntity<String> getCustomerPriceWithDateAsync(@RequestBody @Valid CustomerPriceReqDTO customerPriceReqDTO,
+    ResponseEntity<List<CustomerPrice>> getCustomerPriceWithDateAsync(@RequestBody @Valid CustomerPriceReqDTO customerPriceReqDTO,
                                                          @RequestParam(required = false) Integer supcsPerQuery)
           throws ValidationException {
         LOGGER.info("Entered the ref price handler:getCustomerPrice");
-        String customerPriceList = asyncMySqlRepo.getPrices(customerPriceReqDTO, supcsPerQuery);
+        List<CustomerPrice> customerPriceList = asyncMySqlRepo.getPrices(customerPriceReqDTO, supcsPerQuery);
         return ResponseEntity.status(HttpStatus.OK)
               .body(customerPriceList);
     }
