@@ -1,6 +1,6 @@
 package com.sysco.rps.repository.refpricing;
 
-import com.sysco.rps.dto.refpricing.CustomerPrice;
+import com.sysco.rps.dto.refpricing.CustomerPriceSimplified;
 import com.sysco.rps.dto.refpricing.CustomerPriceReqDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
 
 
     // Using query with no duplicate filter
-    public List<CustomerPrice> getCustomerPrice(CustomerPriceReqDTO customerPriceReqDTO) {
+    public List<CustomerPriceSimplified> getCustomerPrice(CustomerPriceReqDTO customerPriceReqDTO) {
 
         String strQuery = "SELECT p.SUPC, p.PRICE_ZONE, e.CUSTOMER_ID, p.PRICE, p.EFFECTIVE_DATE " +
               "FROM PA_HIS p " +
@@ -60,7 +60,7 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
 
         LOGGER.debug("SQL statement:[{}]", NamedParameterUtils.substituteNamedParameters(strQuery, namedParameters));
 
-        Map<String, CustomerPrice> supcCustomerPriceMap = new HashMap<>();
+        Map<String, CustomerPriceSimplified> supcCustomerPriceMap = new HashMap<>();
 
         getNamedParameterJdbcTemplate().query(strQuery, namedParameters, (resultSet, rowNum) -> {
             String supc = resultSet.getString("SUPC");
@@ -70,7 +70,7 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
                 String customerId = resultSet.getString("CUSTOMER_ID");
                 Double price = resultSet.getDouble("PRICE");
                 Date date = resultSet.getDate("EFFECTIVE_DATE");
-                CustomerPrice customerPrice = new CustomerPrice(supc, priceZone, customerId, price, date);
+                CustomerPriceSimplified customerPrice = new CustomerPriceSimplified(supc, priceZone, customerId, price, date);
                 supcCustomerPriceMap.put(supc, customerPrice);
                 return customerPrice;
             }
@@ -82,7 +82,7 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
     }
 
     // Using query with duplicate filter
-    public List<CustomerPrice> getCustomerPrice2(CustomerPriceReqDTO customerPriceReqDTO) {
+    public List<CustomerPriceSimplified> getCustomerPrice2(CustomerPriceReqDTO customerPriceReqDTO) {
 
         String query =
               "SELECT " +
@@ -117,7 +117,7 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
             String customerId = resultSet.getString("CUSTOMER_ID");
             Double price = resultSet.getDouble("PRICE");
             Date date = resultSet.getDate("EFFECTIVE_DATE");
-            return new CustomerPrice(supc, priceZone, customerId, price, date);
+            return new CustomerPriceSimplified(supc, priceZone, customerId, price, date);
         });
 
     }

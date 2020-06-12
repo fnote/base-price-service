@@ -1,20 +1,28 @@
 package com.sysco.rps.repository.refpricing;
 
 import com.sysco.rps.dto.refpricing.CustomerPrice;
-import com.sysco.rps.dto.refpricing.CustomerPriceReqDTO;
+import com.sysco.rps.dto.refpricing.CustomerPriceRequest;
+import com.sysco.rps.dto.refpricing.Product;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+import java.io.Serializable;
 import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author
@@ -22,51 +30,75 @@ import java.util.stream.Collectors;
  * @doc
  * @end Created : 07. Jun 2020 06:59
  */
-@Component
-public class CustomerPriceRepository {
+@Repository
+public class CustomerPriceRepository extends NamedParameterJdbcDaoSupport implements Serializable {
 
-    @Autowired
-    EntityManagerFactory entityManagerFactory;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerPriceRepository.class);
 
+    @Autowired()
+    @Qualifier("pricingDataSource")
+    public DataSource dataSource;
 
-    public List<CustomerPrice> getCustomerPrice(CustomerPriceReqDTO customerPriceReqDTO) {
-
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-
-        String strQuery = "SELECT p.SUPC, p.PRICE_ZONE, e.CUSTOMER_ID, p.PRICE, p.EFFECTIVE_DATE " +
-              "FROM PA p " +
-              "INNER JOIN EATS_001 e ON p.PRICE_ZONE = e.PRICE_ZONE and p.SUPC = e.SUPC " +
-              "WHERE e.CUSTOMER_ID=\"" + customerPriceReqDTO.getCustomerId() +
-              "\" and e.SUPC in " +
-              "(" + convertList(customerPriceReqDTO.getSupcs()) + ") " +
-              "ORDER BY p.EFFECTIVE_DATE DESC";
-
-        Query query = entityManager.createNativeQuery(strQuery);
-
-
-        List<Object[]> resultList = query.getResultList();
-        Map<String, CustomerPrice> supcCustomerPriceMap = new HashMap<>();
-
-        for (Object[] result : resultList) {
-            String supc = (String) result[0];
-
-            if(!supcCustomerPriceMap.containsKey(supc)) {
-                Double price = (Double) result[3];
-
-                Timestamp timestamp = (Timestamp) result[4];
-                Date date = new Date(timestamp.getTime());
-
-                CustomerPrice customerPrice = new CustomerPrice(supc, (String) result[1], (String) result[2], price, date);
-                supcCustomerPriceMap.put(supc, customerPrice);
-            }
-
-        }
-
-        return new ArrayList<>(supcCustomerPriceMap.values());
+    @PostConstruct
+    private void initialize() {
+        setDataSource(dataSource);
     }
 
-    private String convertList(List<String> stringList) {
-        return stringList.stream().map(str -> "\"" + str + "\"").collect(Collectors.joining(","));
+    public CustomerPrice getCustomerPrice(CustomerPriceRequest customerPriceReq) {
+
+        String query =
+              "SELECT " +
+                    "c.CUSTOMER_ID, p.SUPC, p.PRICE_ZONE, p.PRICE, p.EFFECTIVE_DATE " +
+                    "FROM " +
+                    "PA_HIS p INNER JOIN" +
+                    "(SELECT MAX(p.EFFECTIVE_DATE) max_eff_date, p.SUPC, p.PRICE_ZONE, b.CUSTOMER_ID " +
+                    "FROM " +
+                    "(SELECT e.SUPC, e.PRICE_ZONE, e.CUSTOMER_ID from EATS_001 e " +
+                    "where e.CUSTOMER_ID=:customerId and SUPC in (:supcs) ) b " +
+                    "INNER JOIN " +
+                    "PA_HIS p ON b.SUPC = p.SUPC AND b.PRICE_ZONE = p.PRICE_ZONE " +
+                    "WHERE p.EFFECTIVE_DATE <= :maxEffectiveDate " +
+                    "GROUP BY p.SUPC)  c " +
+                    "ON c.max_eff_date = p.EFFECTIVE_DATE AND c.SUPC = p.SUPC AND c.PRICE_ZONE = p.PRICE_ZONE " +
+                    "ORDER BY c.CUSTOMER_ID, SUPC";
+
+        String maxEffectiveDate = StringUtils.isEmpty(customerPriceReq.getPriceRequestDate()) ? getCurrentDate() :
+              customerPriceReq.getPriceRequestDate();
+
+        SqlParameterSource namedParameters = new MapSqlParameterSource()
+              .addValue("customerId", customerPriceReq.getCustomerAccount())
+              .addValue("supcs", customerPriceReq.getProducts())
+              .addValue("maxEffectiveDate", maxEffectiveDate);
+
+        LOGGER.debug("SQL statement:[{}]", NamedParameterUtils.substituteNamedParameters(query, namedParameters));
+
+        List<Product> products = getNamedParameterJdbcTemplate().query(query, namedParameters, (resultSet, rowNum) -> {
+            String supc = resultSet.getString("SUPC");
+            String priceZone = resultSet.getString("PRICE_ZONE");
+            Double price = resultSet.getDouble("PRICE");
+            Date effectiveDate = resultSet.getDate("EFFECTIVE_DATE");
+            //Date exportDate = resultSet.getDate("EXPORT_DATE");
+
+            return new Product(supc, priceZone, price, getDate(effectiveDate), "");
+        });
+
+        return new CustomerPrice(customerPriceReq.getBusinessUnitNumber(), customerPriceReq.getCustomerAccount(),
+              customerPriceReq.getPriceRequestDate(), products);
+    }
+
+    private String getCurrentDate() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime now = LocalDateTime.now();
+        return dtf.format(now);
+    }
+
+    private String getDate(Date date) {
+        if (date == null) {
+            return "";
+        }
+
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        return df.format(date);
     }
 
 }

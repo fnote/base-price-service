@@ -5,7 +5,7 @@ import com.github.jasync.sql.db.ResultSet;
 import com.github.jasync.sql.db.mysql.MySQLConnection;
 import com.github.jasync.sql.db.pool.ConnectionPool;
 import com.sysco.rps.dto.ResponseWrapper;
-import com.sysco.rps.dto.refpricing.CustomerPrice;
+import com.sysco.rps.dto.refpricing.CustomerPriceSimplified;
 import com.sysco.rps.dto.refpricing.CustomerPriceReqDTO;
 import com.sysco.rps.dto.refpricing.ExecTime;
 import org.apache.commons.collections4.ListUtils;
@@ -86,14 +86,14 @@ public class AsyncMySqlRepo {
         return summary;
     }
 
-    public ResponseWrapper<List<CustomerPrice>> getRandomPricesCustom(Integer supcsCount, Integer supcsPerQuery) {
+    public ResponseWrapper<List<CustomerPriceSimplified>> getRandomPricesCustom(Integer supcsCount, Integer supcsPerQuery) {
         supcsCount = (supcsCount == null || supcsCount == 0) ? 16 : supcsCount;
         supcsPerQuery = (supcsPerQuery == null || supcsPerQuery == 0) ? 4 : supcsPerQuery;
 
         List<String> currentSUPCList = new ArrayList<>();
         Random r = new Random();
         String customerId = "" + r.nextInt(7700);
-        List<CustomerPrice> customerPriceList = null;
+        List<CustomerPriceSimplified> customerPriceList = null;
         ExecTime execTime = new ExecTime();
 
         try {
@@ -117,7 +117,7 @@ public class AsyncMySqlRepo {
         return formResponse(customerPriceList, execTime);
     }
 
-    private ResponseWrapper<List<CustomerPrice>> formResponse(List<CustomerPrice> customerPrices, ExecTime execTime) {
+    private ResponseWrapper<List<CustomerPriceSimplified>> formResponse(List<CustomerPriceSimplified> customerPrices, ExecTime execTime) {
         Map<String, String> metadataMap = new HashMap<>();
 
         if(execTime.getSingle() != null) {
@@ -131,7 +131,7 @@ public class AsyncMySqlRepo {
         return new ResponseWrapper<>(customerPrices, metadataMap);
     }
 
-    public List<CustomerPrice> getPrices(CustomerPriceReqDTO customerPriceReqDTO, Integer supcsPerQuery) {
+    public List<CustomerPriceSimplified> getPrices(CustomerPriceReqDTO customerPriceReqDTO, Integer supcsPerQuery) {
         ExecTime execTime = new ExecTime();
 
         List<String> supcs = customerPriceReqDTO.getSupcs();
@@ -139,7 +139,7 @@ public class AsyncMySqlRepo {
             supcsPerQuery = supcs.size();
         }
 
-        List<CustomerPrice> customerPriceList = null;
+        List<CustomerPriceSimplified> customerPriceList = null;
 
         try {
 
@@ -160,11 +160,11 @@ public class AsyncMySqlRepo {
         return customerPriceList;
     }
 
-    private List<CustomerPrice> getCustomPricesThroughMultipleQueries(String customerId, Integer supcsPerQuery,
-                                                                      List<String> supcs, ExecTime execTime) throws InterruptedException,
+    private List<CustomerPriceSimplified> getCustomPricesThroughMultipleQueries(String customerId, Integer supcsPerQuery,
+                                                                                List<String> supcs, ExecTime execTime) throws InterruptedException,
           java.util.concurrent.ExecutionException {
 
-        List<CustomerPrice> customerPriceList;
+        List<CustomerPriceSimplified> customerPriceList;
 
         List<List<String>> partitionedLists = ListUtils.partition(supcs, supcsPerQuery);
         CompletableFuture<QueryResult>[] futureArray = new CompletableFuture[partitionedLists.size()];
@@ -194,9 +194,9 @@ public class AsyncMySqlRepo {
         return customerPriceList;
     }
 
-    private List<CustomerPrice> getCustomerPricesThroughSingleQuery(String query, ExecTime execTime) throws InterruptedException,
+    private List<CustomerPriceSimplified> getCustomerPricesThroughSingleQuery(String query, ExecTime execTime) throws InterruptedException,
           java.util.concurrent.ExecutionException {
-        List<CustomerPrice> customerPriceList;
+        List<CustomerPriceSimplified> customerPriceList;
         long singleStart = System.currentTimeMillis();
 
         CompletableFuture<QueryResult> future = jaSqlDataSource.sendPreparedStatement(query);
@@ -217,13 +217,13 @@ public class AsyncMySqlRepo {
             String customerId = row.getString("CUSTOMER_ID");
             Double price = row.getDouble("PRICE");
             Date date = localDateToDate(row.getDate("EFFECTIVE_DATE"));
-            return new CustomerPrice(supc, priceZone, customerId, price, date);
+            return new CustomerPriceSimplified(supc, priceZone, customerId, price, date);
         }).collect(Collectors.toList());
         return customerPriceList;
     }
 
     @NotNull
-    private List<CustomerPrice> convertQueryResultsToCustomerPrice(ResultSet rows) {
+    private List<CustomerPriceSimplified> convertQueryResultsToCustomerPrice(ResultSet rows) {
         return rows.stream().map(row -> {
             String supc = row.getString("SUPC");
             String priceZone = row.getString("PRICE_ZONE");
@@ -231,7 +231,7 @@ public class AsyncMySqlRepo {
             Double price = row.getDouble("PRICE");
             LocalDateTime effectiveDate = row.getDate("EFFECTIVE_DATE");
             Date date = localDateToDate(effectiveDate);
-            return new CustomerPrice(supc, priceZone, customerId, price, date);
+            return new CustomerPriceSimplified(supc, priceZone, customerId, price, date);
         }).collect(Collectors.toList());
     }
 
