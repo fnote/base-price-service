@@ -51,7 +51,8 @@ public class RefPricingController {
     @PostMapping("/customer-prices")
     @ApiOperation(
           value = "Gets the reference pricing for the customer item",
-          notes = "Gets the reference pricing for the customer item",
+          notes = "If effectiveDate is provided in the req body, that will be used as the max effective date." +
+                "Else current day will be used. Uses NamedJDBCTemplate to fetch data",
           response = CustomerPrice.class)
     @ApiResponses(value = {
           @ApiResponse(code = org.apache.http.HttpStatus.SC_OK, message = "Data fetch successful"),
@@ -71,7 +72,7 @@ public class RefPricingController {
     @ApiOperation(
           value = "Gets the reference pricing for the customer item",
           notes = "If effectiveDate is provided in the req body, that will be used as the max effective date." +
-                "Else current day will be used.",
+                "Else current day will be used. Uses NamedJDBCTemplate to fetch data",
           response = CustomerPriceSimplified.class)
     @ApiResponses(value = {
           @ApiResponse(code = org.apache.http.HttpStatus.SC_OK, message = "Data fetch successful"),
