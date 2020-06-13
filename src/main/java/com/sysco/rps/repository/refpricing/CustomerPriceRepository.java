@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
-import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StopWatch;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -70,9 +70,18 @@ public class CustomerPriceRepository extends NamedParameterJdbcDaoSupport implem
               .addValue("supcs", customerPriceReq.getProducts())
               .addValue("maxEffectiveDate", maxEffectiveDate);
 
-        LOGGER.debug("SQL statement:[{}]", NamedParameterUtils.substituteNamedParameters(query, namedParameters));
+//        LOGGER.debug("SQL statement:[{}]", NamedParameterUtils.substituteNamedParameters(query, namedParameters));
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
 
         List<Product> products = getNamedParameterJdbcTemplate().query(query, namedParameters, (resultSet, rowNum) -> {
+
+            if (stopWatch.isRunning()) {
+                stopWatch.stop();
+                LOGGER.info("QUERY-LATENCY : [{}]", stopWatch.getLastTaskTimeMillis());
+            }
+
             String supc = resultSet.getString("SUPC");
             String priceZone = resultSet.getString("PRICE_ZONE");
             Double price = resultSet.getDouble("PRICE");
@@ -81,6 +90,7 @@ public class CustomerPriceRepository extends NamedParameterJdbcDaoSupport implem
 
             return new Product(supc, priceZone, price, getDate(effectiveDate), "");
         });
+
 
         return new CustomerPrice(customerPriceReq.getBusinessUnitNumber(), customerPriceReq.getCustomerAccount(),
               customerPriceReq.getPriceRequestDate(), products);

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -52,14 +53,19 @@ public class AsyncMySqlRepo {
 
         try {
 
-            long singleStart = System.currentTimeMillis();
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
 
             CompletableFuture<QueryResult> future5 = jaSqlDataSource.sendPreparedStatement(query5);
             future5.get();
 
-            long singleEnd = System.currentTimeMillis();
+            stopWatch.stop();
 
-            long multiStart = System.currentTimeMillis();
+            long single = stopWatch.getLastTaskTimeMillis();
+            LOGGER.info("[LATENCY] SINGLE query execution: [{}]", stopWatch.getLastTaskTimeMillis());
+
+
+            stopWatch.start();
 
             CompletableFuture<QueryResult> future1 = jaSqlDataSource.sendPreparedStatement(query1);
             CompletableFuture<QueryResult> future2 = jaSqlDataSource.sendPreparedStatement(query2);
@@ -71,12 +77,13 @@ public class AsyncMySqlRepo {
 
 
             combinedFuture.get();
+            stopWatch.stop();
 
-            long multiEnd = System.currentTimeMillis();
+            long multi = stopWatch.getLastTaskTimeMillis();
+            LOGGER.info("[LATENCY] MULTI query execution: [{}]", stopWatch.getLastTaskTimeMillis());
 
-
-            summary = "Multi : " + (multiEnd - multiStart);
-            summary = summary + "\nSingle : " + (singleEnd - singleStart);
+            summary = "Multi : " + (multi);
+            summary = summary + "\nSingle : " + (single);
 
 
         } catch (Exception e) {
@@ -95,19 +102,19 @@ public class AsyncMySqlRepo {
         String customerId = "" + r.nextInt(7700);
         List<CustomerPriceSimplified> customerPriceList = null;
         ExecTime execTime = new ExecTime();
+        StopWatch stopWatch = new StopWatch();
 
         try {
 
             if(supcsCount <= supcsPerQuery) {
 
                 String query = getQuery(currentSUPCList, customerId, 16);
-
-                customerPriceList = getCustomerPricesThroughSingleQuery(query, execTime);
+                customerPriceList = getCustomerPricesThroughSingleQuery(query, execTime, stopWatch);
 
             } else {
 
                 List<String> supcList = getRandomValues(89000, currentSUPCList, supcsCount);
-                customerPriceList = getCustomPricesThroughMultipleQueries(customerId, supcsPerQuery, supcList, execTime);
+                customerPriceList = getCustomPricesThroughMultipleQueries(customerId, supcsPerQuery, supcList, execTime, stopWatch);
             }
 
         } catch (Exception e) {
@@ -140,15 +147,16 @@ public class AsyncMySqlRepo {
         }
 
         List<CustomerPriceSimplified> customerPriceList = null;
+        StopWatch stopWatch = new StopWatch();
 
         try {
 
             if (supcs.size() <= supcsPerQuery) {
                 String query = getQuery(customerPriceReqDTO.getCustomerId(), supcs);
-                customerPriceList = getCustomerPricesThroughSingleQuery(query, execTime);
+                customerPriceList = getCustomerPricesThroughSingleQuery(query, execTime, stopWatch);
 
             } else {
-                customerPriceList = getCustomPricesThroughMultipleQueries(customerPriceReqDTO.getCustomerId(), supcsPerQuery, supcs, execTime);
+                customerPriceList = getCustomPricesThroughMultipleQueries(customerPriceReqDTO.getCustomerId(), supcsPerQuery, supcs, execTime, stopWatch);
             }
 
 
@@ -161,7 +169,7 @@ public class AsyncMySqlRepo {
     }
 
     private List<CustomerPriceSimplified> getCustomPricesThroughMultipleQueries(String customerId, Integer supcsPerQuery,
-                                                                                List<String> supcs, ExecTime execTime) throws InterruptedException,
+                                                                                List<String> supcs, ExecTime execTime, StopWatch stopWatch) throws InterruptedException,
           java.util.concurrent.ExecutionException {
 
         List<CustomerPriceSimplified> customerPriceList;
@@ -169,7 +177,7 @@ public class AsyncMySqlRepo {
         List<List<String>> partitionedLists = ListUtils.partition(supcs, supcsPerQuery);
         CompletableFuture<QueryResult>[] futureArray = new CompletableFuture[partitionedLists.size()];
 
-        long multiStart = System.currentTimeMillis();
+        stopWatch.start();
 
         for (int i = 0; i < partitionedLists.size(); i++) {
             String query = getQuery(customerId, partitionedLists.get(i));
@@ -180,11 +188,11 @@ public class AsyncMySqlRepo {
 
         combinedFuture.get();
 
-        long multiEnd = System.currentTimeMillis();
-        long executionTime = multiEnd - multiStart;
+        stopWatch.stop();
+        long executionTime = stopWatch.getLastTaskTimeMillis();
         execTime.setMulti(executionTime);
 
-        LOGGER.info("[LATENCY] MULTI query execution: [{}]", executionTime);
+        LOGGER.info("[LATENCY] MULTI query execution: [{}]", stopWatch.getLastTaskTimeMillis());
 
         customerPriceList = Stream.of(futureArray)
               .map(CompletableFuture::join)
@@ -194,20 +202,20 @@ public class AsyncMySqlRepo {
         return customerPriceList;
     }
 
-    private List<CustomerPriceSimplified> getCustomerPricesThroughSingleQuery(String query, ExecTime execTime) throws InterruptedException,
+    private List<CustomerPriceSimplified> getCustomerPricesThroughSingleQuery(String query, ExecTime execTime, StopWatch stopWatch) throws InterruptedException,
           java.util.concurrent.ExecutionException {
         List<CustomerPriceSimplified> customerPriceList;
-        long singleStart = System.currentTimeMillis();
+        stopWatch.start();
 
         CompletableFuture<QueryResult> future = jaSqlDataSource.sendPreparedStatement(query);
         QueryResult queryResult = future.get();
 
-        long singleEnd = System.currentTimeMillis();
+        stopWatch.stop();
 
-        long executionTime = singleEnd - singleStart;
+        long executionTime = stopWatch.getLastTaskTimeMillis();
         execTime.setSingle(executionTime);
 
-        LOGGER.info("[LATENCY] SINGLE query execution: [{}]", executionTime);
+        LOGGER.info("[LATENCY] SINGLE query execution: [{}]", stopWatch.getLastTaskTimeMillis());
 
         ResultSet rows = queryResult.getRows();
 

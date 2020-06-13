@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StopWatch;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -58,7 +59,7 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
         SqlParameterSource namedParameters = new MapSqlParameterSource("customerId", customerPriceReqDTO.getCustomerId())
               .addValue("supcs", customerPriceReqDTO.getSupcs());
 
-        LOGGER.debug("SQL statement:[{}]", NamedParameterUtils.substituteNamedParameters(strQuery, namedParameters));
+//        LOGGER.debug("SQL statement:[{}]", NamedParameterUtils.substituteNamedParameters(strQuery, namedParameters));
 
         Map<String, CustomerPriceSimplified> supcCustomerPriceMap = new HashMap<>();
 
@@ -108,11 +109,19 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
               .addValue("supcs", customerPriceReqDTO.getSupcs())
               .addValue("maxEffectiveDate", maxEffectiveDate);
 
-        LOGGER.debug("SQL statement:[{}]", NamedParameterUtils.substituteNamedParameters(query, namedParameters));
+//        LOGGER.debug("SQL statement:[{}]", NamedParameterUtils.substituteNamedParameters(query, namedParameters));
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
 
         return getNamedParameterJdbcTemplate().query(query, namedParameters, (resultSet, rowNum) -> {
-            String supc = resultSet.getString("SUPC");
 
+            if(stopWatch.isRunning()) {
+                stopWatch.stop();
+                LOGGER.info("QUERY-LATENCY : [{}]", stopWatch.getLastTaskTimeMillis());
+            }
+
+            String supc = resultSet.getString("SUPC");
             String priceZone = resultSet.getString("PRICE_ZONE");
             String customerId = resultSet.getString("CUSTOMER_ID");
             Double price = resultSet.getDouble("PRICE");

@@ -12,8 +12,6 @@ import com.sysco.rps.service.exception.ValidationException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +35,7 @@ import java.util.List;
 @RequestMapping("/ref-price/")
 public class RefPricingController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RefPricingController.class);
+//    private static final Logger LOGGER = LoggerFactory.getLogger(RefPricingController.class);
 
     @Autowired
     private CustomerPriceRepository customerPriceRepository;
@@ -62,7 +60,7 @@ public class RefPricingController {
     public @ResponseBody
     ResponseEntity<CustomerPrice> getCustomerPrice(@RequestBody @Valid CustomerPriceRequest customerPriceRequest)
           throws ValidationException {
-        LOGGER.info("Entered the ref price handler:getCustomerPrice");
+//        LOGGER.info("Entered the ref price handler:getCustomerPrice");
         CustomerPrice customerPrice = customerPriceRepository.getCustomerPrice(customerPriceRequest);
         return ResponseEntity.status(HttpStatus.OK)
               .body(customerPrice);
@@ -82,7 +80,7 @@ public class RefPricingController {
     public @ResponseBody
     ResponseEntity<List<CustomerPriceSimplified>> getCustomerPriceWithDate(@RequestBody @Valid CustomerPriceReqDTO customerPriceReqDTO)
           throws ValidationException {
-        LOGGER.info("Entered the ref price handler:getCustomerPriceWithDate");
+//        LOGGER.info("Entered the ref price handler:getCustomerPriceWithDate");
         List<CustomerPriceSimplified> customerPriceList = customerPriceJDBCTemplateRepository.getCustomerPrice2(customerPriceReqDTO);
         return ResponseEntity.status(HttpStatus.OK)
               .body(customerPriceList);
@@ -102,7 +100,7 @@ public class RefPricingController {
     public @ResponseBody
     ResponseEntity<String> getCustomerPriceWithDateAsyncRandom()
           throws ValidationException {
-        LOGGER.info("Entered the ref price handler:getCustomerPriceWithDateAsyncRandom");
+//        LOGGER.info("Entered the ref price handler:getCustomerPriceWithDateAsyncRandom");
         String customerPriceList = asyncMySqlRepo.getPricesForRandomValues();
         return ResponseEntity.status(HttpStatus.OK)
               .body(customerPriceList);
@@ -122,7 +120,7 @@ public class RefPricingController {
     public @ResponseBody
     ResponseEntity<ResponseWrapper<List<CustomerPriceSimplified>>> getCustomerPriceWithDateAsyncRandomCustom(
           @RequestParam(required = false) Integer supcsCount, @RequestParam(required = false) Integer supcsPerQuery) throws ValidationException {
-        LOGGER.info("Entered the ref price handler:getCustomerPrice");
+//        LOGGER.info("Entered the ref price handler:getCustomerPrice");
         ResponseWrapper<List<CustomerPriceSimplified>> customerPriceList = asyncMySqlRepo.getRandomPricesCustom(supcsCount, supcsPerQuery);
         return ResponseEntity.status(HttpStatus.OK)
               .body(customerPriceList);
@@ -142,7 +140,7 @@ public class RefPricingController {
     ResponseEntity<List<CustomerPriceSimplified>> getCustomerPriceWithDateAsync(@RequestBody @Valid CustomerPriceReqDTO customerPriceReqDTO,
                                                                                 @RequestParam(required = false) Integer supcsPerQuery)
           throws ValidationException {
-        LOGGER.info("Entered the ref price handler:getCustomerPriceWithDateAsync");
+//        LOGGER.info("Entered the ref price handler:getCustomerPriceWithDateAsync");
         List<CustomerPriceSimplified> customerPriceList = asyncMySqlRepo.getPrices(customerPriceReqDTO, supcsPerQuery);
         return ResponseEntity.status(HttpStatus.OK)
               .body(customerPriceList);
