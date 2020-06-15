@@ -15,16 +15,16 @@ import java.util.List;
  */
 public class CustomerPrice {
 
-    @JsonProperty("business_unit_number")
+//    @JsonProperty("business_unit_number")
     private String businessUnitNumber;
 
-    @JsonProperty("customer_account")
+//    @JsonProperty("customer_account")
     private String customerAccount;
 
-    @JsonProperty("price_request_date")
+//    @JsonProperty("price_request_date")
     private String priceRequestDate;
 
-    @JsonProperty("products")
+//    @JsonProperty("products")
     private List<Product> products;
 
 

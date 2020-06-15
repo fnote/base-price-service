@@ -13,19 +13,19 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public class Product {
 
-    @JsonProperty("supc")
+//    @JsonProperty("supc")
     private String supc;
 
-    @JsonProperty("price_zone_id")
+//    @JsonProperty("price_zone_id")
     private String priceZoneId;
 
-    @JsonProperty("reference_price")
+//    @JsonProperty("reference_price")
     private Double referencePrice;
 
-    @JsonProperty("effective_from_date")
+//    @JsonProperty("effective_from_date")
     private String effectiveFromDate;
 
-    @JsonProperty("price_export_date")
+//    @JsonProperty("price_export_date")
     private String priceExportDate;
 
     public Product(String supc, String priceZoneId, Double referencePrice, String effectiveFromDate,

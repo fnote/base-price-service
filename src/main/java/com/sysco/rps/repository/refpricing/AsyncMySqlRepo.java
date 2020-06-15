@@ -9,6 +9,7 @@ import com.sysco.rps.dto.refpricing.CustomerPriceSimplified;
 import com.sysco.rps.dto.refpricing.CustomerPriceReqDTO;
 import com.sysco.rps.dto.refpricing.ExecTime;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
 import java.sql.Date;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,11 +47,11 @@ public class AsyncMySqlRepo {
         Random r = new Random();
         String customerId = "" + r.nextInt(7700);
 
-        String query1 = getQuery(currentSUPCList, customerId, 4);
-        String query2 = getQuery(currentSUPCList, customerId, 4);
-        String query3 = getQuery(currentSUPCList, customerId, 4);
-        String query4 = getQuery(currentSUPCList, customerId, 4);
-        String query5 = getQuery(currentSUPCList, customerId, 16);
+        String query1 = getQuery(currentSUPCList, customerId, 4, "");
+        String query2 = getQuery(currentSUPCList, customerId, 4, "");
+        String query3 = getQuery(currentSUPCList, customerId, 4, "");
+        String query4 = getQuery(currentSUPCList, customerId, 4, "");
+        String query5 = getQuery(currentSUPCList, customerId, 16, "");
 
         try {
 
@@ -108,13 +110,13 @@ public class AsyncMySqlRepo {
 
             if(supcsCount <= supcsPerQuery) {
 
-                String query = getQuery(currentSUPCList, customerId, 16);
+                String query = getQuery(currentSUPCList, customerId, 16, "");
                 customerPriceList = getCustomerPricesThroughSingleQuery(query, execTime, stopWatch);
 
             } else {
 
                 List<String> supcList = getRandomValues(89000, currentSUPCList, supcsCount);
-                customerPriceList = getCustomPricesThroughMultipleQueries(customerId, supcsPerQuery, supcList, execTime, stopWatch);
+                customerPriceList = getCustomPricesThroughMultipleQueries(customerId, supcsPerQuery, supcList, execTime, stopWatch, "");
             }
 
         } catch (Exception e) {
@@ -152,11 +154,12 @@ public class AsyncMySqlRepo {
         try {
 
             if (supcs.size() <= supcsPerQuery) {
-                String query = getQuery(customerPriceReqDTO.getCustomerId(), supcs);
+                String query = getQuery(customerPriceReqDTO.getCustomerId(), supcs, customerPriceReqDTO.getEffectiveDate());
                 customerPriceList = getCustomerPricesThroughSingleQuery(query, execTime, stopWatch);
 
             } else {
-                customerPriceList = getCustomPricesThroughMultipleQueries(customerPriceReqDTO.getCustomerId(), supcsPerQuery, supcs, execTime, stopWatch);
+                customerPriceList = getCustomPricesThroughMultipleQueries(customerPriceReqDTO.getCustomerId(), supcsPerQuery, supcs, execTime,
+                      stopWatch, customerPriceReqDTO.getEffectiveDate());
             }
 
 
@@ -168,8 +171,15 @@ public class AsyncMySqlRepo {
         return customerPriceList;
     }
 
+    private String getCurrentDate() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        return dtf.format(now);
+    }
+
     private List<CustomerPriceSimplified> getCustomPricesThroughMultipleQueries(String customerId, Integer supcsPerQuery,
-                                                                                List<String> supcs, ExecTime execTime, StopWatch stopWatch) throws InterruptedException,
+                                                                                List<String> supcs, ExecTime execTime, StopWatch stopWatch,
+                                                                                String effectiveDate) throws InterruptedException,
           java.util.concurrent.ExecutionException {
 
         List<CustomerPriceSimplified> customerPriceList;
@@ -180,7 +190,7 @@ public class AsyncMySqlRepo {
         stopWatch.start();
 
         for (int i = 0; i < partitionedLists.size(); i++) {
-            String query = getQuery(customerId, partitionedLists.get(i));
+            String query = getQuery(customerId, partitionedLists.get(i), effectiveDate);
             futureArray[i] = jaSqlDataSource.sendPreparedStatement(query);
         }
 
@@ -248,13 +258,16 @@ public class AsyncMySqlRepo {
         return new Date(ld.toDateTime().getMillis());
     }
 
-    private String getQuery(List<String> currentSUPCList, String customerId, int countToGenerate) {
+    private String getQuery(List<String> currentSUPCList, String customerId, int countToGenerate, String effectiveDate) {
         List<String> supcList = getRandomValues(89000, currentSUPCList, countToGenerate);
 
-        return getQuery(customerId, supcList);
+        return getQuery(customerId, supcList, effectiveDate);
     }
 
-    private String getQuery(String customerId, List<String> supcList) {
+    private String getQuery(String customerId, List<String> supcList, String effectiveDate) {
+
+        String maxEffectiveDate = StringUtils.isEmpty(effectiveDate) ? getCurrentDate() : effectiveDate;
+
         String supcs = supcList.stream().map(str -> "\"" + str + "\"").collect(Collectors.joining(","));
 
         return "SELECT c.CUSTOMER_ID, p.SUPC, p.PRICE_ZONE, p.PRICE, p.EFFECTIVE_DATE " +
@@ -266,7 +279,7 @@ public class AsyncMySqlRepo {
               ") b " +
               "INNER JOIN " +
               "PA_HIS p ON b.SUPC = p.SUPC AND b.PRICE_ZONE = p.PRICE_ZONE " +
-              "WHERE p.EFFECTIVE_DATE <= \"2021-12-12\" " +
+              "WHERE p.EFFECTIVE_DATE <= \"" + maxEffectiveDate + "\" " +
               "GROUP BY p.SUPC) " +
               "c " +
               "ON c.max_eff_date = p.EFFECTIVE_DATE AND c.SUPC = p.SUPC AND c.PRICE_ZONE = p.PRICE_ZONE " +
