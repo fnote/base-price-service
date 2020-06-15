@@ -1,7 +1,7 @@
 package com.sysco.rps.repository.refpricing;
 
-import com.sysco.rps.dto.refpricing.CustomerPriceSimplified;
 import com.sysco.rps.dto.refpricing.CustomerPriceReqDTO;
+import com.sysco.rps.dto.refpricing.CustomerPriceSimplified;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
-import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StopWatch;
@@ -98,8 +97,7 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
                     "PA_HIS p ON b.SUPC = p.SUPC AND b.PRICE_ZONE = p.PRICE_ZONE " +
                     "WHERE p.EFFECTIVE_DATE <= :maxEffectiveDate " +
                     "GROUP BY p.SUPC)  c " +
-                    "ON c.max_eff_date = p.EFFECTIVE_DATE AND c.SUPC = p.SUPC AND c.PRICE_ZONE = p.PRICE_ZONE " +
-                    "ORDER BY c.CUSTOMER_ID, SUPC";
+                    "ON c.max_eff_date = p.EFFECTIVE_DATE AND c.SUPC = p.SUPC AND c.PRICE_ZONE = p.PRICE_ZONE ";
 
         String maxEffectiveDate = StringUtils.isEmpty(customerPriceReqDTO.getEffectiveDate()) ? getCurrentDate() :
               customerPriceReqDTO.getEffectiveDate();
@@ -116,7 +114,7 @@ public class CustomerPriceJDBCTemplateRepository extends NamedParameterJdbcDaoSu
 
         return getNamedParameterJdbcTemplate().query(query, namedParameters, (resultSet, rowNum) -> {
 
-            if(stopWatch.isRunning()) {
+            if (stopWatch.isRunning()) {
                 stopWatch.stop();
                 LOGGER.info("QUERY-LATENCY : [{}]", stopWatch.getLastTaskTimeMillis());
             }

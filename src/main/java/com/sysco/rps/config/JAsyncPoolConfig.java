@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class JAsyncPoolConfig {
 
-    private static String host = "reference-db-mysql-cluster-instance-1-us-east-1b.c6xai0tt38eb.us-east-1.rds.amazonaws.com";
+    private static String host = "reference-db-mysql-cluster.cluster-ro-c6xai0tt38eb.us-east-1.rds.amazonaws.com";
     private static int port = 3306;
     private static String db = "reference_pricing";
     private static String username = "admin";

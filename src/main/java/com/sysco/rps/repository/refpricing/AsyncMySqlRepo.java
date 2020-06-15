@@ -283,7 +283,6 @@ public class AsyncMySqlRepo {
               "GROUP BY p.SUPC) " +
               "c " +
               "ON c.max_eff_date = p.EFFECTIVE_DATE AND c.SUPC = p.SUPC AND c.PRICE_ZONE = p.PRICE_ZONE " +
-              "ORDER BY c.CUSTOMER_ID, SUPC " +
               ";";
     }
 
