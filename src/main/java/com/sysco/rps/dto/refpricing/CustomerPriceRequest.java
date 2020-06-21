@@ -1,6 +1,5 @@
 package com.sysco.rps.dto.refpricing;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -17,19 +16,15 @@ import java.util.List;
 public class CustomerPriceRequest {
 
     @ApiModelProperty(example = "001")
-    @JsonProperty("business_unit_number")
     private String businessUnitNumber;
 
     @ApiModelProperty(example = "1")
-    @JsonProperty("customer_account")
     private String customerAccount;
 
     @ApiModelProperty(example = "2020-05-31")
-    @JsonProperty("price_request_date")
     private String priceRequestDate;
 
     @ApiModelProperty(example = "[ \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]")
-    @JsonProperty("products")
     private List<String> products;
 
     public String getBusinessUnitNumber() {

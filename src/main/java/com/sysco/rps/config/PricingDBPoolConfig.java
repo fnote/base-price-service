@@ -27,7 +27,7 @@ public class PricingDBPoolConfig {
         config.setJdbcUrl( jdbcUrl );
         config.setUsername( dbUserName );
         config.setPassword( dbPassword );
-        config.setMaximumPoolSize(200);
+        config.setMaximumPoolSize(1);
         config.addDataSourceProperty( "cachePrepStmts" , "true" );
         config.addDataSourceProperty( "prepStmtCacheSize" , "250" );
         config.addDataSourceProperty( "prepStmtCacheSqlLimit" , "2048" );

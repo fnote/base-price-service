@@ -3,19 +3,17 @@ package com.sysco.rps.repository.refpricing;
 import com.sysco.rps.dto.refpricing.CustomerPrice;
 import com.sysco.rps.dto.refpricing.CustomerPriceRequest;
 import com.sysco.rps.dto.refpricing.Product;
+import com.sysco.rps.repository.common.DataSourceProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StopWatch;
 
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
 import java.io.Serializable;
 import java.sql.Date;
 import java.text.DateFormat;
@@ -35,13 +33,10 @@ public class CustomerPriceRepository extends NamedParameterJdbcDaoSupport implem
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerPriceRepository.class);
 
-    @Autowired()
-    @Qualifier("pricingDataSource")
-    public DataSource dataSource;
-
-    @PostConstruct
-    private void initialize() {
-        setDataSource(dataSource);
+    @Autowired
+    CustomerPriceRepository() {
+        super();
+        setDataSource(DataSourceProvider.getActiveDataSource());
     }
 
     public CustomerPrice getCustomerPrice(CustomerPriceRequest customerPriceReq) {
@@ -85,9 +80,8 @@ public class CustomerPriceRepository extends NamedParameterJdbcDaoSupport implem
             String priceZone = resultSet.getString("PRICE_ZONE");
             Double price = resultSet.getDouble("PRICE");
             Date effectiveDate = resultSet.getDate("EFFECTIVE_DATE");
-            //Date exportDate = resultSet.getDate("EXPORT_DATE");
 
-            return new Product(supc, priceZone, price, getDate(effectiveDate), "");
+            return new Product(supc, priceZone, price, getDate(effectiveDate));
         });
 
 

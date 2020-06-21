@@ -7,8 +7,8 @@ import com.sysco.rps.dto.refpricing.CustomerPriceRequest;
 import com.sysco.rps.dto.refpricing.CustomerPriceSimplified;
 import com.sysco.rps.repository.refpricing.AsyncMySqlRepo;
 import com.sysco.rps.repository.refpricing.CustomerPriceJDBCTemplateRepository;
-import com.sysco.rps.repository.refpricing.CustomerPriceRepository;
 import com.sysco.rps.service.exception.ValidationException;
+import com.sysco.rps.service.refpricing.ReferencePricingService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -35,10 +35,9 @@ import java.util.List;
 @RequestMapping("/ref-price/")
 public class RefPricingController {
 
-//    private static final Logger LOGGER = LoggerFactory.getLogger(RefPricingController.class);
 
     @Autowired
-    private CustomerPriceRepository customerPriceRepository;
+    private ReferencePricingService referencePricingService;
 
     @Autowired
     private CustomerPriceJDBCTemplateRepository customerPriceJDBCTemplateRepository;
@@ -58,10 +57,8 @@ public class RefPricingController {
           @ApiResponse(code = org.apache.http.HttpStatus.SC_NOT_FOUND, message = "Customer/OpCo not found."),
     })
     public @ResponseBody
-    ResponseEntity<CustomerPrice> getCustomerPrice(@RequestBody @Valid CustomerPriceRequest customerPriceRequest)
-          throws ValidationException {
-//        LOGGER.info("Entered the ref price handler:getCustomerPrice");
-        CustomerPrice customerPrice = customerPriceRepository.getCustomerPrice(customerPriceRequest);
+    ResponseEntity<CustomerPrice> getCustomerPrice(@RequestBody @Valid CustomerPriceRequest customerPriceRequest) {
+        CustomerPrice customerPrice = referencePricingService.getCustomerPrice(customerPriceRequest);
         return ResponseEntity.status(HttpStatus.OK)
               .body(customerPrice);
     }
