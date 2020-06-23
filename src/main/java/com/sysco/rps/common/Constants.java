@@ -46,7 +46,7 @@ public class Constants {
 
         public static final String JDBC_MYSQL = "jdbc:mysql://";
         public static final String PORT = ":3306";
-        public static final String PRICINGDB = "/reference_pricing_";
+        public static final String PRICINGDB = "/REF_PRICE_";
 
         public static final String NETWORK_ADDRESS = "networkAddress";
         public static final String USER_ID = "userId";

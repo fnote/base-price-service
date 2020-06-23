@@ -46,7 +46,7 @@ public class DataSourceProvider {
     @Value("${pricing.db.max.life.lower.limit}")
     private long pricingDbMaxLifeLowerLimit;
 
-    @Value("${pricing.db.max.life.lower.limit}")
+    @Value("${pricing.db.max.life.upper.limit}")
     private long pricingDbMaxLifeUpperLimit;
 
     @Value("${pricing.db.jdbcHost}")
