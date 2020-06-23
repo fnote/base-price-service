@@ -15,6 +15,9 @@ public class DBConnectionContextHolder {
 
     private static Set<String> enabledDatabases = new HashSet<>();
 
+    private DBConnectionContextHolder() {
+    }
+
     /**
      * Set bunit as the db identifier.
      *
@@ -28,6 +31,7 @@ public class DBConnectionContextHolder {
             contextHolder.set(dbName);
             return true;
         } else {
+            contextHolder.remove();
             return false;
         }
     }

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
-public class ReferencePricingService {
+public class CustomerPriceService {
 
     @Autowired
     private CustomerPriceRepository customerPriceRepository;

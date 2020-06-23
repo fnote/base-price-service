@@ -5,8 +5,8 @@ import com.github.jasync.sql.db.ResultSet;
 import com.github.jasync.sql.db.mysql.MySQLConnection;
 import com.github.jasync.sql.db.pool.ConnectionPool;
 import com.sysco.rps.dto.ResponseWrapper;
-import com.sysco.rps.dto.refpricing.CustomerPriceSimplified;
 import com.sysco.rps.dto.refpricing.CustomerPriceReqDTO;
+import com.sysco.rps.dto.refpricing.CustomerPriceSimplified;
 import com.sysco.rps.dto.refpricing.ExecTime;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -108,7 +108,7 @@ public class AsyncMySqlRepo {
 
         try {
 
-            if(supcsCount <= supcsPerQuery) {
+            if (supcsCount <= supcsPerQuery) {
 
                 String query = getQuery(currentSUPCList, customerId, 16, "");
                 customerPriceList = getCustomerPricesThroughSingleQuery(query, execTime, stopWatch);
@@ -129,11 +129,11 @@ public class AsyncMySqlRepo {
     private ResponseWrapper<List<CustomerPriceSimplified>> formResponse(List<CustomerPriceSimplified> customerPrices, ExecTime execTime) {
         Map<String, String> metadataMap = new HashMap<>();
 
-        if(execTime.getSingle() != null) {
+        if (execTime.getSingle() != null) {
             metadataMap.put("singleQueryExecTime", execTime.getSingle() + " ms");
         }
 
-        if(execTime.getMulti() != null) {
+        if (execTime.getMulti() != null) {
             metadataMap.put("multiQueryExecTime", execTime.getMulti() + " ms");
         }
 

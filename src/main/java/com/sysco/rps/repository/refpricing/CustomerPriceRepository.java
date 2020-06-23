@@ -1,5 +1,6 @@
 package com.sysco.rps.repository.refpricing;
 
+import com.sysco.rps.common.Constants;
 import com.sysco.rps.dto.refpricing.CustomerPrice;
 import com.sysco.rps.dto.refpricing.CustomerPriceRequest;
 import com.sysco.rps.dto.refpricing.Product;
@@ -23,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * @author
+ * @author Sanjaya Amarasinghe
  * @copyright (C) 2020,
  * @doc
  * @end Created : 07. Jun 2020 06:59
@@ -45,13 +46,13 @@ public class CustomerPriceRepository extends NamedParameterJdbcDaoSupport implem
               "SELECT " +
                     "c.CUSTOMER_ID, p.SUPC, p.PRICE_ZONE, p.PRICE, p.EFFECTIVE_DATE " +
                     "FROM " +
-                    "PA_HIS p INNER JOIN" +
+                    Constants.DBNames.PA + " p INNER JOIN" +
                     "(SELECT MAX(p.EFFECTIVE_DATE) max_eff_date, p.SUPC, p.PRICE_ZONE, b.CUSTOMER_ID " +
                     "FROM " +
-                    "(SELECT e.SUPC, e.PRICE_ZONE, e.CUSTOMER_ID from EATS_001 e " +
+                    "(SELECT e.SUPC, e.PRICE_ZONE, e.CUSTOMER_ID from " + Constants.DBNames.EATS + " e " +
                     "where e.CUSTOMER_ID=:customerId and SUPC in (:supcs) ) b " +
                     "INNER JOIN " +
-                    "PA_HIS p ON b.SUPC = p.SUPC AND b.PRICE_ZONE = p.PRICE_ZONE " +
+                    Constants.DBNames.PA + " p ON b.SUPC = p.SUPC AND b.PRICE_ZONE = p.PRICE_ZONE " +
                     "WHERE p.EFFECTIVE_DATE <= :maxEffectiveDate " +
                     "GROUP BY p.SUPC)  c " +
                     "ON c.max_eff_date = p.EFFECTIVE_DATE AND c.SUPC = p.SUPC AND c.PRICE_ZONE = p.PRICE_ZONE ";
