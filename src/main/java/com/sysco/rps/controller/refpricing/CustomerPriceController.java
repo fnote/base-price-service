@@ -8,7 +8,7 @@ import com.sysco.rps.dto.refpricing.CustomerPriceSimplified;
 import com.sysco.rps.repository.refpricing.AsyncMySqlRepo;
 import com.sysco.rps.repository.refpricing.CustomerPriceJDBCTemplateRepository;
 import com.sysco.rps.service.exception.ValidationException;
-import com.sysco.rps.service.refpricing.ReferencePricingService;
+import com.sysco.rps.service.refpricing.CustomerPriceService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -33,11 +33,11 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/ref-price/")
-public class RefPricingController {
+public class CustomerPriceController {
 
 
     @Autowired
-    private ReferencePricingService referencePricingService;
+    private CustomerPriceService customerPriceService;
 
     @Autowired
     private CustomerPriceJDBCTemplateRepository customerPriceJDBCTemplateRepository;
@@ -58,7 +58,7 @@ public class RefPricingController {
     })
     public @ResponseBody
     ResponseEntity<CustomerPrice> getCustomerPrice(@RequestBody @Valid CustomerPriceRequest customerPriceRequest) {
-        CustomerPrice customerPrice = referencePricingService.getCustomerPrice(customerPriceRequest);
+        CustomerPrice customerPrice = customerPriceService.getCustomerPrice(customerPriceRequest);
         return ResponseEntity.status(HttpStatus.OK)
               .body(customerPrice);
     }

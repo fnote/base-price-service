@@ -1,6 +1,5 @@
 package com.sysco.rps.repository.common;
 
-
 import com.sysco.rps.entity.pp.masterdata.BusinessUnit;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
 import com.zaxxer.hikari.HikariConfig;
@@ -26,10 +25,12 @@ import static com.sysco.rps.common.Constants.JdbcProperties.JDBC_DRIVER_NAME;
 import static com.sysco.rps.common.Constants.JdbcProperties.JDBC_MYSQL;
 import static com.sysco.rps.common.Constants.JdbcProperties.PORT;
 import static com.sysco.rps.common.Constants.JdbcProperties.PRICINGDB;
+import static com.sysco.rps.common.Constants.PRICINGDB_MAXAGE_LOWER_LIMIT_DEFAULT;
+import static com.sysco.rps.common.Constants.PRICINGDB_MAXAGE_UPPER_LIMIT_DEFAULT;
 
 /**
  * This works as a scheduler to load connection pools for available OpCos
- *
+ * <p>
  * * @tag Copyright (C) 2018 SYSCO Corp. All Rights Reserved.
  */
 @Component("activeDatabaseProvider")
@@ -40,14 +41,13 @@ public class DataSourceProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProvider.class);
     private static Map<Object, Object> targetDataSources = new HashMap<>();
     private final BusinessUnitLoaderService businessUnitLoaderService;
-    private final String envPrefix;
     private List<BusinessUnit> businessUnits = null;
 
     @Value("${pricing.db.max.life.lower.limit}")
-    private long pricingDbMaxLifeLowerLimit;
+    private String strPricingDbMaxLifeLowerLimit;
 
-    @Value("${pricing.db.max.life.lower.limit}")
-    private long pricingDbMaxLifeUpperLimit;
+    @Value("${pricing.db.max.life.upper.limit}")
+    private String strPricingDbMaxLifeUpperLimit;
 
     @Value("${pricing.db.jdbcHost}")
     private String jdbcHost;
@@ -58,11 +58,14 @@ public class DataSourceProvider {
     @Value("${pricing.db.password}")
     private String jdbcPassword;
 
+    private long pricingDbMaxLifeLowerLimit;
+    private long pricingDbMaxLifeUpperLimit;
 
     @Autowired
     public DataSourceProvider(BusinessUnitLoaderService loadBusinessUnitAction) {
         this.businessUnitLoaderService = loadBusinessUnitAction;
-        this.envPrefix = "d";
+        this.pricingDbMaxLifeLowerLimit = PRICINGDB_MAXAGE_LOWER_LIMIT_DEFAULT;
+        this.pricingDbMaxLifeUpperLimit = PRICINGDB_MAXAGE_UPPER_LIMIT_DEFAULT;
     }
 
     public static RoutingDataSource getActiveDataSource() {
@@ -76,10 +79,22 @@ public class DataSourceProvider {
 //    @Scheduled(fixedRate = FIXED_RATE, initialDelay = 0)
     public void loadActiveDbs() {
         try {
+            setMaxLifeTimeLimits();
             loadActiveBusinessUnits();
             updateActivePricingDbs();
         } catch (Exception e) {
             LOGGER.error("Error in refreshing active db properties for Pricing DBs", e);
+        }
+    }
+
+    private void setMaxLifeTimeLimits() {
+
+        if (strPricingDbMaxLifeLowerLimit != null) {
+            this.pricingDbMaxLifeLowerLimit = Long.parseLong(strPricingDbMaxLifeLowerLimit);
+        }
+
+        if (strPricingDbMaxLifeUpperLimit != null) {
+            this.pricingDbMaxLifeUpperLimit = Long.parseLong(strPricingDbMaxLifeUpperLimit);
         }
     }
 
@@ -109,9 +124,9 @@ public class DataSourceProvider {
 
             for (String businessUnitId : activeBusinessUnitIds) {
 
+                // TODO: Consider appending env
                 String activeDbUrlForCurrentBunit = JDBC_MYSQL + jdbcHost + PORT + PRICINGDB +
                       businessUnitId;
-//                      + envPrefix;
 
                 if (targetDataSources.get(businessUnitId) == null
                       || !activeDbUrlForCurrentBunit.equals(((HikariDataSource) targetDataSources.get(businessUnitId)).getJdbcUrl())) {
@@ -126,12 +141,6 @@ public class DataSourceProvider {
                     hikariConfig.setUsername(jdbcUser);
                     hikariConfig.setPassword(jdbcPassword);
                     hikariConfig.setPoolName(businessUnitId + HIKARI_POOL_NAME_SUFFIX);
-//                    hikariConfig.setMaximumPoolSize(Integer.parseInt(SettingsProvider.getPropertyString(GROUP_NAME_CP_SYSTEM,
-//                          Constants.SettingId.HIKARI_MAX_POOL_SIZE)));
-//                    hikariConfig.setMinimumIdle(Integer.parseInt(SettingsProvider.getPropertyString(GROUP_NAME_CP_SYSTEM,
-//                          Constants.SettingId.HIKARI_CONNECTION_MIN_IDLE_COUNT)));
-//                    hikariConfig.setConnectionTimeout(Long.parseLong(SettingsProvider.getPropertyString(GROUP_NAME_CP_SYSTEM,
-//                          Constants.SettingId.HIKARI_CONNECTION_TIMEOUT)));
                     hikariConfig.setMaxLifetime(getMaxLifeTimeRandomlyBasedOnLimits());
                     hikariConfig.addDataSourceProperty("cachePrepStmts", true);
                     hikariConfig.addDataSourceProperty("prepStmtCacheSize", 500);
@@ -139,25 +148,29 @@ public class DataSourceProvider {
                     hikariConfig.addDataSourceProperty("useServerPrepStmts", true);
                     hikariConfig.setMaximumPoolSize(1);
                     hikariConfig.setMinimumIdle(1);
+
                     try {
                         datasourcesToBeClosed.add(targetDataSources.put(businessUnitId, new HikariDataSource(hikariConfig)));
                         updated = true;
                         LOGGER.info("Configuration completed for {}", activeDbUrlForCurrentBunit);
 
                     } catch (Exception e) {
-                        LOGGER.error("Configuration failed for " + activeDbUrlForCurrentBunit, e);
+                        LOGGER.error("Configuration failed for {}", activeDbUrlForCurrentBunit, e);
                     }
                 }
             }
+
             if (updated) {
                 LOGGER.info("Updating the data sources");
                 updatedRoutingDataSource.setTargetDataSources(targetDataSources);
                 updatedRoutingDataSource.afterPropertiesSet();
+
                 datasourcesToBeClosed.forEach(datasourceToBeClosed -> {
                     if (datasourceToBeClosed != null) {
                         ((HikariDataSource) datasourceToBeClosed).close();
                     }
                 });
+
             } else {
                 LOGGER.info("Data Sources not changed for all opcos");
             }
@@ -167,6 +180,7 @@ public class DataSourceProvider {
         }
     }
 
+    // sets a random value for the maximum lifetime of a connection in the pool
     private long getMaxLifeTimeRandomlyBasedOnLimits() {
         return ThreadLocalRandom.current().nextLong(this.pricingDbMaxLifeLowerLimit, this.pricingDbMaxLifeUpperLimit + 1);
     }
