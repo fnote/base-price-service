@@ -7,7 +7,7 @@ import com.sysco.rps.dto.refpricing.CustomerPriceRequest;
 import com.sysco.rps.dto.refpricing.CustomerPriceSimplified;
 import com.sysco.rps.repository.refpricing.AsyncMySqlRepo;
 import com.sysco.rps.repository.refpricing.CustomerPriceJDBCTemplateRepository;
-import com.sysco.rps.service.exception.ValidationException;
+//import com.sysco.rps.service.exception.ValidationException;
 import com.sysco.rps.service.refpricing.ReferencePricingService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -76,7 +76,7 @@ public class RefPricingController {
     })
     public @ResponseBody
     ResponseEntity<List<CustomerPriceSimplified>> getCustomerPriceWithDate(@RequestBody @Valid CustomerPriceReqDTO customerPriceReqDTO)
-          throws ValidationException {
+          /*throws ValidationException*/ {
 //        LOGGER.info("Entered the ref price handler:getCustomerPriceWithDate");
         List<CustomerPriceSimplified> customerPriceList = customerPriceJDBCTemplateRepository.getCustomerPrice2(customerPriceReqDTO);
         return ResponseEntity.status(HttpStatus.OK)
@@ -96,7 +96,7 @@ public class RefPricingController {
     })
     public @ResponseBody
     ResponseEntity<String> getCustomerPriceWithDateAsyncRandom()
-          throws ValidationException {
+          /*throws ValidationException*/ {
 //        LOGGER.info("Entered the ref price handler:getCustomerPriceWithDateAsyncRandom");
         String customerPriceList = asyncMySqlRepo.getPricesForRandomValues();
         return ResponseEntity.status(HttpStatus.OK)
@@ -116,7 +116,7 @@ public class RefPricingController {
     })
     public @ResponseBody
     ResponseEntity<ResponseWrapper<List<CustomerPriceSimplified>>> getCustomerPriceWithDateAsyncRandomCustom(
-          @RequestParam(required = false) Integer supcsCount, @RequestParam(required = false) Integer supcsPerQuery) throws ValidationException {
+          @RequestParam(required = false) Integer supcsCount, @RequestParam(required = false) Integer supcsPerQuery) /*throws ValidationException */{
 //        LOGGER.info("Entered the ref price handler:getCustomerPrice");
         ResponseWrapper<List<CustomerPriceSimplified>> customerPriceList = asyncMySqlRepo.getRandomPricesCustom(supcsCount, supcsPerQuery);
         return ResponseEntity.status(HttpStatus.OK)
@@ -136,7 +136,7 @@ public class RefPricingController {
     public @ResponseBody
     ResponseEntity<List<CustomerPriceSimplified>> getCustomerPriceWithDateAsync(@RequestBody @Valid CustomerPriceReqDTO customerPriceReqDTO,
                                                                                 @RequestParam(required = false) Integer supcsPerQuery)
-          throws ValidationException {
+          /*throws ValidationException*/ {
 //        LOGGER.info("Entered the ref price handler:getCustomerPriceWithDateAsync");
         List<CustomerPriceSimplified> customerPriceList = asyncMySqlRepo.getPrices(customerPriceReqDTO, supcsPerQuery);
         return ResponseEntity.status(HttpStatus.OK)

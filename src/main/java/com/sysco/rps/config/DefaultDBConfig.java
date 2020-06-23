@@ -1,5 +1,6 @@
 package com.sysco.rps.config;
 
+/*
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+*/
 
 
 /**
@@ -23,6 +25,8 @@ import javax.sql.DataSource;
  * @doc
  * @end Created : 04. Jun 2020 07:19
  */
+
+/*
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
@@ -61,3 +65,4 @@ public class DefaultDBConfig {
         return new JpaTransactionManager(entityManagerFactory);
     }
 }
+*/

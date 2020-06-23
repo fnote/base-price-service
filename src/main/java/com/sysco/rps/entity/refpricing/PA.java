@@ -1,3 +1,4 @@
+/*
 package com.sysco.rps.entity.refpricing;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -14,12 +15,14 @@ import javax.persistence.UniqueConstraint;
 import java.math.BigInteger;
 import java.sql.Date;
 
+*/
 /**
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
  * @end Created : 04. Jun 2020 11:46
- */
+ *//*
+
 
 @Entity
 @Table(name = "PA",
@@ -140,3 +143,4 @@ public class PA {
                 .toString();
     }
 }
+*/
