@@ -103,11 +103,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-actuator
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: '2.2.6.RELEASE'
 
-	// mysql
-	implementation 'com.github.jasync-sql:jasync-mysql:1.1.0'
-	// postgresql
-	implementation 'com.github.jasync-sql:jasync-postgresql:1.1.0'
-
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
 
