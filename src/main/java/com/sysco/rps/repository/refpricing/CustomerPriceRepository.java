@@ -1,6 +1,5 @@
 package com.sysco.rps.repository.refpricing;
 
-import com.sysco.rps.common.Constants;
 import com.sysco.rps.dto.refpricing.CustomerPrice;
 import com.sysco.rps.dto.refpricing.CustomerPriceRequest;
 import com.sysco.rps.dto.refpricing.Product;
@@ -42,20 +41,32 @@ public class CustomerPriceRepository extends NamedParameterJdbcDaoSupport implem
 
     public CustomerPrice getCustomerPrice(CustomerPriceRequest customerPriceReq) {
 
-        String query =
-              "SELECT " +
-                    "c.CUSTOMER_ID, p.SUPC, p.PRICE_ZONE, p.PRICE, p.EFFECTIVE_DATE " +
-                    "FROM " +
-                    Constants.DBNames.PA + " p INNER JOIN" +
-                    "(SELECT MAX(p.EFFECTIVE_DATE) max_eff_date, p.SUPC, p.PRICE_ZONE, b.CUSTOMER_ID " +
-                    "FROM " +
-                    "(SELECT e.SUPC, e.PRICE_ZONE, e.CUSTOMER_ID from " + Constants.DBNames.EATS + " e " +
-                    "where e.CUSTOMER_ID=:customerId and SUPC in (:supcs) ) b " +
-                    "INNER JOIN " +
-                    Constants.DBNames.PA + " p ON b.SUPC = p.SUPC AND b.PRICE_ZONE = p.PRICE_ZONE " +
-                    "WHERE p.EFFECTIVE_DATE <= :maxEffectiveDate " +
-                    "GROUP BY p.SUPC)  c " +
-                    "ON c.max_eff_date = p.EFFECTIVE_DATE AND c.SUPC = p.SUPC AND c.PRICE_ZONE = p.PRICE_ZONE ";
+        String query = "select ll.PRICE, ll.SUPC, ll.EXPORTED_DATE, ll.EFFECTIVE_DATE, ll.PRICE_ZONE from  " +
+              "PA ll  " +
+              "inner join  " +
+              "( " +
+              " select max(pr.EXPORTED_DATE) max_expo, pr.SUPC, pr.PRICE_ZONE, pr.EFFECTIVE_DATE from PA pr " +
+              " inner join  " +
+              " ( " +
+              " select max(pp.EFFECTIVE_DATE) max_eff, pp.SUPC, pp.PRICE_ZONE from PA pp  " +
+              "  inner join  " +
+              "  (select ea.SUPC, ea.CUSTOMER_ID, ea.PRICE_ZONE, ea.EFFECTIVE_DATE from EATS ea  " +
+              "   inner join  " +
+              "    ( " +
+              "     select MAX(e.EFFECTIVE_DATE) eat_max_eff , e.SUPC, e.CUSTOMER_ID  " +
+              "     from EATS e " +
+              "     where e.CUSTOMER_ID =:customerId and SUPC in ( :supcs ) and EFFECTIVE_DATE <= :maxEffectiveDate group by e.SUPC " +
+              "    ) aa " +
+              "   " +
+              "    where ea.SUPC in (aa.SUPC) and ea.CUSTOMER_ID = aa.CUSTOMER_ID and ea.EFFECTIVE_DATE=aa.eat_max_eff " +
+              "  ) bb  " +
+              " on bb.PRICE_ZONE = pp.PRICE_ZONE and pp.SUPC in (bb.SUPC) and pp.EFFECTIVE_DATE <= :maxEffectiveDate group by pp.SUPC " +
+              " ) cc " +
+              "  " +
+              " where pr.EFFECTIVE_DATE = cc.max_eff and pr.SUPC =cc.SUPC and pr.PRICE_ZONE = cc.PRICE_ZONE group by pr.SUPC " +
+              ") ee " +
+              " " +
+              "where ll.EFFECTIVE_DATE = ee.EFFECTIVE_DATE and ll.SUPC in (ee.SUPC) and ll.PRICE_ZONE = ee.PRICE_ZONE and ll.EXPORTED_DATE = ee.max_expo";
 
         String maxEffectiveDate = StringUtils.isEmpty(customerPriceReq.getPriceRequestDate()) ? getCurrentDate() :
               customerPriceReq.getPriceRequestDate();
@@ -78,11 +89,12 @@ public class CustomerPriceRepository extends NamedParameterJdbcDaoSupport implem
             }
 
             String supc = resultSet.getString("SUPC");
-            String priceZone = resultSet.getString("PRICE_ZONE");
+            int priceZone = resultSet.getInt("PRICE_ZONE");
             Double price = resultSet.getDouble("PRICE");
             Date effectiveDate = resultSet.getDate("EFFECTIVE_DATE");
+            Long exportedDate = resultSet.getLong("EXPORTED_DATE");
 
-            return new Product(supc, priceZone, price, getDate(effectiveDate));
+            return new Product(supc, priceZone, price, getDate(effectiveDate), exportedDate);
         });
 
 

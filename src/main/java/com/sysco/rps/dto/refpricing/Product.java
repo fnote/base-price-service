@@ -13,17 +13,17 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class Product {
 
     private String supc;
-    private String priceZoneId;
+    private Integer priceZoneId;
     private Double referencePrice;
     private String effectiveFromDate;
-    private String priceExportDate;
+    private Long priceExportDate;
 
-    public Product(String supc, String priceZoneId, Double referencePrice, String effectiveFromDate) {
+    public Product(String supc, Integer priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportDate) {
         this.supc = supc;
         this.priceZoneId = priceZoneId;
         this.referencePrice = referencePrice;
         this.effectiveFromDate = effectiveFromDate;
-        //TODO add price export date when DBs are ready
+        this.priceExportDate = priceExportDate;
     }
 
     public String getSupc() {
@@ -34,11 +34,11 @@ public class Product {
         this.supc = supc;
     }
 
-    public String getPriceZoneId() {
+    public Integer getPriceZoneId() {
         return priceZoneId;
     }
 
-    public void setPriceZoneId(String priceZoneId) {
+    public void setPriceZoneId(Integer priceZoneId) {
         this.priceZoneId = priceZoneId;
     }
 
@@ -58,11 +58,11 @@ public class Product {
         this.effectiveFromDate = effectiveFromDate;
     }
 
-    public String getPriceExportDate() {
+    public Long getPriceExportDate() {
         return priceExportDate;
     }
 
-    public void setPriceExportDate(String priceExportDate) {
+    public void setPriceExportDate(Long priceExportDate) {
         this.priceExportDate = priceExportDate;
     }
 
