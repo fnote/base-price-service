@@ -1,9 +1,13 @@
 package com.sysco.rps.repository.common;
 
-import com.sysco.rps.entity.pp.masterdata.BusinessUnit;
+import com.sysco.rps.entity.masterdata.BusinessUnit;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import io.r2dbc.pool.ConnectionPool;
+import io.r2dbc.pool.ConnectionPoolConfiguration;
+import io.r2dbc.spi.ConnectionFactories;
+import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.ConnectionFactoryOptions;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,22 +15,31 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import static com.sysco.rps.common.Constants.JdbcProperties.HIKARI_POOL_NAME_SUFFIX;
-import static com.sysco.rps.common.Constants.JdbcProperties.JDBC_DRIVER_NAME;
 import static com.sysco.rps.common.Constants.JdbcProperties.JDBC_MYSQL;
 import static com.sysco.rps.common.Constants.JdbcProperties.PORT;
 import static com.sysco.rps.common.Constants.JdbcProperties.PRICINGDB;
 import static com.sysco.rps.common.Constants.PRICINGDB_MAXAGE_LOWER_LIMIT_DEFAULT;
 import static com.sysco.rps.common.Constants.PRICINGDB_MAXAGE_UPPER_LIMIT_DEFAULT;
+import static io.r2dbc.pool.PoolingConnectionFactoryProvider.INITIAL_SIZE;
+import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_SIZE;
+import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
+import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
+import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL;
+import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
 /**
  * This works as a scheduler to load connection pools for available OpCos
@@ -37,11 +50,10 @@ import static com.sysco.rps.common.Constants.PRICINGDB_MAXAGE_UPPER_LIMIT_DEFAUL
 @DependsOn({"businessUnitLoaderService"})
 public class DataSourceProvider {
 
-    private static final RoutingDataSource updatedRoutingDataSource = new RoutingDataSource();
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProvider.class);
-    private static Map<Object, Object> targetDataSources = new HashMap<>();
     private final BusinessUnitLoaderService businessUnitLoaderService;
-    private List<BusinessUnit> businessUnits = null;
+    private static final Map<String, ConnectionPool> dataSourceMap = new HashMap<>();
+    private static final Set<String> businessUnitIds = new HashSet<>();
 
     @Value("${pricing.db.max.life.lower.limit}")
     private String strPricingDbMaxLifeLowerLimit;
@@ -58,6 +70,15 @@ public class DataSourceProvider {
     @Value("${pricing.db.password}")
     private String jdbcPassword;
 
+    @Value(("${pricing.db.max.pool.size}"))
+    private String maxPoolSize;
+
+    @Value(("${pricing.db.initial.pool.size}"))
+    private String initialPoolSize;
+
+    @Value(("${pricing.db.max.idle.time}"))
+    private String maxIdleTime;
+
     private long pricingDbMaxLifeLowerLimit;
     private long pricingDbMaxLifeUpperLimit;
 
@@ -68,8 +89,8 @@ public class DataSourceProvider {
         this.pricingDbMaxLifeUpperLimit = PRICINGDB_MAXAGE_UPPER_LIMIT_DEFAULT;
     }
 
-    public static RoutingDataSource getActiveDataSource() {
-        return updatedRoutingDataSource;
+    public static ConnectionPool getDataSource(String dbName) {
+        return dataSourceMap.get(dbName);
     }
 
     /**
@@ -100,12 +121,13 @@ public class DataSourceProvider {
 
     private void loadActiveBusinessUnits() {
         try {
-            businessUnits = businessUnitLoaderService.loadBusinessUnitList();
+            List<BusinessUnit> businessUnits = businessUnitLoaderService.loadBusinessUnitList();
             Set<String> activeBusinessUnitIds = businessUnits
                   .stream()
                   .map(BusinessUnit::getBusinessUnitNumber)
                   .collect(Collectors.toSet());
-            DBConnectionContextHolder.setEnabledDatabases(activeBusinessUnitIds);
+            businessUnitIds.clear();
+            businessUnitIds.addAll(activeBusinessUnitIds);
         } catch (Exception e) {
             LOGGER.error("Error in loading active business units", e);
         }
@@ -115,64 +137,55 @@ public class DataSourceProvider {
      * Update Pricing DBs for all the active bunits.
      */
     private void updateActivePricingDbs() {
-        boolean updated = false;
 
-        Set<String> activeBusinessUnitIds = DBConnectionContextHolder.getEnabledDatabases();
         try {
 
             List<Object> datasourcesToBeClosed = null;
 
-            for (String businessUnitId : activeBusinessUnitIds) {
+            for (String businessUnitId : businessUnitIds) {
 
-                // TODO: Consider appending env
-                String activeDbUrlForCurrentBunit = JDBC_MYSQL + jdbcHost + PORT + PRICINGDB +
-                      businessUnitId;
+                String db = PRICINGDB + businessUnitId;
+                String activeDbUrlForCurrentBunit = JDBC_MYSQL + jdbcHost + PORT + "/" + db;
 
-                if (targetDataSources.get(businessUnitId) == null
-                      || !activeDbUrlForCurrentBunit.equals(((HikariDataSource) targetDataSources.get(businessUnitId)).getJdbcUrl())) {
+                if (dataSourceMap.get(businessUnitId) == null) {
 
                     datasourcesToBeClosed = datasourcesToBeClosed == null ? new ArrayList<>() : datasourcesToBeClosed;
 
                     LOGGER.info("Configuration started for {}", activeDbUrlForCurrentBunit);
 
-                    HikariConfig hikariConfig = new HikariConfig();
-                    hikariConfig.setDriverClassName(JDBC_DRIVER_NAME);
-                    hikariConfig.setJdbcUrl(activeDbUrlForCurrentBunit);
-                    hikariConfig.setUsername(jdbcUser);
-                    hikariConfig.setPassword(jdbcPassword);
-                    hikariConfig.setPoolName(businessUnitId + HIKARI_POOL_NAME_SUFFIX);
-                    hikariConfig.setMaxLifetime(getMaxLifeTimeRandomlyBasedOnLimits());
-                    hikariConfig.addDataSourceProperty("cachePrepStmts", true);
-                    hikariConfig.addDataSourceProperty("prepStmtCacheSize", 500);
-                    hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
-                    hikariConfig.addDataSourceProperty("useServerPrepStmts", true);
-                    hikariConfig.setMaximumPoolSize(1);
-                    hikariConfig.setMinimumIdle(1);
-
                     try {
-                        datasourcesToBeClosed.add(targetDataSources.put(businessUnitId, new HikariDataSource(hikariConfig)));
-                        updated = true;
-                        LOGGER.info("Configuration completed for {}", activeDbUrlForCurrentBunit);
+                        ConnectionFactory connectionFactory = ConnectionFactories.get(ConnectionFactoryOptions.builder()
+                              .option(DRIVER, "pool")
+                              .option(PROTOCOL, "mysql")
+                              .option(HOST, jdbcHost)
+                              .option(USER, jdbcUser)
+                              .option(PASSWORD, jdbcPassword)
+                              .option(DATABASE, db)
+                              .option(MAX_SIZE, getInt(maxPoolSize, 10))
+                              .option(INITIAL_SIZE, getInt(initialPoolSize, 1))
+                              .build());
 
+                        ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
+                              .maxIdleTime(Duration.ofMillis(getInt(maxIdleTime, 1000)))
+                              .maxLifeTime(Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits()))
+                              .build();
+
+                        ConnectionPool pool = new ConnectionPool(configuration);
+                        Mono<Integer> warmup = pool.warmup();
+                        warmup.subscribe();
+
+                        warmup.map(val -> {
+                            LOGGER.info("Warmed up {}", val);
+                            return val;
+                        });
+
+                        dataSourceMap.put(businessUnitId, pool);
                     } catch (Exception e) {
-                        LOGGER.error("Configuration failed for {}", activeDbUrlForCurrentBunit, e);
+                        LOGGER.error("Failed to form DB pool for database {}", businessUnitId);
                     }
+
+                    LOGGER.info("Configuration completed for {}", activeDbUrlForCurrentBunit);
                 }
-            }
-
-            if (updated) {
-                LOGGER.info("Updating the data sources");
-                updatedRoutingDataSource.setTargetDataSources(targetDataSources);
-                updatedRoutingDataSource.afterPropertiesSet();
-
-                datasourcesToBeClosed.forEach(datasourceToBeClosed -> {
-                    if (datasourceToBeClosed != null) {
-                        ((HikariDataSource) datasourceToBeClosed).close();
-                    }
-                });
-
-            } else {
-                LOGGER.info("Data Sources not changed for all opcos");
             }
 
         } catch (Exception e) {
@@ -183,6 +196,10 @@ public class DataSourceProvider {
     // sets a random value for the maximum lifetime of a connection in the pool
     private long getMaxLifeTimeRandomlyBasedOnLimits() {
         return ThreadLocalRandom.current().nextLong(this.pricingDbMaxLifeLowerLimit, this.pricingDbMaxLifeUpperLimit + 1);
+    }
+
+    private int getInt(String strVal, int defaultVal) {
+        return StringUtils.isEmpty(strVal) ? defaultVal : Integer.parseInt(strVal);
     }
 }
 

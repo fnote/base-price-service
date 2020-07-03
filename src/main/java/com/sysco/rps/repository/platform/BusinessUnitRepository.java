@@ -1,6 +1,6 @@
 package com.sysco.rps.repository.platform;
 
-import com.sysco.rps.entity.pp.masterdata.BusinessUnit;
+import com.sysco.rps.entity.masterdata.BusinessUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;

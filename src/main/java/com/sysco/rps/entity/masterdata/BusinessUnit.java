@@ -1,4 +1,4 @@
-package com.sysco.rps.entity.pp.masterdata;
+package com.sysco.rps.entity.masterdata;
 
 import com.sysco.rps.util.Conversions;
 import com.sysco.rps.util.PricingUtils;
@@ -7,8 +7,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
- * @author
- * @copyright (C) 2020,
+ * @author Sanjaya Amarasinghe
+ * @copyright (C) 2020, Sysco Corporation
  * @doc
  * @end Created : 21. Jun 2020 09:16
  */

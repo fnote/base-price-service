@@ -1,4 +1,4 @@
-package com.sysco.rps.dto.refpricing;
+package com.sysco.rps.dto;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

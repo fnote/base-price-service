@@ -1,6 +1,5 @@
-package com.sysco.rps.dto.refpricing;
+package com.sysco.rps.dto;
 
-import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -11,21 +10,37 @@ import java.util.List;
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
- * @end Created : 12. Jun 2020 17:00
+ * @end Created : 12. Jun 2020 16:22
  */
-public class CustomerPriceRequest {
+public class CustomerPrice {
 
-    @ApiModelProperty(example = "001")
+//    @JsonProperty("business_unit_number")
     private String businessUnitNumber;
 
-    @ApiModelProperty(example = "1")
+//    @JsonProperty("customer_account")
     private String customerAccount;
 
-    @ApiModelProperty(example = "2020-05-31")
+//    @JsonProperty("price_request_date")
     private String priceRequestDate;
 
-    @ApiModelProperty(example = "[ \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]")
-    private List<String> products;
+//    @JsonProperty("products")
+    private List<Product> products;
+
+
+    public CustomerPrice(String businessUnitNumber, String customerAccount, String priceRequestDate,
+                         List<Product> products) {
+        this.businessUnitNumber = businessUnitNumber;
+        this.customerAccount = customerAccount;
+        this.priceRequestDate = priceRequestDate;
+        this.products = products;
+    }
+
+    public CustomerPrice(CustomerPriceRequest customerPriceRequest, List<Product> products) {
+        this.businessUnitNumber = customerPriceRequest.getBusinessUnitNumber();
+        this.customerAccount = customerPriceRequest.getCustomerAccount();
+        this.priceRequestDate = customerPriceRequest.getPriceRequestDate();
+        this.products = products;
+    }
 
     public String getBusinessUnitNumber() {
         return businessUnitNumber;
@@ -51,11 +66,11 @@ public class CustomerPriceRequest {
         this.priceRequestDate = priceRequestDate;
     }
 
-    public List<String> getProducts() {
+    public List<Product> getProducts() {
         return products;
     }
 
-    public void setProducts(List<String> products) {
+    public void setProducts(List<Product> products) {
         this.products = products;
     }
 
@@ -63,9 +78,9 @@ public class CustomerPriceRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
 
-        if (!(o instanceof CustomerPriceRequest)) return false;
+        if (!(o instanceof CustomerPrice)) return false;
 
-        CustomerPriceRequest that = (CustomerPriceRequest) o;
+        CustomerPrice that = (CustomerPrice) o;
 
         return new EqualsBuilder()
               .append(businessUnitNumber, that.businessUnitNumber)

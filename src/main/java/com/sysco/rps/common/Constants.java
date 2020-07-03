@@ -15,6 +15,9 @@ public class Constants {
     public static final long PRICINGDB_MAXAGE_LOWER_LIMIT_DEFAULT = 180000;
     public static final long PRICINGDB_MAXAGE_UPPER_LIMIT_DEFAULT = 300000;
 
+    public static final String CORRELATION_ID_HEADER = "X-Syy-Correlation-ID";
+    public static final String CORRELATION_ID_KEY = "Correlation-Id";
+
     public static class FieldsLength {
         public static final int SUPC_NUMBER = 7;
         public static final int SUPC = 9;
@@ -50,7 +53,7 @@ public class Constants {
 
         public static final String JDBC_MYSQL = "jdbc:mysql://";
         public static final String PORT = ":3306";
-        public static final String PRICINGDB = "/REF_PRICE_";
+        public static final String PRICINGDB = "REF_PRICE_";
 
         public static final String NETWORK_ADDRESS = "networkAddress";
         public static final String USER_ID = "userId";
