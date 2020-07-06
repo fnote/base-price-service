@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.INITIAL_SIZE;
@@ -62,6 +63,12 @@ public class RoutingConnectionFactoryConfig {
     @Value("${pricing.db.max.life.time}")
     private String maxLifeTime;
 
+    @Value("${pricing.db.max.life.lower.limit}")
+    private Long pricingDbMaxLifeLowerLimit;
+
+    @Value("${pricing.db.max.life.upper.limit}")
+    private Long pricingDbMaxLifeUpperLimit;
+
     private BusinessUnitLoaderService businessUnitLoaderService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutingConnectionFactoryConfig.class);
@@ -101,7 +108,7 @@ public class RoutingConnectionFactoryConfig {
 
             ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
                   .maxIdleTime(Duration.ofMillis(getInt(maxIdleTime, 1000)))
-                  .maxLifeTime(Duration.ofMillis(getInt(maxLifeTime, 180000)))
+                  .maxLifeTime(Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits()))
                   .build();
 
             try {
@@ -126,6 +133,10 @@ public class RoutingConnectionFactoryConfig {
               .stream()
               .map(BusinessUnit::getBusinessUnitNumber)
               .collect(Collectors.toSet());
+    }
+
+    private long getMaxLifeTimeRandomlyBasedOnLimits() {
+        return ThreadLocalRandom.current().nextLong(pricingDbMaxLifeLowerLimit, pricingDbMaxLifeUpperLimit + 1);
     }
 
     private int getInt(String strVal, int defaultVal) {
