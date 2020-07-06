@@ -88,14 +88,6 @@ public class CustomerPriceRepository {
               ).all();
     }
 
-
-//    private String getSUPCs(PricingRequestBody body) {
-//        return body.getSupcs()
-//              .stream()
-//              .map(s -> "\"" + s + "\"")
-//              .collect(Collectors.joining(","));
-//    }
-
     private String getSUPCs(List<String> supcs) {
         return supcs
               .stream()
