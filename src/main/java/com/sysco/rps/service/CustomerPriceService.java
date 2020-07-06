@@ -5,11 +5,8 @@ import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.Product;
 import com.sysco.rps.repository.refpricing.CustomerPriceRepository;
 import org.apache.commons.collections4.ListUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
@@ -31,16 +28,10 @@ import static com.sysco.rps.common.Constants.ROUTING_KEY;
 @Service
 public class CustomerPriceService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerPriceService.class);
-
-
     @Autowired
     private CustomerPriceRepository repository;
 
     public Mono<CustomerPrice> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
-
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
 
         int supcsPerQuery = (requestedSupcsPerQuery == null) ? request.getProducts().size() : requestedSupcsPerQuery;
 
@@ -60,10 +51,6 @@ public class CustomerPriceService {
                       }
                   });
                   return Mono.just(new CustomerPrice(request, new ArrayList<>(productMap.values())));
-              })
-              .doFinally(o -> {
-                  stopWatch.stop();
-                  LOGGER.info("LATENCY [{}]", stopWatch.getLastTaskTimeMillis());
               });
 
     }
