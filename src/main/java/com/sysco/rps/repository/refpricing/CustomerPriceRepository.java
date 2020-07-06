@@ -53,9 +53,7 @@ public class CustomerPriceRepository {
               "                                          ORDER BY NULL) cc" +
               "                     WHERE pr.SUPC = cc.SUPC" +
               "                       AND pr.PRICE_ZONE = cc.PRICE_ZONE" +
-              "                       AND pr.EFFECTIVE_DATE = cc.max_eff" +
-              "                     GROUP BY pr.SUPC" +
-              "                     ORDER BY NULL";
+              "                       AND pr.EFFECTIVE_DATE = cc.max_eff";
 
 //        LOGGER.debug(q2);
         return q2;
