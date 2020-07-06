@@ -2,10 +2,9 @@ package com.sysco.rps.repository.refpricing;
 
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.Product;
-import com.sysco.rps.repository.common.DataSourceProvider;
-import io.r2dbc.pool.ConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.util.StopWatch;
 import reactor.core.publisher.Flux;
@@ -22,6 +21,9 @@ import java.util.stream.Collectors;
  */
 @org.springframework.stereotype.Repository
 public class CustomerPriceRepository {
+
+    @Autowired
+    private DatabaseClient databaseClient;
 
     private Logger LOGGER = LoggerFactory.getLogger(CustomerPriceRepository.class);
 
@@ -51,9 +53,7 @@ public class CustomerPriceRepository {
               "                                          ORDER BY NULL) cc" +
               "                     WHERE pr.SUPC = cc.SUPC" +
               "                       AND pr.PRICE_ZONE = cc.PRICE_ZONE" +
-              "                       AND pr.EFFECTIVE_DATE = cc.max_eff" +
-              "                     GROUP BY pr.SUPC" +
-              "                     ORDER BY NULL";
+              "                       AND pr.EFFECTIVE_DATE = cc.max_eff";
 
 //        LOGGER.debug(q2);
         return q2;
@@ -65,10 +65,7 @@ public class CustomerPriceRepository {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        ConnectionPool dataSource = DataSourceProvider.getDataSource(customerPriceRequest.getBusinessUnitNumber());
-        DatabaseClient dbConn = DatabaseClient.create(dataSource);
-
-        return dbConn.execute(getQuery(customerPriceRequest.getCustomerAccount(), customerPriceRequest.getPriceRequestDate(), supcs))
+        return databaseClient.execute(getQuery(customerPriceRequest.getCustomerAccount(), customerPriceRequest.getPriceRequestDate(), supcs))
               .map((row, rowMetaData) -> {
 
                         if (stopWatch.isRunning()) {

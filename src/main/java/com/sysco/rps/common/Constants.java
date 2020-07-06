@@ -18,6 +18,8 @@ public class Constants {
     public static final String CORRELATION_ID_HEADER = "X-Syy-Correlation-ID";
     public static final String CORRELATION_ID_KEY = "Correlation-Id";
 
+    public static final String ROUTING_KEY = "businessUnitId";
+
     public static class FieldsLength {
         public static final int SUPC_NUMBER = 7;
         public static final int SUPC = 9;
