@@ -24,6 +24,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.INITIAL_SIZE;
+import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_IDLE_TIME;
+import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_LIFE_TIME;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_SIZE;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
@@ -93,6 +95,12 @@ public class RoutingConnectionFactoryConfig {
 
             String db = PRICINGDB + businessUnitId;
 
+            Duration maxLife = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
+            Duration maxIdle = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
+
+            LOGGER.debug("Setting max times for conn pool [{}] Max Lifetime: [{} S], Max Idle Time [{} S]", db, maxLife.toSeconds(),
+                  maxIdle.toSeconds());
+
             ConnectionFactory connectionFactory = ConnectionFactories.get(
                   ConnectionFactoryOptions.builder()
                         .option(DRIVER, "pool")
@@ -103,12 +111,14 @@ public class RoutingConnectionFactoryConfig {
                         .option(DATABASE, db)
                         .option(MAX_SIZE, getInt(maxPoolSize, 10))
                         .option(INITIAL_SIZE, getInt(maxPoolSize, 1))
+                        .option(MAX_IDLE_TIME, maxIdle)
+                        .option(MAX_LIFE_TIME, maxLife)
                         .build()
             );
 
             ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-                  .maxIdleTime(Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits()))
-                  .maxLifeTime(Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits()))
+                  .maxIdleTime(maxIdle)
+                  .maxLifeTime(maxLife)
                   .build();
 
             try {
