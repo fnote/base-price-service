@@ -13,7 +13,7 @@ import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 public class ReferencePriceService {
 
   static {
-    java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
+    java.security.Security.setProperty("networkaddress.cache.ttl" , "30");
   }
 
   public static void main(String[] args) {
