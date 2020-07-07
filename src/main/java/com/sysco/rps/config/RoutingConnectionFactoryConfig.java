@@ -107,7 +107,7 @@ public class RoutingConnectionFactoryConfig {
             );
 
             ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-                  .maxIdleTime(Duration.ofMillis(getInt(maxIdleTime, 1000)))
+                  .maxIdleTime(Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits()))
                   .maxLifeTime(Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits()))
                   .build();
 
