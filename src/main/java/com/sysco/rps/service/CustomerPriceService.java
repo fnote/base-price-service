@@ -5,6 +5,8 @@ import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.Product;
 import com.sysco.rps.repository.refpricing.CustomerPriceRepository;
 import org.apache.commons.collections4.ListUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
 
@@ -28,6 +31,8 @@ import static com.sysco.rps.common.Constants.ROUTING_KEY;
 @Service
 public class CustomerPriceService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CustomerPriceService.class);
+
     @Autowired
     private CustomerPriceRepository repository;
 
@@ -37,8 +42,15 @@ public class CustomerPriceService {
 
         List<List<String>> supcsPartitions = ListUtils.partition(request.getProducts(), supcsPerQuery);
 
+        AtomicLong timeConsumedForDbActivities = new AtomicLong(0);
+
         return Flux.fromIterable(supcsPartitions)
               .flatMap(supcPartition -> repository.getPricesByOpCo(request, supcPartition))
+              .elapsed()
+              .map(t -> {
+                  timeConsumedForDbActivities.addAndGet(t.getT1());
+                  return t.getT2();
+              })
               .subscriberContext(Context.of(ROUTING_KEY, request.getBusinessUnitNumber()))
               .collectList()
               .flatMap(v -> {
@@ -50,6 +62,7 @@ public class CustomerPriceService {
                           productMap.put(supc, p);
                       }
                   });
+                  logger.info("TOTAL-DB-TIME : [{}]", timeConsumedForDbActivities.get());
                   return Mono.just(new CustomerPrice(request, new ArrayList<>(productMap.values())));
               });
 
