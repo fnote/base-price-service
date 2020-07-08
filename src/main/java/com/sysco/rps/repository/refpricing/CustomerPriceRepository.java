@@ -34,9 +34,9 @@ public class CustomerPriceRepository {
               "                              INNER JOIN (SELECT max(pp.EFFECTIVE_DATE) max_eff, pp.SUPC, pp.PRICE_ZONE" +
               "                                          FROM PA pp force index (pa_ix_supc_eff_date)" +
               "                                                   INNER JOIN (SELECT ea.SUPC, ea.CUSTOMER_ID, ea.PRICE_ZONE, ea.EFFECTIVE_DATE" +
-              "                                                               FROM EATS ea force index (PRIMARY)" +
+              "                                                               FROM PRICE_ZONE_01 ea force index (PRIMARY)" +
               "                                                                        INNER JOIN (SELECT MAX(e.EFFECTIVE_DATE) eat_max_eff, e.SUPC, e.CUSTOMER_ID" +
-              "                                                                                    FROM EATS e force index (PRIMARY)" +
+              "                                                                                    FROM PRICE_ZONE_01 e force index (PRIMARY)" +
               "                                                                                    WHERE e.CUSTOMER_ID = \""+customerId+"\" " +
               "                                                                                      AND e.SUPC IN" +
               "                                                                                          ("+supcs+")" +
