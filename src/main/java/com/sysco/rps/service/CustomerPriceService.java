@@ -1,6 +1,6 @@
 package com.sysco.rps.service;
 
-import com.sysco.rps.dto.CustomerPrice;
+import com.sysco.rps.dto.CustomerPriceResponse;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.Product;
 import com.sysco.rps.repository.refpricing.CustomerPriceRepository;
@@ -36,7 +36,7 @@ public class CustomerPriceService {
     @Autowired
     private CustomerPriceRepository repository;
 
-    public Mono<CustomerPrice> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
+    public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
 
         int supcsPerQuery = (requestedSupcsPerQuery == null) ? request.getProducts().size() : requestedSupcsPerQuery;
 
@@ -63,7 +63,7 @@ public class CustomerPriceService {
                       }
                   });
                   logger.info("TOTAL-DB-TIME : [{}]", timeConsumedForDbActivities.get());
-                  return Mono.just(new CustomerPrice(request, new ArrayList<>(productMap.values())));
+                  return Mono.just(new CustomerPriceResponse(request, new ArrayList<>(productMap.values()), new ArrayList<>()));
               });
 
     }

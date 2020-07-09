@@ -1,6 +1,6 @@
 package com.sysco.rps.controller;
 
-import com.sysco.rps.dto.CustomerPrice;
+import com.sysco.rps.dto.CustomerPriceResponse;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.service.CustomerPriceService;
 import io.swagger.annotations.ApiOperation;
@@ -34,14 +34,14 @@ public class CustomerPriceController {
           value = "Gets the reference pricing for the customer item",
           notes = "If effectiveDate is provided in the req body, that will be used as the max effective date." +
                 "Else current day will be used. Uses NamedJDBCTemplate to fetch data",
-          response = CustomerPrice.class)
+          response = CustomerPriceResponse.class)
     @ApiResponses(value = {
           @ApiResponse(code = org.apache.http.HttpStatus.SC_OK, message = "Data fetch successful"),
           @ApiResponse(code = org.apache.http.HttpStatus.SC_BAD_REQUEST, message = "Request validation failed."),
           @ApiResponse(code = org.apache.http.HttpStatus.SC_NOT_FOUND, message = "Customer/OpCo not found."),
     })
     public @ResponseBody
-    Mono<CustomerPrice> getCustomerPrices(@RequestBody CustomerPriceRequest request, @RequestParam(required = false) Integer supcsPerQuery) {
+    Mono<CustomerPriceResponse> getCustomerPrices(@RequestBody CustomerPriceRequest request, @RequestParam(required = false) Integer supcsPerQuery) {
         return customerPriceService.pricesByOpCo(request, supcsPerQuery);
     }
 }
