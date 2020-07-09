@@ -117,8 +117,6 @@ public class RoutingConnectionFactoryConfig {
             );
 
             ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-                  .maxIdleTime(maxIdle)
-                  .maxLifeTime(maxLife)
                   .build();
 
             try {
