@@ -117,8 +117,6 @@ public class RoutingConnectionFactoryConfig {
             );
 
             ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-                  .maxIdleTime(maxIdle)
-                  .maxLifeTime(maxLife)
                   .build();
 
             try {
@@ -127,6 +125,7 @@ public class RoutingConnectionFactoryConfig {
                     defaultConnectionFactory = pool;
                 }
                 factories.put(businessUnitId, pool);
+                pool.warmup().subscribe(k -> LOGGER.debug("Warmed up connection pool for opco: [{}] connections: [{}]", businessUnitId, k));
             } catch (Exception e) {
                 LOGGER.error("Error Occurred while creating connection pool for [{}] [{}]", businessUnitId, e);
             }
