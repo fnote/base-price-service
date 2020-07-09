@@ -29,31 +29,28 @@ public class CustomerPriceRepository {
 
     private String getQuery(String customerId, String effectiveDate, String supcs) {
 
-        String q2 = "SELECT pr.EXPORTED_DATE, pr.SUPC, pr.PRICE, pr.PRICE_ZONE, pr.EFFECTIVE_DATE" +
-              "                     FROM PA pr force index (pa_ix_supc_eff_date)" +
-              "                              INNER JOIN (SELECT max(pp.EFFECTIVE_DATE) max_eff, pp.SUPC, pp.PRICE_ZONE" +
-              "                                          FROM PA pp force index (pa_ix_supc_eff_date)" +
-              "                                                   INNER JOIN (SELECT ea.SUPC, ea.CUSTOMER_ID, ea.PRICE_ZONE, ea.EFFECTIVE_DATE" +
-              "                                                               FROM PRICE_ZONE_01 ea force index (PRIMARY)" +
-              "                                                                        INNER JOIN (SELECT MAX(e.EFFECTIVE_DATE) eat_max_eff, e.SUPC, e.CUSTOMER_ID" +
-              "                                                                                    FROM PRICE_ZONE_01 e force index (PRIMARY)" +
-              "                                                                                    WHERE e.CUSTOMER_ID = \""+customerId+"\" " +
-              "                                                                                      AND e.SUPC IN" +
-              "                                                                                          ("+supcs+")" +
-              "                                                                                      AND e.EFFECTIVE_DATE <= \""+effectiveDate+"\" " +
-              "                                                                                    GROUP BY e.SUPC" +
-              "                                                                                    ORDER BY NULL) aa" +
-              "                                                               WHERE ea.CUSTOMER_ID = aa.CUSTOMER_ID" +
-              "                                                                 AND ea.SUPC = aa.SUPC" +
-              "                                                                 AND ea.EFFECTIVE_DATE = aa.eat_max_eff) bb" +
-              "                                                              ON pp.SUPC = bb.SUPC" +
-              "                                                                  AND bb.PRICE_ZONE = pp.PRICE_ZONE" +
-              "                                                                  AND pp.EFFECTIVE_DATE <= \""+effectiveDate+"\" " +
-              "                                          GROUP BY pp.SUPC" +
-              "                                          ORDER BY NULL) cc" +
-              "                     WHERE pr.SUPC = cc.SUPC" +
-              "                       AND pr.PRICE_ZONE = cc.PRICE_ZONE" +
-              "                       AND pr.EFFECTIVE_DATE = cc.max_eff";
+        String q2 = "SELECT paOuter.SUPC," +
+              "       paOuter.PRICE_ZONE," +
+              "       paOuter.PRICE," +
+              "       paOuter.EFFECTIVE_DATE," +
+              "       paOuter.EXPORTED_DATE" +
+              " FROM PA paOuter force index (`PRIMARY`)" +
+              "         INNER JOIN (SELECT Max(paInner.EFFECTIVE_DATE) max_eff_date," +
+              "                            paInner.SUPC," +
+              "                            paInner.PRICE_ZONE" +
+              "                     FROM (SELECT e.SUPC," +
+              "                                  e.PRICE_ZONE," +
+              "                                  e.CUSTOMER_ID" +
+              "                           FROM PRICE_ZONE_01 e force index (`PRIMARY`)" +
+              "                           WHERE e.CUSTOMER_ID = \"" + customerId + "\"" +
+              "                             AND SUPC IN (" + supcs + ")) pz" +
+              "                              INNER JOIN PA paInner force index (`PRIMARY`)" +
+              "                                         ON pz.SUPC = paInner.SUPC" +
+              "                                             AND pz.PRICE_ZONE = paInner.PRICE_ZONE" +
+              "                                             AND paInner.EFFECTIVE_DATE <= \"" + effectiveDate + "\"" +
+              "                     GROUP BY paInner.SUPC, paInner.PRICE_ZONE) c" +
+              "                    ON c.SUPC = paOuter.SUPC AND c.PRICE_ZONE = paOuter.PRICE_ZONE AND" +
+              "                       c.MAX_EFF_DATE = paOuter.EFFECTIVE_DATE";
 
 //        LOGGER.debug(q2);
         return q2;
