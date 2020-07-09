@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import static com.sysco.rps.common.Constants.JdbcProperties.PRICINGDB;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.INITIAL_SIZE;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_IDLE_TIME;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_LIFE_TIME;
@@ -33,7 +34,6 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
 import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
 import static io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL;
 import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
-import static com.sysco.rps.common.Constants.JdbcProperties.PRICINGDB;
 
 
 /**
@@ -83,7 +83,7 @@ public class RoutingConnectionFactoryConfig {
 
     @Bean
     public RoutingConnectionFactory routingConnectionFactory() {
-        RoutingConnectionFactory router =  new RoutingConnectionFactory();
+        RoutingConnectionFactory router = new RoutingConnectionFactory();
 
         ConnectionFactory defaultConnectionFactory = null;
 
@@ -91,7 +91,7 @@ public class RoutingConnectionFactoryConfig {
 
         Set<String> activeBusinessUnitIds = loadActiveBusinessUnits();
 
-        for (String businessUnitId: activeBusinessUnitIds) {
+        for (String businessUnitId : activeBusinessUnitIds) {
 
             String db = PRICINGDB + businessUnitId;
 
@@ -121,13 +121,16 @@ public class RoutingConnectionFactoryConfig {
 
             try {
                 ConnectionPool pool = new ConnectionPool(configuration);
+
+                pool.warmup().subscribe();
+
                 if (defaultConnectionFactory == null) {
                     defaultConnectionFactory = pool;
                 }
                 factories.put(businessUnitId, pool);
                 pool.warmup().subscribe(k -> LOGGER.debug("Warmed up connection pool for opco: [{}] connections: [{}]", businessUnitId, k));
             } catch (Exception e) {
-                LOGGER.error("Error Occurred while creating connection pool for [{}] [{}]", businessUnitId, e);
+                LOGGER.error("Error Occurred while creating connection pool for [{}]", businessUnitId, e);
             }
 
         }
