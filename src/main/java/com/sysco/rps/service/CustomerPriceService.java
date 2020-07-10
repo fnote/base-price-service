@@ -64,7 +64,8 @@ public class CustomerPriceService {
                   });
                   logger.info("TOTAL-DB-TIME : [{}]", timeConsumedForDbActivities.get());
                   return Mono.just(new CustomerPrice(request, new ArrayList<>(productMap.values())));
-              });
+              })
+              .doOnError(e -> logger.error("Oops", e));
 
     }
 }
