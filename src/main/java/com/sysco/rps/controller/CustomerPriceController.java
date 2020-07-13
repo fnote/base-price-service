@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono;
  */
 @RestController
 @RequestMapping("/ref-price/")
-public class CustomerPriceController {
+public class CustomerPriceController extends AbstractController{
 
 
     @Autowired
@@ -38,7 +38,7 @@ public class CustomerPriceController {
     @ApiResponses(value = {
           @ApiResponse(code = org.apache.http.HttpStatus.SC_OK, message = "Data fetch successful"),
           @ApiResponse(code = org.apache.http.HttpStatus.SC_BAD_REQUEST, message = "Request validation failed."),
-          @ApiResponse(code = org.apache.http.HttpStatus.SC_NOT_FOUND, message = "Customer/OpCo not found."),
+          @ApiResponse(code = org.apache.http.HttpStatus.SC_NOT_FOUND, message = "OpCo not found."),
     })
     public @ResponseBody
     Mono<CustomerPriceResponse> getCustomerPrices(@RequestBody CustomerPriceRequest request, @RequestParam(required = false) Integer supcsPerQuery) {

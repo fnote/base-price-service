@@ -1,11 +1,13 @@
 package com.sysco.rps.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 3/13/20 Time: 12:54 PM
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorDTO {
 
     private String code;

@@ -41,4 +41,14 @@ public class BusinessUnitLoaderService {
         return businessUnitRepository.getBusinessUnitList();
     }
 
+
+    /**
+     * Verifies whether an OpCo exist
+     *
+     * @return boolean
+     */
+    public boolean isOpcoExist(String requestedOpCoId){
+        return businessUnitRepository.isOpcoExist(requestedOpCoId);
+    }
+
 }
