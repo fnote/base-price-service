@@ -116,24 +116,10 @@ public class RoutingConnectionFactoryConfig {
                         .build()
             );
 
-            ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-                  .maxIdleTime(maxIdle)
-                  .maxLifeTime(maxLife)
-                  .build();
-
-            try {
-                ConnectionPool pool = new ConnectionPool(configuration);
-
-                pool.warmup().subscribe();
-
-                if (defaultConnectionFactory == null) {
-                    defaultConnectionFactory = pool;
-                }
-                factories.put(businessUnitId, pool);
-            } catch (Exception e) {
-                LOGGER.error("Error Occurred while creating connection pool for [{}]", businessUnitId, e);
+            if (defaultConnectionFactory == null) {
+                defaultConnectionFactory = connectionFactory;
             }
-
+            factories.put(businessUnitId, connectionFactory);
         }
 
         router.setTargetConnectionFactories(factories);
