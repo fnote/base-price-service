@@ -77,6 +77,9 @@ public class CustomerPriceService {
                   });
                   logger.info("TOTAL-DB-TIME : [{}]", timeConsumedForDbActivities.get());
                   return Mono.just(formResponse(request, productMap));
+              }).doOnError(e -> {
+                  logger.error("Request Payload: [{}]", request);
+                  logger.error(e.getMessage(), e);
               });
 
     }

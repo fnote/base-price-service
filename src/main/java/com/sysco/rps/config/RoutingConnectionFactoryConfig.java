@@ -3,8 +3,6 @@ package com.sysco.rps.config;
 import com.sysco.rps.entity.masterdata.BusinessUnit;
 import com.sysco.rps.repository.common.RoutingConnectionFactory;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
-import io.r2dbc.pool.ConnectionPool;
-import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
@@ -119,22 +117,10 @@ public class RoutingConnectionFactoryConfig {
                         .build()
             );
 
-            ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-                  .build();
-
-            try {
-                ConnectionPool pool = new ConnectionPool(configuration);
-
-                pool.warmup().subscribe();
-
-                if (defaultConnectionFactory == null) {
-                    defaultConnectionFactory = pool;
-                }
-                factories.put(businessUnitId, pool);
-            } catch (Exception e) {
-                LOGGER.error("Error Occurred while creating connection pool for [{}]", businessUnitId, e);
+            if (defaultConnectionFactory == null) {
+                defaultConnectionFactory = connectionFactory;
             }
-
+            factories.put(businessUnitId, connectionFactory);
         }
 
         router.setTargetConnectionFactories(factories);
