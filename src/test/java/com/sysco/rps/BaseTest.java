@@ -1,14 +1,14 @@
 package com.sysco.rps;
 
-import ch.vorburger.exec.ManagedProcessException;
-import ch.vorburger.mariadb4j.springframework.MariaDB4jSpringService;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
+import com.sysco.rps.repository.common.RoutingConnectionFactory;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.r2dbc.connectionfactory.init.ResourceDatabasePopulator;
 
 /**
  * @author Sanjaya Amarasinghe
@@ -17,11 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @end Created : 13. Jul 2020 18:21
  */
 //@SpringBootTest
-//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@TestPropertySource(locations = "classpath:application-junit.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BaseTest {
 
 //    @Autowired
@@ -34,25 +30,5 @@ public class BaseTest {
 //              resourceLoader.getResource("classpath:data.sql")};
 //
 //        new ResourceDatabasePopulator(scripts).execute(routingConnectionFactory).block();
-//
 //    }
-
-
-    private static MariaDB4jSpringService DB;
-
-    @BeforeClass
-    public static void init() throws ManagedProcessException {
-        DB = new MariaDB4jSpringService();
-        DB.setDefaultPort(1234);
-        DB.start();
-        DB.getDB().createDB("yourtables");
-        DB.getDB().source("schema.sql"); // init scripts from /src/test/resources/schema.sql
-    }
-
-    @AfterClass
-    public static void cleanup() {
-        if (DB != null) DB.stop();
-    }
-
-
 }
