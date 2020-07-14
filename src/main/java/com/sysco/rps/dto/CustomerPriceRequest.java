@@ -27,6 +27,17 @@ public class CustomerPriceRequest {
     @ApiModelProperty(example = "[ \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]")
     private List<String> products;
 
+    public CustomerPriceRequest(){
+        // default constructor
+    }
+    public CustomerPriceRequest(String businessUnitNumber, String customerAccount, String priceRequestDate,
+                                List<String> products) {
+        this.businessUnitNumber = businessUnitNumber;
+        this.customerAccount = customerAccount;
+        this.priceRequestDate = priceRequestDate;
+        this.products = products;
+    }
+
     public String getBusinessUnitNumber() {
         return businessUnitNumber;
     }

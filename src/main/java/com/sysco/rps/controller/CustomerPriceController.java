@@ -25,7 +25,6 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/ref-price/")
 public class CustomerPriceController extends AbstractController{
 
-
     @Autowired
     private CustomerPriceService customerPriceService;
 

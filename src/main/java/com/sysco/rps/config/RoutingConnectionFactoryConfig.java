@@ -71,6 +71,9 @@ public class RoutingConnectionFactoryConfig {
     @Value("${pricing.db.max.life.upper.limit}")
     private Long pricingDbMaxLifeUpperLimit;
 
+    @Value("${pricing.db.protocol}")
+    private String dbProtocol;
+
     private BusinessUnitLoaderService businessUnitLoaderService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutingConnectionFactoryConfig.class);
@@ -104,7 +107,7 @@ public class RoutingConnectionFactoryConfig {
             ConnectionFactory connectionFactory = ConnectionFactories.get(
                   ConnectionFactoryOptions.builder()
                         .option(DRIVER, "pool")
-                        .option(PROTOCOL, "mysql")
+                        .option(PROTOCOL, dbProtocol)
                         .option(HOST, jdbcHost)
                         .option(USER, jdbcUser)
                         .option(PASSWORD, jdbcPassword)
