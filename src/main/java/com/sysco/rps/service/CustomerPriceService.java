@@ -67,7 +67,7 @@ public class CustomerPriceService {
               })
               .doOnError(e -> {
                   logger.error("Request Payload: [{}]", request);
-                  logger.error("Oops", e);
+                  logger.error(e.getMessage(), e);
               });
 
     }
