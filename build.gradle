@@ -66,10 +66,22 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     runtimeOnly 'dev.miku:r2dbc-mysql'
     runtimeOnly 'mysql:mysql-connector-java'
+
+    testImplementation 'dev.miku:r2dbc-mysql'
+    testImplementation 'mysql:mysql-connector-java'
+
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation 'io.projectreactor:reactor-test'
+
+//    testRuntimeOnly 'org.liquibase:liquibase-core'
+//    testRuntimeOnly 'com.h2database:h2'
+    // https://mvnrepository.com/artifact/io.r2dbc/r2dbc-h2
+//    testRuntimeOnly group: 'io.r2dbc', name: 'r2dbc-h2', version: '0.8.4.RELEASE'
+
+    testCompile("ch.vorburger.mariaDB4j:mariaDB4j-springboot:2.4.0")
+
 
     // https://mvnrepository.com/artifact/io.springfox/springfox-swagger2
     implementation(group: 'io.springfox', name: 'springfox-swagger2', version: '2.10.5') {
