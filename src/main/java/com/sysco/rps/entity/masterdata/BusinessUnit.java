@@ -1,12 +1,13 @@
 package com.sysco.rps.entity.masterdata;
 
-import com.sysco.rps.util.Conversions;
 import com.sysco.rps.util.PricingUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
+ * Class that holds business unit (aka OpCo) data
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -30,13 +31,13 @@ public class BusinessUnit {
         setBusinessUnitNumber(bunitId);
     }
 
-    private void setBusinessUnitNumber(String businessUnitNumber) {
-        businessUnitNumber = Conversions.convertOpCoIdToDBField(businessUnitNumber);
-        this.businessUnitNumber = PricingUtils.trimSafely(businessUnitNumber, "000");
-    }
-
     public String getBusinessUnitNumber() {
         return businessUnitNumber;
+    }
+
+    private void setBusinessUnitNumber(String businessUnitNumber) {
+        businessUnitNumber = PricingUtils.convertOpCoIdToDBField(businessUnitNumber);
+        this.businessUnitNumber = PricingUtils.trimSafely(businessUnitNumber, "000");
     }
 
     public String getBusinessName() {

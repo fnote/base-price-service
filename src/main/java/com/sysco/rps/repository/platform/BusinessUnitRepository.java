@@ -10,6 +10,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Repository used to load business unit info
+ *
+ * @author Tharuka Jayalath
+ * @copyright (C) 2020, Sysco Corporation
+ * @end Created : 6/21/20. Sun 2020 10:50
+ */
 @Repository
 public class BusinessUnitRepository {
 
@@ -32,7 +39,7 @@ public class BusinessUnitRepository {
     public List<BusinessUnit> getBusinessUnitList() {
         // TODO: Retrieve business units from a different source (e.g. a DB table)
 
-        if(businessUnits.isEmpty()) {
+        if (businessUnits.isEmpty()) {
             String[] businessUnitIds = businessUnitsStr.split(",");
 
             for (String businessUnitId : businessUnitIds) {

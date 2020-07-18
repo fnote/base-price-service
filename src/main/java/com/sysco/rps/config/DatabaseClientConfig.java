@@ -7,8 +7,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 
 /**
+ * Configuration class for database client
+ *
  * @author Tharuka Jayalath
- * (C) 2019, Sysco Labs
+ * (C) 2020, Sysco Corporation
  * Created: 7/6/20. Mon 2020 09:53
  */
 @Configuration

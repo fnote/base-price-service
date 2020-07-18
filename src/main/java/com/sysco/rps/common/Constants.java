@@ -8,17 +8,14 @@ package com.sysco.rps.common;
 public class Constants {
 
 
-    private Constants() {
-    }
-
-
     public static final long PRICINGDB_MAXAGE_LOWER_LIMIT_DEFAULT = 180000;
     public static final long PRICINGDB_MAXAGE_UPPER_LIMIT_DEFAULT = 300000;
-
     public static final String CORRELATION_ID_HEADER = "X-Syy-Correlation-ID";
     public static final String CORRELATION_ID_KEY = "Correlation-Id";
-
     public static final String ROUTING_KEY = "businessUnitId";
+
+    private Constants() {
+    }
 
     public static class FieldsLength {
         public static final int SUPC_NUMBER = 7;

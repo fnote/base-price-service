@@ -7,7 +7,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 /**
- * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 3/28/20 Time: 12:54 PM
+ * Adds hooks for all operators so that MDCContextLifter is used on each
+ *
+ * @author rohana.kumara@sysco.com
+ * @copyright (C) 2020, Sysco Corporation
+ * @end Created : 3/28/20 Time: 12:54 PM
  */
 
 @Configuration

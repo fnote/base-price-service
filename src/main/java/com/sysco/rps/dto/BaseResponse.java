@@ -4,14 +4,21 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 4/1/20 Time: 12:54 PM
+ * The Base Response class that can be extended by other sub classes related to responses
+ *
+ * @author rohana.kumara@sysco.com
+ * @copyright (C) 2020, Sysco Corporation
+ * @end Created : 4/1/20 Time: 12:54 PM
  */
 
 public class BaseResponse<T> {
     private final List<T> successfulItems;
+
+    // contains info about requested objects that resulted in minor errors
     private final List<ErrorDTO> failedItems;
 
 
@@ -61,10 +68,9 @@ public class BaseResponse<T> {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-              .append("successfulItems", successfulItems)
-              .append("failedItems", failedItems)
+              .append("successfulItems", (successfulItems == null) ? null : Arrays.toString(successfulItems.toArray()))
+              .append("failedItems", (failedItems == null) ? null : Arrays.toString(failedItems.toArray()))
               .toString();
     }
-
 
 }

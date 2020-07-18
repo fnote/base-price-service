@@ -30,6 +30,8 @@ import static com.sysco.rps.common.Errors.Codes.OPCO_NOT_FOUND;
 import static com.sysco.rps.common.Errors.Messages.MSG_OPCO_NOT_FOUND;
 
 /**
+ * Contains logic on processing the price request by calling repositories
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -86,11 +88,11 @@ public class CustomerPriceService {
 
     private void validateRequest(CustomerPriceRequest request) {
         // Validate the OpCo
-        if(!businessUnitLoaderService.isOpcoExist(request.getBusinessUnitNumber())) {
+        if (!businessUnitLoaderService.isOpcoExist(request.getBusinessUnitNumber())) {
             throw new RefPriceAPIException(HttpStatus.NOT_FOUND, OPCO_NOT_FOUND, MSG_OPCO_NOT_FOUND);
         }
 
-        if(StringUtils.isEmpty(request.getCustomerAccount())) {
+        if (StringUtils.isEmpty(request.getCustomerAccount())) {
             throw new RefPriceAPIException(HttpStatus.BAD_REQUEST, OPCO_NOT_FOUND, MSG_OPCO_NOT_FOUND);
         }
     }
@@ -111,7 +113,7 @@ public class CustomerPriceService {
                 Product product = foundProductsMap.get(productId);
                 if (product == null) {
                     String errorData = String.format("Price not found for SUPC: %s Customer: %s", productId, customer);
-                    errors.add(new ErrorDTO(Errors.Messages.MSG_CUSTOMER_INVALID, Errors.Codes.CUSTOMER_INVALID, errorData));
+                    errors.add(new ErrorDTO(Errors.Messages.MAPPING_NOT_FOUND, Errors.Codes.MAPPING_NOT_FOUND, errorData));
                 } else {
                     products.add(product);
                 }

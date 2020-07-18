@@ -1,11 +1,15 @@
 package com.sysco.rps.util;
 
+import com.sysco.rps.common.Constants;
+
 import java.util.Objects;
 
 /**
- * Various SYSCO specific conversion routines to convert dates and string values.
+ * Various Sysco specific conversion routines.
  *
- * @tag Copyright (C) 2007 Sysco Corporation. All Rights Reserved.
+ * @author
+ * @copyright (C) 2007, Sysco Corporation
+ * @doc
  */
 public class PricingUtils {
 
@@ -20,7 +24,7 @@ public class PricingUtils {
      * @param length      int
      * @return String (right adjusted input String)
      */
-    public static String rightAdjustString(String inputString, int length) {
+    private static String rightAdjustString(String inputString, int length) {
         char[] rightAdjustedValue = new char[length];
         int startMove;
         int outOffset;
@@ -52,7 +56,7 @@ public class PricingUtils {
      * @param fillCharacter char
      * @return String (right adjusted input String)
      */
-    public static String rightAdjustString(String inputString, int length, char fillCharacter) {
+    private static String rightAdjustString(String inputString, int length, char fillCharacter) {
         char[] rightAdjustedValue = new char[length];
         int startMove;
         int outOffset = 0;
@@ -96,6 +100,29 @@ public class PricingUtils {
         }
 
         return result;
+    }
+
+    /**
+     * Converts an opco id to the format required by the database.
+     * SYSCO operating company numbers are numeric strings of three digits
+     * padded on the left with zeroes and with two leading spaces
+     * for a total length of five characters such as "  001".
+     *
+     * @param opcoId String
+     * @return String
+     */
+    public static String convertOpCoIdToDBField(String opcoId) {
+        if (opcoId == null) {
+            return "";
+        } else {
+            String opcoNumber = opcoId.trim();
+
+            if (opcoNumber.length() < Constants.FieldsLength.OPCO_NUMBER) {
+                opcoNumber = PricingUtils.rightAdjustString(opcoNumber, Constants.FieldsLength.OPCO_NUMBER, '0');
+            }
+
+            return PricingUtils.rightAdjustString(opcoNumber, Constants.FieldsLength.OPCO_ID_OVERALL);
+        }
     }
 
 }

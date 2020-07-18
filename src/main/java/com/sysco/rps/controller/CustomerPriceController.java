@@ -1,7 +1,7 @@
 package com.sysco.rps.controller;
 
-import com.sysco.rps.dto.CustomerPriceResponse;
 import com.sysco.rps.dto.CustomerPriceRequest;
+import com.sysco.rps.dto.CustomerPriceResponse;
 import com.sysco.rps.service.CustomerPriceService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 /**
+ * Controller class that defines the Customer Price endpoints
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -23,7 +25,7 @@ import reactor.core.publisher.Mono;
  */
 @RestController
 @RequestMapping("/ref-price/")
-public class CustomerPriceController extends AbstractController{
+public class CustomerPriceController extends AbstractController {
 
     @Autowired
     private CustomerPriceService customerPriceService;

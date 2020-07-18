@@ -3,9 +3,14 @@ package com.sysco.rps.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
- * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 3/13/20 Time: 12:54 PM
+ * Bean that can be used to include error data for responses
+ *
+ * @author rohana.kumara@sysco.com
+ * @copyright (C) 2020, Sysco Corporation
+ * @end Created : 3/13/20 Time: 12:54 PM
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorDTO {
@@ -97,4 +102,15 @@ public class ErrorDTO {
               .append(originalData)
               .toHashCode();
     }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+              .append("code", code)
+              .append("message", message)
+              .append("errorData", errorData)
+              .append("originalData", originalData)
+              .toString();
+    }
+
 }

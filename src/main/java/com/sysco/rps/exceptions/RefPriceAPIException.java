@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import java.util.Objects;
 
 /**
+ * The class to be used during reference price exceptions
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -21,11 +23,11 @@ public class RefPriceAPIException extends RuntimeException {
         this(httpStatusCode, errorCode, message, null);
     }
 
-    public RefPriceAPIException(HttpStatus httpStatusCode, String errorCode, String message, Throwable throwable) {
+    private RefPriceAPIException(HttpStatus httpStatusCode, String errorCode, String message, Throwable throwable) {
         this(httpStatusCode, errorCode, message, null, throwable);
     }
 
-    public RefPriceAPIException(HttpStatus httpStatusCode, String errorCode, String message, Object additionalInfo, Throwable throwable) {
+    private RefPriceAPIException(HttpStatus httpStatusCode, String errorCode, String message, Object additionalInfo, Throwable throwable) {
         super(message, throwable);
         this.httpStatusCode = httpStatusCode;
         this.errorCode = errorCode;

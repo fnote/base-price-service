@@ -10,7 +10,6 @@ import reactor.util.context.Context;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -18,9 +17,10 @@ import static com.sysco.rps.common.Constants.CORRELATION_ID_KEY;
 
 
 /**
+ * Adds hooks for all operators so that MDCContextLifter is used on each
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
- * @doc
  * @end Created : 03. Jul 2020 11:46
  */
 
@@ -42,6 +42,10 @@ public class MDCContextLifterConfig {
 
 /***
  * Helper class that copies the reactor context to MDC
+ *
+ * @author Sanjaya Amarasinghe
+ * @copyright (C) 2020, Sysco Corporation
+ * @end Created : 03. Jul 2020 11:46
  */
 class MDCContextLifter<T> implements CoreSubscriber<T> {
 

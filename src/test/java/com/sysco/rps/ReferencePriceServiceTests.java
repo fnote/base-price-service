@@ -9,12 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 class ReferencePriceServiceTests {
-  @Value("${spring.profiles.active}")
-  private String activeProfile;
-  @Test
-  void contextLoads() {
-  assertNotNull(activeProfile);
-  assertNotEquals("prod",activeProfile);
-  }
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+
+    @Test
+    void contextLoads() {
+        assertNotNull(activeProfile);
+        assertNotEquals("prod", activeProfile);
+    }
 
 }

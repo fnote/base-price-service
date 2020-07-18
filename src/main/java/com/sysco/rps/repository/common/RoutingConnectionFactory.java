@@ -6,9 +6,12 @@ import reactor.core.publisher.Mono;
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
 
 /**
+ * Routing Conn Factory class that contains overridden method for determining lookup key for conn pool
+ * Uses the routing key in subscriber context
+ *
  * @author Tharuka Jayalath
- * (C) 2019, Sysco Labs
- * Created: 7/6/20. Mon 2020 09:48
+ * @copyright (C) 2020, Sysco Corporation
+ * @end Created : 7/6/20. Mon 2020 09:48
  */
 public class RoutingConnectionFactory extends AbstractRoutingConnectionFactory {
 

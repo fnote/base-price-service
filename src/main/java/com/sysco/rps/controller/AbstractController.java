@@ -19,7 +19,8 @@ import java.util.Locale;
 import static java.text.MessageFormat.format;
 
 /**
- * @author hasithag
+ * Class based global exception handlers
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
