@@ -24,8 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
+import static com.sysco.rps.common.Errors.Codes.CUSTOMER_NOT_FOUND_ON_REQUEST;
 import static com.sysco.rps.common.Errors.Codes.OPCO_NOT_FOUND;
 import static com.sysco.rps.common.Errors.Messages.MSG_OPCO_NOT_FOUND;
 
@@ -53,9 +55,11 @@ public class CustomerPriceService {
 
         validateRequest(request);
 
-        int supcsPerQuery = (requestedSupcsPerQuery == null) ? request.getProducts().size() : requestedSupcsPerQuery;
+        List<String> requestedSUPCs = request.getProducts().stream().distinct().collect(Collectors.toList());
 
-        List<List<String>> supcsPartitions = ListUtils.partition(request.getProducts(), supcsPerQuery);
+        int supcsPerQuery = (requestedSupcsPerQuery == null) ? requestedSUPCs.size() : requestedSupcsPerQuery;
+
+        List<List<String>> supcsPartitions = ListUtils.partition(requestedSUPCs, supcsPerQuery);
 
         AtomicLong timeConsumedForDbActivities = new AtomicLong(0);
 
@@ -78,7 +82,7 @@ public class CustomerPriceService {
                       }
                   });
                   logger.info("TOTAL-DB-TIME : [{}]", timeConsumedForDbActivities.get());
-                  return Mono.just(formResponse(request, productMap));
+                  return Mono.just(formResponse(request, requestedSUPCs, productMap));
               }).doOnError(e -> {
                   logger.error("Request Payload: [{}]", request);
                   logger.error(e.getMessage(), e);
@@ -93,22 +97,21 @@ public class CustomerPriceService {
         }
 
         if (StringUtils.isEmpty(request.getCustomerAccount())) {
-            throw new RefPriceAPIException(HttpStatus.BAD_REQUEST, OPCO_NOT_FOUND, MSG_OPCO_NOT_FOUND);
+            throw new RefPriceAPIException(HttpStatus.BAD_REQUEST, CUSTOMER_NOT_FOUND_ON_REQUEST, CUSTOMER_NOT_FOUND_ON_REQUEST);
         }
     }
 
-    private CustomerPriceResponse formResponse(CustomerPriceRequest request, Map<String, Product> foundProductsMap) {
+    private CustomerPriceResponse formResponse(CustomerPriceRequest request, List<String> requestedSUPCs, Map<String, Product> foundProductsMap) {
 
-        List<String> reqProducts = request.getProducts();
         List<ErrorDTO> errors = new ArrayList<>();
         List<Product> products = new ArrayList<>();
         String customer = request.getCustomerAccount();
 
-        if (foundProductsMap.size() == reqProducts.size()) {
+        if (foundProductsMap.size() == requestedSUPCs.size()) {
             products.addAll(foundProductsMap.values());
         } else {
 
-            for (String productId : reqProducts) {
+            for (String productId : requestedSUPCs) {
 
                 Product product = foundProductsMap.get(productId);
                 if (product == null) {

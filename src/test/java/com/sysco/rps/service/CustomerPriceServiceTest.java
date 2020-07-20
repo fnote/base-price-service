@@ -82,11 +82,6 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(result.getSuccessfulItems().size(), 1);
                   assertEquals(result.getFailedItems().size(), 0);
 
-                  ErrorDTO errorDTO = result.getFailedItems().get(0);
-                  assertEquals("102020", errorDTO.getCode());
-                  assertEquals("Price not found for given SUPC/customer combination", errorDTO.getMessage());
-                  assertEquals("Price not found for SUPC: 1000001 Customer: 100001", errorDTO.getErrorData());
-
               })
               .verifyComplete();
     }

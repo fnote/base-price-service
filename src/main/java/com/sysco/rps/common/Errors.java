@@ -17,6 +17,7 @@ public class Errors {
         public static final String MAPPING_NOT_FOUND = "Price not found for given SUPC/customer combination";
         public static final String MSG_CUSTOMER_INVALID = "Requested Customer is in invalid format";
         public static final String MSG_OPCO_NOT_FOUND = "Couldn't find a matching DB for the requested OpCo";
+        public static final String CUSTOMER_NOT_FOUND_ON_REQUEST = "Customer not found in the request";
         private Messages() {
             // default constructor
         }
@@ -28,6 +29,7 @@ public class Errors {
         public static final String OPCO_NOT_FOUND = "102010";
         public static final String CUSTOMER_INVALID = "102012";
         public static final String MAPPING_NOT_FOUND = "102020";
+        public static final String CUSTOMER_NOT_FOUND_ON_REQUEST = "102030";
         private Codes() {
             // default constructor
         }
