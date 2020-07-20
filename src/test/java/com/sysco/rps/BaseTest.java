@@ -3,6 +3,8 @@ package com.sysco.rps;
 import com.sysco.rps.repository.common.RoutingConnectionFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +24,8 @@ import org.springframework.data.r2dbc.connectionfactory.init.ResourceDatabasePop
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BaseTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(BaseTest.class);
+
     @Autowired
     RoutingConnectionFactory routingConnectionFactory;
 
@@ -31,11 +35,9 @@ public class BaseTest {
         Resource[] scripts = new Resource[]{resourceLoader.getResource("classpath:schema.sql"),
               resourceLoader.getResource("classpath:data.sql")};
 
-        new ResourceDatabasePopulator(scripts).execute(routingConnectionFactory).doOnError(e -> {
-            System.out.println(e);
-        })
-              .doOnSuccess(s -> {
-                  System.out.printf("Success");
-              }).block();
+        new ResourceDatabasePopulator(scripts).execute(routingConnectionFactory)
+              .doOnError(e -> logger.error("Failed to load initial data", e))
+              .doOnSuccess(s -> logger.info("Successfully loaded initial data"))
+              .block();
     }
 }

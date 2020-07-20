@@ -12,6 +12,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * @doc
  * @end Created : 12. Jun 2020 16:23
  */
+//TODO: Add split indicator
 public class Product {
 
     private String supc;

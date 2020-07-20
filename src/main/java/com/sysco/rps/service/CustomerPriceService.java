@@ -113,7 +113,7 @@ public class CustomerPriceService {
                 Product product = foundProductsMap.get(productId);
                 if (product == null) {
                     String errorData = String.format("Price not found for SUPC: %s Customer: %s", productId, customer);
-                    errors.add(new ErrorDTO(Errors.Messages.MAPPING_NOT_FOUND, Errors.Codes.MAPPING_NOT_FOUND, errorData));
+                    errors.add(new ErrorDTO(Errors.Codes.MAPPING_NOT_FOUND, Errors.Messages.MAPPING_NOT_FOUND, errorData));
                 } else {
                     products.add(product);
                 }
