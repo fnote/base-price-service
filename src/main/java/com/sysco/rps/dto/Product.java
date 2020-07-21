@@ -20,13 +20,15 @@ public class Product {
     private Double referencePrice;
     private String effectiveFromDate;
     private Long priceExportDate;
+    private Character splitIndicator;
 
-    public Product(String supc, Integer priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportDate) {
+    public Product(String supc, Integer priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportDate, Character splitIndicator) {
         this.supc = supc;
         this.priceZoneId = priceZoneId;
         this.referencePrice = referencePrice;
         this.effectiveFromDate = effectiveFromDate;
         this.priceExportDate = priceExportDate;
+        this.splitIndicator = splitIndicator;
     }
 
     public String getSupc() {
@@ -69,6 +71,14 @@ public class Product {
         this.priceExportDate = priceExportDate;
     }
 
+    public Character getSplitIndicator() {
+        return splitIndicator;
+    }
+
+    public void setSplitIndicator(Character splitIndicator) {
+        this.splitIndicator = splitIndicator;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -83,6 +93,7 @@ public class Product {
               .append(referencePrice, product.referencePrice)
               .append(effectiveFromDate, product.effectiveFromDate)
               .append(priceExportDate, product.priceExportDate)
+              .append(splitIndicator, product.splitIndicator)
               .isEquals();
     }
 
@@ -94,6 +105,7 @@ public class Product {
               .append(referencePrice)
               .append(effectiveFromDate)
               .append(priceExportDate)
+              .append(splitIndicator)
               .toHashCode();
     }
 
@@ -105,6 +117,7 @@ public class Product {
               .append("referencePrice", referencePrice)
               .append("effectiveFromDate", effectiveFromDate)
               .append("priceExportDate", priceExportDate)
+              .append("splitIndicator", splitIndicator)
               .toString();
     }
 

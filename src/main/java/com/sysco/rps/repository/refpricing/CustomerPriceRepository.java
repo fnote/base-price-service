@@ -2,6 +2,7 @@ package com.sysco.rps.repository.refpricing;
 
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.Product;
+import io.r2dbc.spi.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +31,13 @@ public class CustomerPriceRepository {
     @Autowired
     private DatabaseClient databaseClient;
 
-    private String query = "SELECT paOuter.SUPC," +
+    private String query =
+          "SELECT paOuter.SUPC," +
           "       paOuter.PRICE_ZONE," +
           "       paOuter.PRICE," +
           "       paOuter.EFFECTIVE_DATE," +
-          "       paOuter.EXPORTED_DATE" +
+          "       paOuter.EXPORTED_DATE," +
+          "       paOuter.SPLIT_INDICATOR" +
           " FROM PA paOuter force index (`PRIMARY`)" +
           "         INNER JOIN (SELECT Max(paInner.EFFECTIVE_DATE) max_eff_date," +
           "                            paInner.SUPC," +
@@ -80,12 +83,17 @@ public class CustomerPriceRepository {
                               row.get("PRICE_ZONE", Integer.class),
                               row.get("PRICE", Double.class),
                               getDate(row.get("EFFECTIVE_DATE", LocalDateTime.class)),
-                              row.get("EXPORTED_DATE", Long.class)
+                              row.get("EXPORTED_DATE", Long.class),
+                              getChar(row.get("SPLIT_INDICATOR", String.class))
                         );
 
                     }
 
               ).all();
+    }
+
+    private Character getChar(String str) {
+        return StringUtils.isEmpty(str) ? null : str.charAt(0);
     }
 
     private String getDate(LocalDateTime date) {
