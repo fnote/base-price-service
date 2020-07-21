@@ -5,6 +5,7 @@ import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
 import com.sysco.rps.dto.ErrorDTO;
 import com.sysco.rps.entity.PAData;
+import com.sysco.rps.entity.PriceZoneData;
 import com.sysco.rps.repository.TestUtilsRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,21 +69,30 @@ class CustomerPriceServiceTest extends BaseTest {
 
     @Test
     void testRequestingDuplicateProducts() {
-        List<String> products = new ArrayList<>(Arrays.asList("1000001", "1000001"));
+        List<String> products = new ArrayList<>(Arrays.asList("1000001", "1000001", "1000002", "1000002"));
 
         CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "2024-12-12", products);
 
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
 
-        testUtilsRepository.addPARecord(new PAData("1000001", 1, 100.20, "2024-12-12", 1595229000, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 6, 100.20, "2024-12-12", 1595229000, 'C'));
+        testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 6, "100001", "2024-12-12"));
 
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(result.getSuccessfulItems().size(), 1);
-                  assertEquals(result.getFailedItems().size(), 0);
+                  assertEquals(1, result.getSuccessfulItems().size());
+                  assertEquals(1, result.getFailedItems().size());
 
               })
               .verifyComplete();
+    }
+
+    // Testing query edge cases
+    @Test
+    void testSingleEffDateWithMultipleExportedDates() {
+        testUtilsRepository.addPARecord(new PAData("1000001", 1, 100.20, "2024-12-12", 1595229000, 'C'));
+
+
     }
 }
