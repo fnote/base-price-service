@@ -46,6 +46,18 @@ class CustomerPriceServiceTest extends BaseTest {
     void tearDown() {
     }
 
+    private void validateFirstSuccessItem(CustomerPriceResponse result, String supc, Integer priceZoneId, Double referencePrice,
+                                          String effectiveFromDate, Long priceExportDate, Character splitIndicator) {
+        Product product = new Product(supc, priceZoneId, referencePrice, effectiveFromDate, priceExportDate, splitIndicator);
+        assertEquals(product, result.getSuccessfulItems().get(0));
+    }
+
+    private void validateFirstMinorError(CustomerPriceResponse result, String code, String message, Object errorData) {
+        ErrorDTO error = new ErrorDTO(code, message, errorData);
+        assertEquals(result.getFailedItems().get(0), error);
+    }
+
+
     @Test
     void pricesByOpCo() {
         List<String> products = new ArrayList<>(Arrays.asList("1000001", "1000002", "1000003", "1000004", "1000005"));
@@ -106,10 +118,68 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getSuccessfulItems().size());
                   assertEquals(0, result.getFailedItems().size());
 
-                  Product product = new Product("1000001", 3, 200.24, "2021-03-01 00:00:00", 1595308212L, 'C');
-                  assertEquals(product, result.getSuccessfulItems().get(0));
+                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-03-01 00:00:00", 1595308212L, 'C');
 
               })
               .verifyComplete();
     }
+
+    /***
+     * Having Multiple effective dates with a single exported date
+     */
+    @Test
+    void testMultipleEffDatesWithSingleExportedDates() {
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 125.24, "2021-03-10", 1595308212, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.24, "2021-03-06", 1595308212, 'C'));
+        testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 3, "100001", "2021-02-02"));
+
+        List<String> products = new ArrayList<>(Collections.singletonList("1000001"));
+
+        // date too old
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "2020-03-05", products);
+        Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(0, result.getSuccessfulItems().size());
+                  assertEquals(1, result.getFailedItems().size());
+
+                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
+                        "Price not found for SUPC: 1000001 Customer: 100001");
+
+              })
+              .verifyComplete();
+
+        // date at the middle
+        customerPriceRequest.setPriceRequestDate("2021-03-07");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getSuccessfulItems().size());
+                  assertEquals(0, result.getFailedItems().size());
+
+                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-03-06 00:00:00", 1595308212L, 'C');
+
+              })
+              .verifyComplete();
+
+        // date after the last eff date
+        customerPriceRequest.setPriceRequestDate("2021-03-12");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getSuccessfulItems().size());
+                  assertEquals(0, result.getFailedItems().size());
+
+                  validateFirstSuccessItem(result, "1000001", 3, 125.24, "2021-03-10 00:00:00", 1595308212L, 'C');
+
+              })
+              .verifyComplete();
+    }
+
 }

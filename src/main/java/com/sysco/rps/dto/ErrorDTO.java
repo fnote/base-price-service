@@ -1,9 +1,10 @@
 package com.sysco.rps.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.util.Objects;
 
 /**
  * Bean that can be used to include error data for responses
@@ -83,13 +84,10 @@ public class ErrorDTO {
 
         ErrorDTO errorDTO = (ErrorDTO) o;
 
-        return new EqualsBuilder()
-              .appendSuper(super.equals(o))
-              .append(code, errorDTO.code)
-              .append(message, errorDTO.message)
-              .append(errorData, errorDTO.errorData)
-              .append(originalData, errorDTO.originalData)
-              .isEquals();
+        return Objects.equals(code, errorDTO.code) &&
+              Objects.equals(message, errorDTO.message) &&
+              Objects.equals(errorData, errorDTO.errorData) &&
+              Objects.equals(originalData, errorDTO.originalData);
     }
 
     @Override
