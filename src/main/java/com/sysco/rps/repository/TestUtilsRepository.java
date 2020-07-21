@@ -133,6 +133,12 @@ public class TestUtilsRepository {
         return records;
     }
 
+    /**
+     * CSV data column order should be according to this
+     * SUPC,PRICE_ZONE,PRICE,EFFECTIVE_DATE,EXPORTED_DATE,SPLIT_INDICATOR
+     * @param csvData
+     * @return List<PAData>
+     */
     private List<PAData> generatePARecords(List<List<String>> csvData) {
         return csvData
               .stream()
@@ -141,6 +147,12 @@ public class TestUtilsRepository {
               ).collect(Collectors.toList());
     }
 
+    /**
+     * CSV data column order should be according to this
+     * SUPC,PRICE_ZONE,CUSTOMER_ID,EFFECTIVE_DATE
+     * @param csvData
+     * @return List<PriceZoneData>
+     */
     private List<PriceZoneData> generatePriceZoneRecords(List<List<String>> csvData) {
         return csvData
               .stream()
