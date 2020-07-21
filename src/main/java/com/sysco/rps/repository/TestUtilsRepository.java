@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -105,8 +107,13 @@ public class TestUtilsRepository {
         return isSuccess.get();
     }
 
+    public void addPARecordsFromCsv(String fileName, Boolean formatExportedDate) {
+        generatePARecords(readCsv(fileName), formatExportedDate)
+              .forEach(this::addPARecord);
+    }
+
     public void addPARecordsFromCsv(String fileName) {
-        generatePARecords(readCsv(fileName))
+        generatePARecords(readCsv(fileName), false)
               .forEach(this::addPARecord);
     }
 
@@ -139,11 +146,32 @@ public class TestUtilsRepository {
      * @param csvData
      * @return List<PAData>
      */
-    private List<PAData> generatePARecords(List<List<String>> csvData) {
+    private List<PAData> generatePARecords(List<List<String>> csvData, Boolean formatExportedDate) {
         return csvData
               .stream()
-              .map(r -> new PAData(r.get(0), Integer.parseInt(r.get(1)), Double.parseDouble(r.get(2)),
-                    r.get(3), Long.parseLong(r.get(4)), r.get(5).charAt(0))
+              .map(r -> {
+
+                  if (formatExportedDate) {
+                      String[] exportedDateTime =r.get(4).split(" ");
+
+                      String[] date = exportedDateTime[0].split("-");
+                      String[] time = exportedDateTime[1].split(":");
+
+                      LocalDateTime localDateTime = LocalDateTime.of(
+                            Integer.parseInt(date[0]),
+                            Integer.parseInt(date[1]),
+                            Integer.parseInt(date[2]),
+                            Integer.parseInt(time[0]),
+                            Integer.parseInt(date[1]),
+                            Integer.parseInt(date[2])
+                      );
+
+                      return new PAData(r.get(0), Integer.parseInt(r.get(1)), Double.parseDouble(r.get(2)),
+                            r.get(3), localDateTime.toEpochSecond(ZoneOffset.UTC), r.get(5).charAt(0));
+                  }
+                return new PAData(r.get(0), Integer.parseInt(r.get(1)), Double.parseDouble(r.get(2)),
+                      r.get(3), Long.parseLong(r.get(4)), r.get(5).charAt(0));
+              }
               ).collect(Collectors.toList());
     }
 
