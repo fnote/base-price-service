@@ -129,8 +129,8 @@ class CustomerPriceServiceTest extends BaseTest {
      */
     @Test
     void testMultipleEffDatesWithSingleExportedDates() {
-        testUtilsRepository.addPARecord(new PAData("1000001", 3, 125.24, "2021-03-10", 1595308212, 'C'));
         testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.24, "2021-03-06", 1595308212, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 125.24, "2021-03-10", 1595308212, 'C'));
         testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 3, "100001", "2021-02-02"));
 
         List<String> products = new ArrayList<>(Collections.singletonList("1000001"));
@@ -151,6 +151,21 @@ class CustomerPriceServiceTest extends BaseTest {
               })
               .verifyComplete();
 
+        // date = min eff Date
+        customerPriceRequest.setPriceRequestDate("2021-03-06");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getSuccessfulItems().size());
+                  assertEquals(0, result.getFailedItems().size());
+
+                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-03-06 00:00:00", 1595308212L, 'C');
+
+              })
+              .verifyComplete();
+
         // date at the middle
         customerPriceRequest.setPriceRequestDate("2021-03-07");
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
@@ -166,6 +181,21 @@ class CustomerPriceServiceTest extends BaseTest {
               })
               .verifyComplete();
 
+        // date = last eff date
+        customerPriceRequest.setPriceRequestDate("2021-03-10");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getSuccessfulItems().size());
+                  assertEquals(0, result.getFailedItems().size());
+
+                  validateFirstSuccessItem(result, "1000001", 3, 125.24, "2021-03-10 00:00:00", 1595308212L, 'C');
+
+              })
+              .verifyComplete();
+
         // date after the last eff date
         customerPriceRequest.setPriceRequestDate("2021-03-12");
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
@@ -177,6 +207,192 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(0, result.getFailedItems().size());
 
                   validateFirstSuccessItem(result, "1000001", 3, 125.24, "2021-03-10 00:00:00", 1595308212L, 'C');
+
+              })
+              .verifyComplete();
+    }
+
+    /***
+     * Having max(effective_date) < max (exported_date)
+     *
+     */
+    @Test
+    void testMaxEffDateLessThanMaxExportedDate() {
+
+        // Exported date: 2021-03-24
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 125.24, "2021-04-10", 1616578866, 'C'));
+        // Exported date: 2021-06-24
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.24, "2021-04-10", 1624527666, 'C'));
+        testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 3, "100001", "2021-02-02"));
+
+
+        List<String> products = new ArrayList<>(Collections.singletonList("1000001"));
+
+        // date too old
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "2020-03-05", products);
+        Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(0, result.getSuccessfulItems().size());
+                  assertEquals(1, result.getFailedItems().size());
+
+                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
+                        "Price not found for SUPC: 1000001 Customer: 100001");
+
+              })
+              .verifyComplete();
+
+        // date > min exported date && < min eff date
+        customerPriceRequest.setPriceRequestDate("2021-03-20");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(0, result.getSuccessfulItems().size());
+                  assertEquals(1, result.getFailedItems().size());
+
+                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
+                        "Price not found for SUPC: 1000001 Customer: 100001");
+              })
+              .verifyComplete();
+
+        // date > min exported date && > min eff date
+        customerPriceRequest.setPriceRequestDate("2021-04-11");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getSuccessfulItems().size());
+                  assertEquals(0, result.getFailedItems().size());
+
+                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-04-10 00:00:00", 1624527666L, 'C');
+
+              })
+              .verifyComplete();
+
+        // date > max exported date && > max eff date
+        customerPriceRequest.setPriceRequestDate("2021-06-25");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getSuccessfulItems().size());
+                  assertEquals(0, result.getFailedItems().size());
+
+                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-04-10 00:00:00", 1624527666L, 'C');
+
+              })
+              .verifyComplete();
+    }
+
+    /***
+     * Having max(effective_date) > max(exported_date)
+     */
+    @Test
+    void testMaxEffDateGreaterThanMaxExportedDate() {
+
+        // Exported date: 2021-02-24
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 100.00, "2021-04-12", 1614159666, 'C'));
+        // Exported date: 2021-03-24
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.00, "2021-04-12", 1616578866, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 300.00, "2021-04-13", 1614159666, 'C'));
+        testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 3, "100001", "2021-04-02"));
+
+
+        List<String> products = new ArrayList<>(Collections.singletonList("1000001"));
+
+        // date too old: 202-01-23
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "202-01-23", products);
+        Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(0, result.getSuccessfulItems().size());
+                  assertEquals(1, result.getFailedItems().size());
+
+                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
+                        "Price not found for SUPC: 1000001 Customer: 100001");
+
+              })
+              .verifyComplete();
+
+        // date > min exported date && < max exported date
+        customerPriceRequest.setPriceRequestDate("2021-03-20");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(0, result.getSuccessfulItems().size());
+                  assertEquals(1, result.getFailedItems().size());
+
+                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
+                        "Price not found for SUPC: 1000001 Customer: 100001");
+              })
+              .verifyComplete();
+
+        // date > min exported date && > max exported date && < min eff date
+        customerPriceRequest.setPriceRequestDate("2021-03-25");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(0, result.getSuccessfulItems().size());
+                  assertEquals(1, result.getFailedItems().size());
+
+                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
+                        "Price not found for SUPC: 1000001 Customer: 100001");
+              })
+              .verifyComplete();
+
+        // date > min exported date && > max exported date && = min eff date
+        customerPriceRequest.setPriceRequestDate("2021-04-12");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getSuccessfulItems().size());
+                  assertEquals(0, result.getFailedItems().size());
+
+                  validateFirstSuccessItem(result, "1000001", 3, 200.00, "2021-04-12 00:00:00", 1616578866L, 'C');
+
+              })
+              .verifyComplete();
+
+        // date > min exported date && > max exported date && > min eff date && < max eff date
+        customerPriceRequest.setPriceRequestDate("2021-04-13");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getSuccessfulItems().size());
+                  assertEquals(0, result.getFailedItems().size());
+
+                  validateFirstSuccessItem(result, "1000001", 3, 300.00, "2021-04-13 00:00:00", 1614159666L, 'C');
+
+              })
+              .verifyComplete();
+
+        // date > min exported date && > max exported date && > min eff date && < max eff date
+        customerPriceRequest.setPriceRequestDate("2021-04-16");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getSuccessfulItems().size());
+                  assertEquals(0, result.getFailedItems().size());
+
+                  validateFirstSuccessItem(result, "1000001", 3, 300.00, "2021-04-13 00:00:00", 1614159666L, 'C');
 
               })
               .verifyComplete();
