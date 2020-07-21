@@ -27,4 +27,6 @@ public class DatabaseClientConfig {
     public DatabaseClient databaseClient() {
         return DatabaseClient.create(routingConnectionFactory);
     }
+
+
 }

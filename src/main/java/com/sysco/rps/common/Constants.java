@@ -71,4 +71,13 @@ public class Constants {
         }
     }
 
+    public static class SplitIndicators {
+        public static final Character CASE = 'c';
+        public static final Character POUND = 'p';
+
+        private SplitIndicators() {
+        }
+    }
+
+
 }

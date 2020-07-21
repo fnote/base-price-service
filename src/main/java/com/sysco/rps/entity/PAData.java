@@ -1,5 +1,7 @@
 package com.sysco.rps.entity;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Entity bean for Price Advisor Data
  * @author Sanjaya Amarasinghe
@@ -20,9 +22,9 @@ public class PAData {
         this.supc = supc;
         this.priceZone = priceZone;
         this.price = price;
-        this.effectiveDate = effectiveDate;
         this.exportedDate = exportedDate;
         this.splitIndicator = splitIndicator;
+        setEffectiveDate(effectiveDate);
     }
 
     public String getSupc() {
@@ -54,7 +56,11 @@ public class PAData {
     }
 
     public void setEffectiveDate(String effectiveDate) {
-        this.effectiveDate = effectiveDate;
+        if(StringUtils.isEmpty(effectiveDate)) {
+            this.effectiveDate = effectiveDate;
+        } else {
+            this.effectiveDate = effectiveDate.replace("/", "-");
+        }
     }
 
     public long getExportedDate() {

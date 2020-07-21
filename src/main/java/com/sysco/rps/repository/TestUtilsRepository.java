@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +36,7 @@ public class TestUtilsRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtilsRepository.class);
     private static final String RESULT_ROW = "Result row {}";
+    private static final String EXPORTED_DATE_CSV_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     @Autowired
     private DatabaseClient databaseClient;
@@ -112,24 +114,21 @@ public class TestUtilsRepository {
               .forEach(this::addPARecord);
     }
 
-    public void addPARecordsFromCsv(String fileName) {
-        generatePARecords(readCsv(fileName), false)
-              .forEach(this::addPARecord);
-    }
-
     public void addPriceZoneRecordsFromCsv(String fileName) {
         generatePriceZoneRecords(readCsv(fileName))
               .forEach(this::addPriceZoneRecord);
     }
 
     private List<List<String>> readCsv(String fileName) {
+        String filePath = "test-data" + "/" + fileName;
         ResourceLoader resourceLoader = new DefaultResourceLoader();
-        Resource[] scripts = new Resource[]{resourceLoader.getResource("classpath:".concat(fileName))};
+        Resource[] scripts = new Resource[]{resourceLoader.getResource("classpath:".concat(filePath))};
 
         List<List<String>> records = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(scripts[0].getFile()))) {
             String line;
             while ((line = br.readLine()) != null) {
+                line = line.replace("\'", "");
                 String[] values = line.split(",");
                 records.add(Arrays.asList(values));
             }
@@ -143,41 +142,39 @@ public class TestUtilsRepository {
     /**
      * CSV data column order should be according to this
      * SUPC,PRICE_ZONE,PRICE,EFFECTIVE_DATE,EXPORTED_DATE,SPLIT_INDICATOR
+     *
      * @param csvData
      * @return List<PAData>
      */
     private List<PAData> generatePARecords(List<List<String>> csvData, Boolean formatExportedDate) {
+        //Sample : '2512527','1','1.00','2020-02-01',2020-01-14 00:05:00,'p'
         return csvData
               .stream()
               .map(r -> {
 
-                  if (formatExportedDate) {
-                      String[] exportedDateTime =r.get(4).split(" ");
+                        String dateField = r.get(4);
+                        long exportedDate;
 
-                      String[] date = exportedDateTime[0].split("-");
-                      String[] time = exportedDateTime[1].split(":");
+                        if (formatExportedDate != null && formatExportedDate) {
+                            dateField = dateField.replace("/", "-");
+                            LocalDateTime dateTime = LocalDateTime.parse(dateField, DateTimeFormatter.ofPattern(EXPORTED_DATE_CSV_FORMAT));
+                            exportedDate = dateTime.toEpochSecond(ZoneOffset.UTC);
+                        } else {
+                            exportedDate = Long.parseLong(dateField);
+                        }
 
-                      LocalDateTime localDateTime = LocalDateTime.of(
-                            Integer.parseInt(date[0]),
-                            Integer.parseInt(date[1]),
-                            Integer.parseInt(date[2]),
-                            Integer.parseInt(time[0]),
-                            Integer.parseInt(date[1]),
-                            Integer.parseInt(date[2])
-                      );
+                        char splitIndicator = (r.size() < 6 || r.get(5) == null) ? Constants.SplitIndicators.CASE : r.get(5).charAt(0);
 
-                      return new PAData(r.get(0), Integer.parseInt(r.get(1)), Double.parseDouble(r.get(2)),
-                            r.get(3), localDateTime.toEpochSecond(ZoneOffset.UTC), r.get(5).charAt(0));
-                  }
-                return new PAData(r.get(0), Integer.parseInt(r.get(1)), Double.parseDouble(r.get(2)),
-                      r.get(3), Long.parseLong(r.get(4)), r.get(5).charAt(0));
-              }
+                        return new PAData(r.get(0), Integer.parseInt(r.get(1)), Double.parseDouble(r.get(2)),
+                              r.get(3), exportedDate, splitIndicator);
+                    }
               ).collect(Collectors.toList());
     }
 
     /**
      * CSV data column order should be according to this
      * SUPC,PRICE_ZONE,CUSTOMER_ID,EFFECTIVE_DATE
+     *
      * @param csvData
      * @return List<PriceZoneData>
      */
