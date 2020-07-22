@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -110,13 +111,44 @@ public class TestUtilsRepository {
     }
 
     public void addPARecordsFromCsv(String fileName, Boolean formatExportedDate) {
-        generatePARecords(readCsv(fileName), formatExportedDate)
-              .forEach(this::addPARecord);
+        Optional<String> bulkValues = generatePARecords(readCsv(fileName), formatExportedDate)
+              .stream()
+              .map(r -> "('"+r.getSupc()+"',"+r.getPriceZone()+","+r.getPrice()+",'"+r.getEffectiveDate()+"',"+r.getExportedDate()+",'"+r.getSplitIndicator()+"')")
+              .reduce((a, b) -> a.concat(",").concat(b));
+
+        bulkValues.ifPresent(v -> {
+            String query = "INSERT INTO `" + Constants.DBNames.PA + "` VALUES " + v + ";";
+            executeQuery(query);
+        });
     }
 
     public void addPriceZoneRecordsFromCsv(String fileName) {
-        generatePriceZoneRecords(readCsv(fileName))
-              .forEach(this::addPriceZoneRecord);
+        Optional<String> bulkValues = generatePriceZoneRecords(readCsv(fileName))
+              .stream()
+              .map(r -> "('"+r.getSupc()+"',"+r.getPriceZone()+",'"+r.getCustomerId()+"','"+r.getEffectiveDate()+"')")
+              .reduce((a, b) -> a.concat(",").concat(b));
+
+        bulkValues.ifPresent(v -> {
+            String query = "INSERT INTO `" + Constants.DBNames.PRICE_ZONE_01 + "` VALUES " + v + ";";
+            executeQuery(query);
+        });
+    }
+
+    private boolean executeQuery(String query) {
+        AtomicBoolean isSuccess = new AtomicBoolean();
+        databaseClient.execute(query)
+              .map((row, rowMetaData) -> {
+                  LOGGER.debug(RESULT_ROW, row);
+                  return row;
+              })
+              .all()
+              .doOnError(r -> LOGGER.error("Failed to execute query: [{}]", query, r))
+              .doOnComplete(() -> {
+                  LOGGER.info("Data inserted successfully");
+                  isSuccess.set(true);
+              })
+              .subscribe();
+        return isSuccess.get();
     }
 
     private List<List<String>> readCsv(String fileName) {
