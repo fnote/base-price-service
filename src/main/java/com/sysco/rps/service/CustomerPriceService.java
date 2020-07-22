@@ -106,6 +106,10 @@ public class CustomerPriceService {
         if (StringUtils.isEmpty(request.getCustomerAccount())) {
             return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.CUSTOMER_NULL_OR_EMPTY, Errors.Messages.CUSTOMER_NULL_OR_EMPTY);
         }
+
+        if (request.getProducts() == null) {
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.PRODUCTS_NOT_FOUND_IN_REQUEST, Errors.Messages.MSG_PRODUCTS_NOT_FOUND_IN_REQUEST);
+        }
         return null;
     }
 
