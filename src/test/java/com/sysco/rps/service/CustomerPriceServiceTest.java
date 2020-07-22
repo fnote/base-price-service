@@ -1,20 +1,27 @@
 package com.sysco.rps.service;
 
 import com.sysco.rps.BaseTest;
+import com.sysco.rps.common.Errors;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
 import com.sysco.rps.dto.ErrorDTO;
 import com.sysco.rps.dto.Product;
 import com.sysco.rps.entity.PAData;
 import com.sysco.rps.entity.PriceZoneData;
+import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.TestUtilsRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -396,6 +403,68 @@ class CustomerPriceServiceTest extends BaseTest {
 
               })
               .verifyComplete();
+    }
+
+
+    /**
+     * Testing invalid SUPC scenarios
+     * Jira task: PRCP-2080
+     */
+    @Test
+    void testInvalidSUPCScenarios() {
+        testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
+        testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
+
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020",
+              "68579367", "2020-02-02",
+              Arrays.asList("aaa", "123","", "~!@#$%^&*()-_+=|/.,", "-3219121",
+                    "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
+        );
+        Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(0, response.getSuccessfulItems().size());
+                  assertEquals(6, response.getFailedItems().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(1).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(2).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(3).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(4).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(5).getMessage());
+              })
+              .verifyComplete();
+
+
+        customerPriceRequest.setProducts(Arrays.asList("aaa", "2512527"));
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(1, response.getSuccessfulItems().size());
+                  assertEquals(1, response.getFailedItems().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+                  validateFirstSuccessItem(response, "2512527", 1, 1.00, "2020-02-01 00:00:00", 1578960300L,'p');
+              })
+              .verifyComplete();
+
+
+        customerPriceRequest.setProducts(new ArrayList<>());
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(0, response.getSuccessfulItems().size());
+                  assertEquals(0, response.getFailedItems().size());
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setProducts(null);
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .verifyErrorSatisfies(error -> {
+                  RefPriceAPIException exception = (RefPriceAPIException) error;
+                  assertEquals(Errors.Codes.PRODUCTS_NOT_FOUND_IN_REQUEST, exception.getErrorCode());
+                  assertEquals(Errors.Messages.MSG_PRODUCTS_NOT_FOUND_IN_REQUEST, exception.getMessage());
+              });
+
     }
 
 }
