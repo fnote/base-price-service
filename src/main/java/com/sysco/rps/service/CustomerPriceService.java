@@ -54,10 +54,10 @@ public class CustomerPriceService {
     public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
 
         // TODO: See whether Mono.error can be achieved through Aspects or by some other means
-        try {
-            validateRequest(request);
-        } catch (Exception e) {
-            return Mono.error(e);
+        RefPriceAPIException validationException = validateRequest(request);
+
+        if (validationException != null) {
+            return Mono.error(validationException);
         }
 
         List<String> requestedSUPCs = request.getProducts().stream().distinct().collect(Collectors.toList());
@@ -95,15 +95,16 @@ public class CustomerPriceService {
 
     }
 
-    private void validateRequest(CustomerPriceRequest request) {
+    private RefPriceAPIException validateRequest(CustomerPriceRequest request) {
         // Validate the OpCo
         if (!businessUnitLoaderService.isOpcoExist(request.getBusinessUnitNumber())) {
-            throw new RefPriceAPIException(HttpStatus.NOT_FOUND, OPCO_NOT_FOUND, MSG_OPCO_NOT_FOUND);
+            return new RefPriceAPIException(HttpStatus.NOT_FOUND, OPCO_NOT_FOUND, MSG_OPCO_NOT_FOUND);
         }
 
         if (StringUtils.isEmpty(request.getCustomerAccount())) {
-            throw new RefPriceAPIException(HttpStatus.BAD_REQUEST, CUSTOMER_NOT_FOUND_ON_REQUEST, CUSTOMER_NOT_FOUND_ON_REQUEST);
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, CUSTOMER_NOT_FOUND_ON_REQUEST, CUSTOMER_NOT_FOUND_ON_REQUEST);
         }
+        return null;
     }
 
     private CustomerPriceResponse formResponse(CustomerPriceRequest request, List<String> requestedSUPCs, Map<String, Product> foundProductsMap) {
