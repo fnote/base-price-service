@@ -32,7 +32,7 @@ public class RefPriceAPIException extends RuntimeException {
         super(message, throwable);
         this.httpStatusCode = httpStatusCode;
         this.errorCode = errorCode;
-        this.additionalInfo = additionalInfo;
+        this.additionalInfo = additionalInfo == null ? message : additionalInfo;
     }
 
     public HttpStatus getHttpStatusCode() {
@@ -50,6 +50,7 @@ public class RefPriceAPIException extends RuntimeException {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+              .appendSuper(super.toString())
               .append("errorCode", errorCode)
               .append("httpStatusCode", httpStatusCode)
               .append("additionalInfo", additionalInfo)

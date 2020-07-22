@@ -38,6 +38,8 @@ public class TestUtilsRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtilsRepository.class);
     private static final String RESULT_ROW = "Result row {}";
     private static final String EXPORTED_DATE_CSV_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String INSERT_INTO = "INSERT INTO `";
+    private static final String FAILED_TO_EXECUTE_QUERY = "Failed to execute query: [{}]";
 
     @Autowired
     private DatabaseClient databaseClient;
@@ -62,7 +64,7 @@ public class TestUtilsRepository {
     }
 
     public boolean addPARecord(PAData paData) {
-        String query = "INSERT INTO `" + Constants.DBNames.PA + "` VALUES (:supc, :priceZone, :price, :effectiveDate, :exportedDate, " +
+        String query = INSERT_INTO + Constants.DBNames.PA + "` VALUES (:supc, :priceZone, :price, :effectiveDate, :exportedDate, " +
               ":splitIndicator);";
 
         AtomicBoolean isSuccess = new AtomicBoolean(false);
@@ -80,7 +82,7 @@ public class TestUtilsRepository {
               })
               .all()
               .doOnError(r -> {
-                  LOGGER.error("Failed to execute query: [{}]", query, r);
+                  LOGGER.error(FAILED_TO_EXECUTE_QUERY, query, r);
                   isSuccess.set(false);
               })
               .subscribe();
@@ -88,7 +90,7 @@ public class TestUtilsRepository {
     }
 
     public boolean addPriceZoneRecord(PriceZoneData priceZoneData) {
-        String query = "INSERT INTO `" + Constants.DBNames.PRICE_ZONE_01 + "` VALUES (:supc, :priceZone, :customerId, :effectiveDate);";
+        String query = INSERT_INTO + Constants.DBNames.PRICE_ZONE_01 + "` VALUES (:supc, :priceZone, :customerId, :effectiveDate);";
 
         AtomicBoolean isSuccess = new AtomicBoolean(false);
 
@@ -103,35 +105,41 @@ public class TestUtilsRepository {
               })
               .all()
               .doOnError(r -> {
-                  LOGGER.error("Failed to execute query: [{}]", query, r);
+                  LOGGER.error(FAILED_TO_EXECUTE_QUERY, query, r);
                   isSuccess.set(false);
               })
               .subscribe();
         return isSuccess.get();
     }
 
-    public void addPARecordsFromCsv(String fileName, Boolean formatExportedDate) {
+    public boolean addPARecordsFromCsv(String fileName, Boolean formatExportedDate) {
+        AtomicBoolean success = new AtomicBoolean(true);
         Optional<String> bulkValues = generatePARecords(readCsv(fileName), formatExportedDate)
               .stream()
-              .map(r -> "('"+r.getSupc()+"',"+r.getPriceZone()+","+r.getPrice()+",'"+r.getEffectiveDate()+"',"+r.getExportedDate()+",'"+r.getSplitIndicator()+"')")
+              .map(r -> "('" + r.getSupc() + "'," + r.getPriceZone() + "," + r.getPrice() + ",'" + r.getEffectiveDate() + "'," + r.getExportedDate() + ",'" + r.getSplitIndicator() + "')")
               .reduce((a, b) -> a.concat(",").concat(b));
 
         bulkValues.ifPresent(v -> {
-            String query = "INSERT INTO `" + Constants.DBNames.PA + "` VALUES " + v + ";";
-            executeQuery(query);
+            String query = INSERT_INTO + Constants.DBNames.PA + "` VALUES " + v + ";";
+            success.set(executeQuery(query));
         });
+        return success.get();
     }
 
-    public void addPriceZoneRecordsFromCsv(String fileName) {
+    public boolean addPriceZoneRecordsFromCsv(String fileName) {
+        AtomicBoolean success = new AtomicBoolean(true);
+
         Optional<String> bulkValues = generatePriceZoneRecords(readCsv(fileName))
               .stream()
-              .map(r -> "('"+r.getSupc()+"',"+r.getPriceZone()+",'"+r.getCustomerId()+"','"+r.getEffectiveDate()+"')")
+              .map(r -> "('" + r.getSupc() + "'," + r.getPriceZone() + ",'" + r.getCustomerId() + "','" + r.getEffectiveDate() + "')")
               .reduce((a, b) -> a.concat(",").concat(b));
 
         bulkValues.ifPresent(v -> {
-            String query = "INSERT INTO `" + Constants.DBNames.PRICE_ZONE_01 + "` VALUES " + v + ";";
-            executeQuery(query);
+            String query = INSERT_INTO + Constants.DBNames.PRICE_ZONE_01 + "` VALUES " + v + ";";
+            success.set(executeQuery(query));
         });
+
+        return success.get();
     }
 
     private boolean executeQuery(String query) {
@@ -142,7 +150,10 @@ public class TestUtilsRepository {
                   return row;
               })
               .all()
-              .doOnError(r -> LOGGER.error("Failed to execute query: [{}]", query, r))
+              .doOnError(r -> {
+                  isSuccess.set(false);
+                  LOGGER.error(FAILED_TO_EXECUTE_QUERY, query, r);
+              })
               .doOnComplete(() -> {
                   LOGGER.info("Data inserted successfully");
                   isSuccess.set(true);

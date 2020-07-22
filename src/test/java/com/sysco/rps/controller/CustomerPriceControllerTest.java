@@ -3,6 +3,7 @@ package com.sysco.rps.controller;
 import com.sysco.rps.BaseTest;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
+import com.sysco.rps.dto.ErrorDTO;
 import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.TestUtilsRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -40,8 +41,13 @@ class CustomerPriceControllerTest extends BaseTest {
     @BeforeAll
     void initialSetup() {
         testUtilsRepository.truncateTables();
-        testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
-        testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
+        boolean paBulkDataSuccess = testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
+        boolean eatsBulkDataSuccess = testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
+
+        if (!(paBulkDataSuccess && eatsBulkDataSuccess)) {
+            throw new RefPriceAPIException(null, "", "Initial data load failed");
+        }
+
     }
 
     @BeforeEach
@@ -55,11 +61,11 @@ class CustomerPriceControllerTest extends BaseTest {
     @Test
     void getCustomerPrices_PRCP_2078() {
 
-        RefPriceAPIException expected = new RefPriceAPIException(HttpStatus.NOT_FOUND, "102010", "Couldn't find a matching DB for the requested OpCo");
+        RefPriceAPIException opcoInvalidException = new RefPriceAPIException(HttpStatus.NOT_FOUND, "102010", "Couldn't find a matching DB for the requested OpCo");
+        RefPriceAPIException opCoEmptyException = new RefPriceAPIException(HttpStatus.BAD_REQUEST, "102040", "OpCo ID should not be null/empty");
 
         // with correct data
-        CustomerPriceRequest request = new CustomerPriceRequest("020", "68579367", "2020-02-10", new ArrayList<>(Arrays.asList("2512527", "3325677",
-              "8328971")));
+        CustomerPriceRequest request = new CustomerPriceRequest("020", "68579367", "2020-02-10", new ArrayList<>(Arrays.asList("2512527", "3325677", "8328971")));
 
         Mono<CustomerPriceResponse> customerPrices = customerPriceController.getCustomerPrices(request, null);
 
@@ -74,28 +80,33 @@ class CustomerPriceControllerTest extends BaseTest {
         // null OpCo ID
         request.setBusinessUnitNumber(null);
         customerPrices = customerPriceController.getCustomerPrices(request, null);
-        verifyInvalidOpCoError(expected, customerPrices);
+        verifyInvalidOpCoError(opCoEmptyException, customerPrices);
 
 
         // Empty OpCo ID
         request.setBusinessUnitNumber("");
         customerPrices = customerPriceController.getCustomerPrices(request, null);
-        verifyInvalidOpCoError(expected, customerPrices);
+        verifyInvalidOpCoError(opCoEmptyException, customerPrices);
 
         // OpCo ID: 00
         request.setBusinessUnitNumber("00");
         customerPrices = customerPriceController.getCustomerPrices(request, null);
-        verifyInvalidOpCoError(expected, customerPrices);
+        verifyInvalidOpCoError(opcoInvalidException, customerPrices);
 
         // OpCo ID: -21
         request.setBusinessUnitNumber("-21");
         customerPrices = customerPriceController.getCustomerPrices(request, null);
-        verifyInvalidOpCoError(expected, customerPrices);
+        verifyInvalidOpCoError(opcoInvalidException, customerPrices);
 
         // OpCo ID length 256 chars
         request.setBusinessUnitNumber("E1aijYo394mRFFqMozy81uG2oQpFTinipk46777u7bveSm8c8tKGZwiajgklPtsZKalqS29RZfNkkrWBxCKucokZrlJ2RtZdBriOoOn5AOaqzqJGbPO8A5kgh88YE9PSSq1GLsFxYC0MzFxiAwl78iFG2g7mhLwqCblXQ3UD2brRdKt8vroDjnu95y6bQLPgR8fTHye8lAnoKRMfrAp1W2nnsNyectJB0Lqs5CY04Mm5vwU9KIcB1Pvho3f6TtKR\n");
         customerPrices = customerPriceController.getCustomerPrices(request, null);
-        verifyInvalidOpCoError(expected, customerPrices);
+        verifyInvalidOpCoError(opcoInvalidException, customerPrices);
+
+        // OpCo ID: 092 (correct opco, but does not exist)
+        request.setBusinessUnitNumber("092");
+        customerPrices = customerPriceController.getCustomerPrices(request, null);
+        verifyInvalidOpCoError(opcoInvalidException, customerPrices);
 
     }
 
@@ -108,5 +119,74 @@ class CustomerPriceControllerTest extends BaseTest {
                   assertEquals(expected, exception);
               })
               .verify();
+    }
+
+    @Test
+    void getCustomerPrices_PRCP_2079_invalid_customer() {
+
+        RefPriceAPIException opCoEmptyException = new RefPriceAPIException(HttpStatus.BAD_REQUEST, "102030", "Customer ID should not be null/empty");
+
+        // with correct data
+        CustomerPriceRequest request = new CustomerPriceRequest("020", "68579367", "2020-02-10", new ArrayList<>(Arrays.asList("2512527", "3325677",
+              "8328971")));
+
+        Mono<CustomerPriceResponse> customerPrices;
+
+        // null Customer ID
+        request.setCustomerAccount(null);
+        customerPrices = customerPriceController.getCustomerPrices(request, null);
+        verifyInvalidOpCoError(opCoEmptyException, customerPrices);
+
+
+        // Empty Customer ID
+        request.setCustomerAccount("");
+        customerPrices = customerPriceController.getCustomerPrices(request, null);
+        verifyInvalidOpCoError(opCoEmptyException, customerPrices);
+
+        // Customer ID: 00
+        request.setCustomerAccount("00");
+        customerPrices = customerPriceController.getCustomerPrices(request, null);
+
+        validateInvalidCustomer(customerPrices, "00");
+
+        // Customer ID: -12345
+        request.setCustomerAccount("-12345");
+        customerPrices = customerPriceController.getCustomerPrices(request, null);
+
+        validateInvalidCustomer(customerPrices, "-12345");
+
+        // Customer ID length 256 chars
+        String longCustomerId =
+              "F1aijYo394mRFFqMozy81uG2oQpFTinipk46777u7bveSm8c8tKGZwiajgklPtsZKalqS29RZfNkkrWBxCKucokZrlJ2RtZdBriOoOn5AOaqzqJGbPO8A5kgh88YE9PSSq1GLs" +
+                    "FxYC0MzFxiAwl78iFG2g7mhLwqCblXQ3UD2brRdKt8vroDjnu95y6bQLPgR8fTHye8lAnoKRMfrAp1W2nnsNyectJB0Lqs5CY04Mm5vwU9KIcB1Pvho3f6TtKR";
+        request.setCustomerAccount(longCustomerId);
+        customerPrices = customerPriceController.getCustomerPrices(request, null);
+
+        validateInvalidCustomer(customerPrices, longCustomerId);
+
+        // Customer ID; 400001 (correct Customer, but does not exist)
+        request.setCustomerAccount("400001");
+        customerPrices = customerPriceController.getCustomerPrices(request, null);
+
+        validateInvalidCustomer(customerPrices, "400001");
+
+    }
+
+    private void validateInvalidCustomer(Mono<CustomerPriceResponse> customerPrices, String s) {
+        StepVerifier.create(customerPrices)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(result.getSuccessfulItems().size(), 0);
+                  assertEquals(result.getFailedItems().size(), 3);
+
+                  String errorData = "Price not found for SUPC: %s Customer: %s";
+                  String errorMsg = "Price not found for given SUPC/customer combination";
+
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, 2512527, s)), result.getFailedItems().get(0));
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, 3325677, s)), result.getFailedItems().get(1));
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, 8328971, s)), result.getFailedItems().get(2));
+
+              })
+              .verifyComplete();
     }
 }

@@ -27,9 +27,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
-import static com.sysco.rps.common.Errors.Codes.CUSTOMER_NOT_FOUND_ON_REQUEST;
-import static com.sysco.rps.common.Errors.Codes.OPCO_NOT_FOUND;
-import static com.sysco.rps.common.Errors.Messages.MSG_OPCO_NOT_FOUND;
 
 /**
  * Contains logic on processing the price request by calling repositories
@@ -97,12 +94,17 @@ public class CustomerPriceService {
 
     private RefPriceAPIException validateRequest(CustomerPriceRequest request) {
         // Validate the OpCo
+
+        if (StringUtils.isEmpty(request.getBusinessUnitNumber())) {
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.REQUESTED_OPCO_NULL_OR_EMPTY, Errors.Messages.REQUESTED_OPCO_NULL_OR_EMPTY);
+        }
+
         if (!businessUnitLoaderService.isOpcoExist(request.getBusinessUnitNumber())) {
-            return new RefPriceAPIException(HttpStatus.NOT_FOUND, OPCO_NOT_FOUND, MSG_OPCO_NOT_FOUND);
+            return new RefPriceAPIException(HttpStatus.NOT_FOUND, Errors.Codes.OPCO_NOT_FOUND, Errors.Messages.MSG_OPCO_NOT_FOUND);
         }
 
         if (StringUtils.isEmpty(request.getCustomerAccount())) {
-            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, CUSTOMER_NOT_FOUND_ON_REQUEST, CUSTOMER_NOT_FOUND_ON_REQUEST);
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.CUSTOMER_NULL_OR_EMPTY, Errors.Messages.CUSTOMER_NULL_OR_EMPTY);
         }
         return null;
     }
