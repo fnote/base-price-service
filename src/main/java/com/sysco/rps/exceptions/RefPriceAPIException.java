@@ -1,5 +1,6 @@
 package com.sysco.rps.exceptions;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.http.HttpStatus;
 
@@ -53,5 +54,26 @@ public class RefPriceAPIException extends RuntimeException {
               .append("httpStatusCode", httpStatusCode)
               .append("additionalInfo", additionalInfo)
               .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof RefPriceAPIException)) return false;
+
+        RefPriceAPIException exception = (RefPriceAPIException) o;
+        return Objects.equals(errorCode, exception.errorCode) &&
+              Objects.equals(httpStatusCode, exception.httpStatusCode) &&
+              Objects.equals(additionalInfo, exception.additionalInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+              .append(errorCode)
+              .append(httpStatusCode)
+              .append(additionalInfo)
+              .toHashCode();
     }
 }

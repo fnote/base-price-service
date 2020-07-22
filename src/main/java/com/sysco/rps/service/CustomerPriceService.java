@@ -53,7 +53,12 @@ public class CustomerPriceService {
 
     public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
 
-        validateRequest(request);
+        // TODO: See whether Mono.error can be achieved through Aspects or by some other means
+        try {
+            validateRequest(request);
+        } catch (Exception e) {
+            return Mono.error(e);
+        }
 
         List<String> requestedSUPCs = request.getProducts().stream().distinct().collect(Collectors.toList());
 

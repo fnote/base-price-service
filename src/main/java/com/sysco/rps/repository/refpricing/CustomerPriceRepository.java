@@ -2,7 +2,6 @@ package com.sysco.rps.repository.refpricing;
 
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.Product;
-import io.r2dbc.spi.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
