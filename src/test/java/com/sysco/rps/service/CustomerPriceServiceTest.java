@@ -462,4 +462,224 @@ class CustomerPriceServiceTest extends BaseTest {
 
     }
 
+    /**
+     * Testing invalid Date scenarios
+     * Jira task: PRCP-2085
+     */
+    @Test
+    void testInvalidSUPCWithValidSUPCList() {
+        testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
+        testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
+
+        // SUPC -> 7565088 is not in the database
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020",
+              "68579367", "2020-02-02",
+              Arrays.asList("2512527", "7565045","7565088", "3982204")
+        );
+        Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getSuccessfulItems().size());
+                  assertEquals(1, response.getFailedItems().size());
+
+                  String errorData = "Price not found for SUPC: %s Customer: %s";
+                  String errorMsg = "Price not found for given SUPC/customer combination";
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "7565088", "68579367")), response.getFailedItems().get(0));
+
+              })
+              .verifyComplete();
+    }
+
+
+    /**
+     * Testing invalid Date scenarios
+     * Jira task: PRCP-2086
+     */
+    @Test
+    void testAllSUPCsInvalid() {
+        testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
+        testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
+
+        // SUPC -> 7565088, 3982205 are not in the database
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020",
+              "68579367", "2020-02-02",
+              Arrays.asList("7565088", "3982205")
+        );
+        Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(0, response.getSuccessfulItems().size());
+                  assertEquals(2, response.getFailedItems().size());
+
+                  String errorData = "Price not found for SUPC: %s Customer: %s";
+                  String errorMsg = "Price not found for given SUPC/customer combination";
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "7565088", "68579367")), response.getFailedItems().get(0));
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "3982205", "68579367")), response.getFailedItems().get(1));
+
+              })
+              .verifyComplete();
+
+    }
+
+    /**
+     * Testing invalid Date scenarios
+     * Jira task: PRCP-2083
+     */
+
+    @Test
+    void testInvalidDateScenarios() {
+        testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
+        testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
+
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020",
+              "68579367", "0020-02-02",
+              Arrays.asList("2512527", "7565045", "3982204")
+        );
+
+        Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getFailedItems().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("2019-02-29");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .verifyErrorSatisfies(error -> {
+                  RefPriceAPIException exception = (RefPriceAPIException) error;
+                  assertEquals(Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getMessage());
+                  assertEquals(Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getErrorCode());
+              });
+
+        customerPriceRequest.setPriceRequestDate("2019-13-29");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .verifyErrorSatisfies(error -> {
+                  RefPriceAPIException exception = (RefPriceAPIException) error;
+                  assertEquals(Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getMessage());
+                  assertEquals(Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getErrorCode());
+              });
+
+        customerPriceRequest.setPriceRequestDate("2019-10-35");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .verifyErrorSatisfies(error -> {
+                  RefPriceAPIException exception = (RefPriceAPIException) error;
+                  assertEquals(Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getMessage());
+                  assertEquals(Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getErrorCode());
+              });
+
+        customerPriceRequest.setPriceRequestDate("2019/10/10");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .verifyErrorSatisfies(error -> {
+                  RefPriceAPIException exception = (RefPriceAPIException) error;
+                  assertEquals(Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getMessage());
+                  assertEquals(Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getErrorCode());
+              });
+
+        customerPriceRequest.setPriceRequestDate("10/13/2019");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .verifyErrorSatisfies(error -> {
+                  RefPriceAPIException exception = (RefPriceAPIException) error;
+                  assertEquals(Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getMessage());
+                  assertEquals(Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getErrorCode());
+              });
+
+        customerPriceRequest.setPriceRequestDate("");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .verifyErrorSatisfies(error -> {
+                  RefPriceAPIException exception = (RefPriceAPIException) error;
+                  assertEquals(Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getMessage());
+                  assertEquals(Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getErrorCode());
+              });
+
+        customerPriceRequest.setPriceRequestDate(null);
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .verifyErrorSatisfies(error -> {
+                  RefPriceAPIException exception = (RefPriceAPIException) error;
+                  assertEquals(Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getMessage());
+                  assertEquals(Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getErrorCode());
+              });
+
+        customerPriceRequest.setPriceRequestDate("2^20-1&-1*");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .verifyErrorSatisfies(error -> {
+                  RefPriceAPIException exception = (RefPriceAPIException) error;
+                  assertEquals(Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getMessage());
+                  assertEquals(Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST, exception.getErrorCode());
+              });
+
+    }
+
+    /**
+     * Testing invalid Date scenarios
+     * Jira task: PRCP-2093
+     */
+    @Test
+    void testMultipleEffectiveDates() {
+        testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
+        testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
+
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020",
+              "68579367", "2020-02-01",
+              Collections.singletonList("3982206")
+        );
+
+        Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(
+                        new Product("3982206", 4, 28.00,
+                              "2020-02-01 00:00:00", 1580947560L, 'p'),
+                        response.getSuccessfulItems().get(0)
+                  );
+              })
+              .verifyComplete();
+
+
+        customerPriceRequest.setPriceRequestDate("2020-02-02");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(
+                        new Product("3982206", 4, 28.00,
+                              "2020-02-01 00:00:00", 1580947560L, 'p'),
+                        response.getSuccessfulItems().get(0)
+                  );
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("2020-02-05");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(
+                        new Product("3982206", 4, 30.00,
+                              "2020-02-05 00:00:00", 1580947560L, 'c'),
+                        response.getSuccessfulItems().get(0)
+                  );
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("2020-02-06");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(
+                        new Product("3982206", 4, 30.00,
+                              "2020-02-05 00:00:00", 1580947560L, 'c'),
+                        response.getSuccessfulItems().get(0)
+                  );
+              })
+              .verifyComplete();
+
+    }
+
 }
