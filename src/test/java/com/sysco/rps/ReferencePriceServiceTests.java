@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 class ReferencePriceServiceTests {
-    @Value("${spring.profiles.active}")
+    @Value("${spring.profiles.active:test}")
     private String activeProfile;
 
     @Test
