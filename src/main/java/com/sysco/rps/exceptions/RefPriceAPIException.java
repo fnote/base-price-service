@@ -16,6 +16,7 @@ import java.util.Objects;
  */
 public class RefPriceAPIException extends RuntimeException {
 
+    private static final long serialVersionUID = -1451969741112865896L;
     private final String errorCode;
     private final HttpStatus httpStatusCode;
     private final transient Object additionalInfo;
