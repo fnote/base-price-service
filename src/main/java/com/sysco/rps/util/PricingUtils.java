@@ -2,6 +2,8 @@ package com.sysco.rps.util;
 
 import com.sysco.rps.common.Constants;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
@@ -123,6 +125,21 @@ public class PricingUtils {
 
             return PricingUtils.rightAdjustString(opcoNumber, Constants.FieldsLength.OPCO_ID_OVERALL);
         }
+    }
+
+    /**
+     * Validates a given date String is in the format of YYYY-MM-DD and a valid date.
+     *
+     * @param dateStr String
+     * @return boolean
+     */
+    public static boolean isValidDate(String dateStr) {
+        try {
+            LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
 }

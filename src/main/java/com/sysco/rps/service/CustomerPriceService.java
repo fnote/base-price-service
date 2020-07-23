@@ -8,6 +8,7 @@ import com.sysco.rps.dto.Product;
 import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.refpricing.CustomerPriceRepository;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
+import com.sysco.rps.util.PricingUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -109,6 +110,11 @@ public class CustomerPriceService {
 
         if (request.getProducts() == null) {
             return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.PRODUCTS_NOT_FOUND_IN_REQUEST, Errors.Messages.MSG_PRODUCTS_NOT_FOUND_IN_REQUEST);
+        }
+
+        if (!PricingUtils.isValidDate(request.getPriceRequestDate())) {
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST,
+                  Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST);
         }
         return null;
     }
