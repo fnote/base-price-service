@@ -32,6 +32,8 @@ class ConversionsTest extends BaseTest {
     void testIsValidDate() {
         assertTrue(PricingUtils.isValidDate("2020-02-19"));
         assertTrue(PricingUtils.isValidDate("2020-02-29"));
+        assertFalse(PricingUtils.isValidDate("2020-2-29"));
+        assertFalse(PricingUtils.isValidDate("2020-02-1"));
         assertFalse(PricingUtils.isValidDate("2020/02/19"));
         assertFalse(PricingUtils.isValidDate("2020-13-19"));
         assertFalse(PricingUtils.isValidDate("2020-02-35"));

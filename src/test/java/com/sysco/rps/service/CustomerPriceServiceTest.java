@@ -308,8 +308,8 @@ class CustomerPriceServiceTest extends BaseTest {
 
         List<String> products = new ArrayList<>(Collections.singletonList("1000001"));
 
-        // date too old: 202-01-23
-        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "202-01-23", products);
+        // date too old: 2020-01-23
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "2020-01-23", products);
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
 
         StepVerifier.create(customerPriceResponseMono)
