@@ -412,20 +412,21 @@ class CustomerPriceServiceTest extends BaseTest {
 
         CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020",
               "68579367", "2020-02-02",
-              Arrays.asList("aaa", "123", "", "~!@#$%^&*()-_+=|/.,", "-3219121",
+              Arrays.asList("aaa", "123", "", "~!@#$%^&*()-_+=|/.,", "-3219121", "20001.47",
                     "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")
         );
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(0, response.getSuccessfulItems().size());
-                  assertEquals(6, response.getFailedItems().size());
+                  assertEquals(7, response.getFailedItems().size());
                   assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
                   assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(1).getMessage());
                   assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(2).getMessage());
                   assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(3).getMessage());
                   assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(4).getMessage());
                   assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(5).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(6).getMessage());
               })
               .verifyComplete();
 
