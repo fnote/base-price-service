@@ -20,24 +20,23 @@ import java.util.Set;
 @Repository
 public class BusinessUnitRepository {
 
-    @Value("${active.business.units}")
-    private String businessUnitsStr;
-
     private List<BusinessUnit> businessUnits;
     private Set<String> businessUnitSet;
+    private String businessUnitsStr;
 
     /**
      * Constructor
      */
     @Autowired
-    public BusinessUnitRepository() {
+    public BusinessUnitRepository(@Value("${active.business.units}") String businessUnitsStr) {
         super();
+        this.businessUnitsStr = businessUnitsStr;
         businessUnits = new ArrayList<>();
         businessUnitSet = new HashSet<>();
     }
 
-    public List<BusinessUnit> getBusinessUnitList() {
-        // TODO: Retrieve business units from a different source (e.g. a DB table)
+    public List<BusinessUnit> getBusinessUnitList( ) {
+        // TODO: Consider retrieve business units from a different source (e.g. a DB table)
 
         if (businessUnits.isEmpty()) {
             String[] businessUnitIds = businessUnitsStr.split(",");

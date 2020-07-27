@@ -1,6 +1,8 @@
 package com.sysco.rps.common;
 
 /**
+ * This class contains error messages and error codes used for responses
+ * Refer errors.properties to see error texts matching the error codes. Always update that file when you add a new error code
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc

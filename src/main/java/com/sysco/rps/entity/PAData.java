@@ -3,7 +3,7 @@ package com.sysco.rps.entity;
 import org.springframework.util.StringUtils;
 
 /**
- * Entity bean for Price Advisor Data
+ * Bean to hold Price Advisor Data (supc-priceZone-price mapping)
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc

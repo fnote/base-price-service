@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
- * Contains some util methods that are only used during unit testing
+ * Contains some methods that are only used during unit testing
  *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
@@ -163,7 +163,7 @@ public class TestUtilsRepository {
     }
 
     private List<List<String>> readCsv(String fileName) {
-        String filePath = "test-data" + "/" + fileName;
+        String filePath = "test-data/" + fileName;
         ResourceLoader resourceLoader = new DefaultResourceLoader();
         Resource[] scripts = new Resource[]{resourceLoader.getResource("classpath:".concat(filePath))};
 

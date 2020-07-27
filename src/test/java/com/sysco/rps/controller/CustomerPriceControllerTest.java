@@ -176,8 +176,8 @@ class CustomerPriceControllerTest extends BaseTest {
         StepVerifier.create(customerPrices)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(result.getSuccessfulItems().size(), 0);
-                  assertEquals(result.getFailedItems().size(), 3);
+                  assertEquals(0, result.getSuccessfulItems().size());
+                  assertEquals(3, result.getFailedItems().size());
 
                   String errorData = "Price not found for SUPC: %s Customer: %s";
                   String errorMsg = "Price not found for given SUPC/customer combination";

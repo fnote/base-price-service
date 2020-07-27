@@ -24,8 +24,8 @@ import static com.sysco.rps.common.Constants.CORRELATION_ID_KEY;
  * Date: 06/03/20
  */
 @Component
-public class LogFilter implements WebFilter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogFilter.class);
+public class CorrelationIDFilter implements WebFilter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CorrelationIDFilter.class);
 
     @Override
     public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {

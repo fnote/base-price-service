@@ -45,7 +45,6 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 @Configuration
 public class RoutingConnectionFactoryConfig {
 
-
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutingConnectionFactoryConfig.class);
     @Value("${pricing.db.max.life.lower.limit}")
     private Long pricingDbMaxLifeLowerLimit;
@@ -53,11 +52,30 @@ public class RoutingConnectionFactoryConfig {
     private Long pricingDbMaxLifeUpperLimit;
     private BusinessUnitLoaderService businessUnitLoaderService;
 
+    /***
+     * Allows setting a business loader service
+     * @param businessUnitLoaderService
+     */
     @Autowired
     public RoutingConnectionFactoryConfig(BusinessUnitLoaderService businessUnitLoaderService) {
         this.businessUnitLoaderService = businessUnitLoaderService;
     }
 
+    /***
+     * Method to create RoutingConnectionFactory bean.
+     * Will go through all the available business units and create a connection factory for each.
+     * businessUnitId is used as the key when adding factories to the RoutingConnectionFactory.
+     * See RoutingConnectionFactory's determineCurrentLookupKey implementation where it is defined how to determine this business unit ID as the
+     * lookup key
+     * @param jdbcHost
+     * @param jdbcUser
+     * @param jdbcPassword
+     * @param maxPoolSize
+     * @param initialPoolSize
+     * @param maxIdleTime
+     * @param maxLifeTime
+     * @return RoutingConnectionFactory
+     */
     @Bean
     public RoutingConnectionFactory routingConnectionFactory(@Value("${pricing.db.jdbcHost}") String jdbcHost,
                                                              @Value("${pricing.db.username}") String jdbcUser,
@@ -125,5 +143,4 @@ public class RoutingConnectionFactoryConfig {
     private int getInt(String strVal, int defaultVal) {
         return StringUtils.isEmpty(strVal) ? defaultVal : Integer.parseInt(strVal);
     }
-
 }

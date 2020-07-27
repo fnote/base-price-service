@@ -24,7 +24,7 @@ class ConversionsTest extends BaseTest {
     @Test
     void convertOpCoIdToDBField() {
         assertTrue(PricingUtils.convertOpCoIdToDBField(null).isEmpty());
-        assertEquals(PricingUtils.convertOpCoIdToDBField("004"), "  004");
+        assertEquals( "  004", PricingUtils.convertOpCoIdToDBField("004"));
     }
 
 }

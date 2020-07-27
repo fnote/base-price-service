@@ -9,8 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 class ReferencePriceServiceTests {
-    @Value("${spring.profiles.active:test}")
+
     private String activeProfile;
+
+    ReferencePriceServiceTests(@Value("${spring.profiles.active}") String activeProfile){
+        this.activeProfile = activeProfile;
+    }
 
     @Test
     void contextLoads() {

@@ -88,7 +88,6 @@ class MDCContextLifter<T> implements CoreSubscriber<T> {
      * One thread-local access only.
      */
     private void copyToMdc(Context context) {
-
         // TODO: @sanjayaa see whether we only need to copy correlation ID
         if (!context.isEmpty()) {
             Map<String, String> map = context.stream()
