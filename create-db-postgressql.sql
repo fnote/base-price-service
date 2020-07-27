@@ -1,5 +1,5 @@
 # Execute the create db as a separate sql as create db can not run in transaction space
-CREATE DATABASE payplus_dev
+CREATE DATABASE ref_price_dev
     WITH
     OWNER = postgres
     ENCODING = 'UTF-8'
@@ -9,8 +9,8 @@ CREATE DATABASE payplus_dev
     CONNECTION LIMIT = -1;
 # Create the users and grant permission.
 
-CREATE ROLE payplus_user NOSUPERUSER NOCREATEROLE NOINHERIT LOGIN PASSWORD 'password';
+CREATE ROLE ref_price_user NOSUPERUSER NOCREATEROLE NOINHERIT LOGIN PASSWORD 'password';
 
-GRANT ALL ON DATABASE payplus_dev TO payplus_user;
-GRANT ALL PRIVILEGES ON DATABASE payplus_dev TO payplus_user;
-GRANT ALL ON DATABASE payplus_dev TO postgres;
+GRANT ALL ON DATABASE ref_price_dev TO ref_price_user;
+GRANT ALL PRIVILEGES ON DATABASE ref_price_dev TO ref_price_user;
+GRANT ALL ON DATABASE ref_price_dev TO postgres;

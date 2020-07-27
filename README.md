@@ -1,9 +1,9 @@
 # How to start up 
 Do the below steps to get the API blueprint up and running entirely in a local developer workstation
 * The API blueprint requires a postgre sql database
-* Create the database:here we name the db as payplus_dev
+* Create the database:here we name the db as ref_price_dev
 ```dtd
-CREATE DATABASE payplus_dev
+CREATE DATABASE ref_price_dev
     WITH
     OWNER = postgres
     ENCODING = 'UTF-8'
@@ -12,12 +12,12 @@ CREATE DATABASE payplus_dev
     LC_CTYPE = 'C'
     CONNECTION LIMIT = -1;
 ```
-* Grant required permission to a preferred user: here we name the db user as payplus
+* Grant required permission to a preferred user: here we name the db user as ref_price_user
 ```dtd
-CREATE ROLE payplus NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT LOGIN PASSWORD 'password';
-GRANT ALL ON DATABASE payplus_dev TO payplus;
-GRANT ALL PRIVILEGES ON DATABASE payplus_dev TO payplus;
-GRANT ALL ON DATABASE payplus_dev TO postgres;
+CREATE ROLE ref_price_user NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT LOGIN PASSWORD 'password';
+GRANT ALL ON DATABASE ref_price_dev TO ref_price_user;
+GRANT ALL PRIVILEGES ON DATABASE ref_price_dev TO ref_price_user;
+GRANT ALL ON DATABASE ref_price_dev TO postgres;
 
 ```
 * Set the active profile to local
@@ -31,8 +31,8 @@ export spring_profiles_active=local
 resolved.introspect.url=http://10.133.201.10:8080/v1/auth-service/introspect
 
 #database parameters
-resolved.db.jdbcUrl=jdbc:postgresql://localhost:5432/payplus_dev?characterEncoding=utf8&useSSL=false
-resolved.db.username=payplus
+resolved.db.jdbcUrl=jdbc:postgresql://localhost:5432/ref_price_dev?characterEncoding=utf8&useSSL=false
+resolved.db.username=ref_price_user
 resolved.db.password=password
 ```
 * Run the unit tests
@@ -85,11 +85,11 @@ cloud.aws.stack.auto=false
 cloud.aws.region.auto=false
 cloud.aws.region.static=us-east-1
 
-aws.paramstore.prefix=/payplus/config
+aws.paramstore.prefix=/ref-price/config
 aws.paramstore.defaultContext=application
 aws.paramstore.profileSeparator=_
 aws.paramstore.failFast=true
-aws.paramstore.name=payplus-api
+aws.paramstore.name=ref-price-service
 aws.paramstore.enabled=true
 
 ```
@@ -327,20 +327,10 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
 #### Role Based Access
 
-
 ### Validation and Exception Handling
-
-
 
 ### Logging 
 
 ### Swagger API documentation
 
 ### Secure Coding Practices
-
-
-
-
-
-
-
