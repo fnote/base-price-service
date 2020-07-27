@@ -601,6 +601,15 @@ class CustomerPriceServiceTest extends BaseTest {
               })
               .verifyComplete();
 
+        customerPriceRequest.setPriceRequestDate("5020-05-15");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getSuccessfulItems().size());
+              })
+              .verifyComplete();
+
+
         customerPriceRequest.setPriceRequestDate("2019-02-29");
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
         StepVerifier.create(customerPriceResponseMono)
