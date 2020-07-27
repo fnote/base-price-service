@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * @author
@@ -28,17 +27,4 @@ class ConversionsTest extends BaseTest {
         assertEquals(PricingUtils.convertOpCoIdToDBField("004"), "  004");
     }
 
-    @Test
-    void testIsValidDate() {
-        assertTrue(PricingUtils.isValidDate("2020-02-19"));
-        assertTrue(PricingUtils.isValidDate("2020-02-29"));
-        assertFalse(PricingUtils.isValidDate("2020-2-29"));
-        assertFalse(PricingUtils.isValidDate("2020-02-1"));
-        assertFalse(PricingUtils.isValidDate("2020/02/19"));
-        assertFalse(PricingUtils.isValidDate("2020-13-19"));
-        assertFalse(PricingUtils.isValidDate("2020-02-35"));
-        assertFalse(PricingUtils.isValidDate("2019-02-29"));
-        assertFalse(PricingUtils.isValidDate(""));
-        assertFalse(PricingUtils.isValidDate(null));
-    }
 }

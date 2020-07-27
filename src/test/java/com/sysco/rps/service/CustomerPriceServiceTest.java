@@ -308,8 +308,8 @@ class CustomerPriceServiceTest extends BaseTest {
 
         List<String> products = new ArrayList<>(Collections.singletonList("1000001"));
 
-        // date too old: 2020-01-23
-        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "2020-01-23", products);
+        // date too old: 202-01-23
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "202-01-23", products);
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
 
         StepVerifier.create(customerPriceResponseMono)
@@ -495,7 +495,7 @@ class CustomerPriceServiceTest extends BaseTest {
 
 
     /**
-     * Testing invalid Date scenarios
+     * Testing invalid SUPC scenarios
      * Jira task: PRCP-2086
      */
     @Test
@@ -540,6 +540,60 @@ class CustomerPriceServiceTest extends BaseTest {
         );
 
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getFailedItems().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("2019-3-29");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getFailedItems().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("2019-02-9");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getFailedItems().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("2009-02-25");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getFailedItems().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("009-02-25");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getFailedItems().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("09-02-25");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getFailedItems().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("9-02-25");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(3, response.getFailedItems().size());
