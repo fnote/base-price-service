@@ -1,12 +1,13 @@
 package com.sysco.rps.service.loader;
 
 
-import com.sysco.rps.entity.pp.masterdata.BusinessUnit;
+import com.sysco.rps.entity.masterdata.BusinessUnit;
 import com.sysco.rps.repository.platform.BusinessUnitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
 
 /**
  * This class reads the list of business units from the business unit table.
@@ -38,6 +39,16 @@ public class BusinessUnitLoaderService {
      */
     public List<BusinessUnit> loadBusinessUnitList(){
         return businessUnitRepository.getBusinessUnitList();
+    }
+
+
+    /**
+     * Verifies whether an OpCo exist
+     *
+     * @return boolean
+     */
+    public boolean isOpcoExist(String requestedOpCoId){
+        return businessUnitRepository.isOpcoExist(requestedOpCoId);
     }
 
 }

@@ -1,108 +1,100 @@
 package com.sysco.rps.repository.refpricing;
 
-import com.sysco.rps.common.Constants;
-import com.sysco.rps.dto.refpricing.CustomerPrice;
-import com.sysco.rps.dto.refpricing.CustomerPriceRequest;
-import com.sysco.rps.dto.refpricing.Product;
-import com.sysco.rps.repository.common.DataSourceProvider;
-import org.apache.commons.lang3.StringUtils;
+import com.sysco.rps.dto.CustomerPriceRequest;
+import com.sysco.rps.dto.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.util.StopWatch;
+import reactor.core.publisher.Flux;
 
-import java.io.Serializable;
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * @author Sanjaya Amarasinghe
- * @copyright (C) 2020,
- * @doc
- * @end Created : 07. Jun 2020 06:59
+ * @author Tharuka Jayalath
+ * (C) 2019, Sysco Labs
+ * Created: 6/14/20. Sun 2020 18:11
  */
-@Repository
-public class CustomerPriceRepository extends NamedParameterJdbcDaoSupport implements Serializable {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerPriceRepository.class);
+@org.springframework.stereotype.Repository
+public class CustomerPriceRepository {
 
     @Autowired
-    CustomerPriceRepository() {
-        super();
-        setDataSource(DataSourceProvider.getActiveDataSource());
+    private DatabaseClient databaseClient;
+
+    private Logger LOGGER = LoggerFactory.getLogger(CustomerPriceRepository.class);
+
+    private String getQuery(String customerId, String effectiveDate, String supcs) {
+
+        String q2 = "SELECT paOuter.SUPC," +
+              "       paOuter.PRICE_ZONE," +
+              "       paOuter.PRICE," +
+              "       paOuter.EFFECTIVE_DATE," +
+              "       paOuter.EXPORTED_DATE" +
+              " FROM PA paOuter force index (`PRIMARY`)" +
+              "         INNER JOIN (SELECT Max(paInner.EFFECTIVE_DATE) max_eff_date," +
+              "                            paInner.SUPC," +
+              "                            paInner.PRICE_ZONE" +
+              "                     FROM (SELECT e.SUPC," +
+              "                                  e.PRICE_ZONE," +
+              "                                  e.CUSTOMER_ID" +
+              "                           FROM PRICE_ZONE_01 e force index (`PRIMARY`)" +
+              "                           WHERE e.CUSTOMER_ID = \"" + customerId + "\"" +
+              "                             AND SUPC IN (" + supcs + ")) pz" +
+              "                              INNER JOIN PA paInner force index (`PRIMARY`)" +
+              "                                         ON pz.SUPC = paInner.SUPC" +
+              "                                             AND pz.PRICE_ZONE = paInner.PRICE_ZONE" +
+              "                                             AND paInner.EFFECTIVE_DATE <= \"" + effectiveDate + "\"" +
+              "                     GROUP BY paInner.SUPC, paInner.PRICE_ZONE) c" +
+              "                    ON c.SUPC = paOuter.SUPC AND c.PRICE_ZONE = paOuter.PRICE_ZONE AND" +
+              "                       c.MAX_EFF_DATE = paOuter.EFFECTIVE_DATE";
+
+//        LOGGER.debug(q2);
+        return q2;
     }
 
-    public CustomerPrice getCustomerPrice(CustomerPriceRequest customerPriceReq) {
-
-        String query =
-              "SELECT " +
-                    "c.CUSTOMER_ID, p.SUPC, p.PRICE_ZONE, p.PRICE, p.EFFECTIVE_DATE " +
-                    "FROM " +
-                    Constants.DBNames.PA + " p INNER JOIN" +
-                    "(SELECT MAX(p.EFFECTIVE_DATE) max_eff_date, p.SUPC, p.PRICE_ZONE, b.CUSTOMER_ID " +
-                    "FROM " +
-                    "(SELECT e.SUPC, e.PRICE_ZONE, e.CUSTOMER_ID from " + Constants.DBNames.EATS + " e " +
-                    "where e.CUSTOMER_ID=:customerId and SUPC in (:supcs) ) b " +
-                    "INNER JOIN " +
-                    Constants.DBNames.PA + " p ON b.SUPC = p.SUPC AND b.PRICE_ZONE = p.PRICE_ZONE " +
-                    "WHERE p.EFFECTIVE_DATE <= :maxEffectiveDate " +
-                    "GROUP BY p.SUPC)  c " +
-                    "ON c.max_eff_date = p.EFFECTIVE_DATE AND c.SUPC = p.SUPC AND c.PRICE_ZONE = p.PRICE_ZONE ";
-
-        String maxEffectiveDate = StringUtils.isEmpty(customerPriceReq.getPriceRequestDate()) ? getCurrentDate() :
-              customerPriceReq.getPriceRequestDate();
-
-        SqlParameterSource namedParameters = new MapSqlParameterSource()
-              .addValue("customerId", customerPriceReq.getCustomerAccount())
-              .addValue("supcs", customerPriceReq.getProducts())
-              .addValue("maxEffectiveDate", maxEffectiveDate);
-
-//        LOGGER.debug("SQL statement:[{}]", NamedParameterUtils.substituteNamedParameters(query, namedParameters));
+    public Flux<Product> getPricesByOpCo(CustomerPriceRequest customerPriceRequest, List<String> supcsPartition) {
+        String supcs = getSUPCs(supcsPartition);
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        List<Product> products = getNamedParameterJdbcTemplate().query(query, namedParameters, (resultSet, rowNum) -> {
+        return databaseClient.execute(getQuery(customerPriceRequest.getCustomerAccount(), customerPriceRequest.getPriceRequestDate(), supcs))
+              .map((row, rowMetaData) -> {
 
-            if (stopWatch.isRunning()) {
-                stopWatch.stop();
-                LOGGER.info("QUERY-LATENCY : [{}]", stopWatch.getLastTaskTimeMillis());
-            }
+                        if (stopWatch.isRunning()) {
+                            stopWatch.stop();
+                            LOGGER.debug("QUERY-LATENCY : [{}]", stopWatch.getLastTaskTimeMillis());
+                        }
 
-            String supc = resultSet.getString("SUPC");
-            String priceZone = resultSet.getString("PRICE_ZONE");
-            Double price = resultSet.getDouble("PRICE");
-            Date effectiveDate = resultSet.getDate("EFFECTIVE_DATE");
+                        return new Product(row.get("SUPC", String.class),
+                              row.get("PRICE_ZONE", Integer.class),
+                              row.get("PRICE", Double.class),
+                              getDate(row.get("EFFECTIVE_DATE", LocalDateTime.class)),
+                                    row.get("EXPORTED_DATE", Long.class)
+                        );
 
-            return new Product(supc, priceZone, price, getDate(effectiveDate));
-        });
+                    }
 
-
-        return new CustomerPrice(customerPriceReq.getBusinessUnitNumber(), customerPriceReq.getCustomerAccount(),
-              customerPriceReq.getPriceRequestDate(), products);
+              ).all();
     }
 
-    private String getCurrentDate() {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDateTime now = LocalDateTime.now();
-        return dtf.format(now);
+    private String getSUPCs(List<String> supcs) {
+        return supcs
+              .stream()
+              .map(s -> "\"" + s + "\"")
+              .collect(Collectors.joining(","));
     }
 
-    private String getDate(Date date) {
+    private String getDate(LocalDateTime date) {
         if (date == null) {
             return "";
         }
 
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        return df.format(date);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return formatter.format(date);
     }
-
 }

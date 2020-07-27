@@ -1,5 +1,7 @@
 package com.sysco.rps.util;
 
+import java.util.Objects;
+
 /**
  * Various SYSCO specific conversion routines to convert dates and string values.
  *
@@ -80,7 +82,7 @@ public class PricingUtils {
      * @return String trimmed or empty (never null).
      */
     public static String trimSafely(String inString, String nullValue) {
-        String result = null;
+        String result;
 
         if (inString != null) {
             if (inString.length() > 0) {
@@ -90,11 +92,7 @@ public class PricingUtils {
             }
         } else // Handle null case
         {
-            if (nullValue != null) {
-                result = nullValue;
-            } else {
-                result = "";
-            }
+            result = Objects.requireNonNullElse(nullValue, "");
         }
 
         return result;
