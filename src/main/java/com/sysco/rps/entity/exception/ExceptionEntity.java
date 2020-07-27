@@ -1,7 +1,7 @@
 package com.sysco.rps.entity.exception;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sysco.rps.entity.RawBaseEntity;
+import com.sysco.rps.entity.pp.RawBaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

@@ -1,10 +1,10 @@
 package com.sysco.rps.controller.masterdata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sysco.rps.dto.ListResponse;
-import com.sysco.rps.dto.masterdata.BaseCustomerDTO;
-import com.sysco.rps.dto.masterdata.CustomerDTO;
-import com.sysco.rps.entity.masterdata.enums.StopClass;
+import com.sysco.rps.dto.pp.ListResponse;
+import com.sysco.rps.dto.pp.masterdata.BaseCustomerDTO;
+import com.sysco.rps.dto.pp.masterdata.CustomerDTO;
+import com.sysco.rps.entity.pp.masterdata.enums.StopClass;
 import com.sysco.rps.service.masterdata.CustomerService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

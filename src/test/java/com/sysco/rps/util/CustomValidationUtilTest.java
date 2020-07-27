@@ -1,7 +1,7 @@
 package com.sysco.rps.util;
 
-import com.sysco.rps.dto.masterdata.BaseGlobalDTO;
-import com.sysco.rps.dto.masterdata.BaseOpCoDTO;
+import com.sysco.rps.dto.pp.masterdata.BaseGlobalDTO;
+import com.sysco.rps.dto.pp.masterdata.BaseOpCoDTO;
 import com.sysco.rps.service.exception.ErrorCode;
 import com.sysco.rps.service.exception.ValidationException;
 import com.sysco.rps.validators.annotations.ValidDateFormat;

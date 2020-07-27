@@ -1,7 +1,7 @@
 package com.sysco.rps.controller.masterdata;
 
-import com.sysco.rps.dto.masterdata.FiscalCalendarDTO;
-import com.sysco.rps.entity.masterdata.FiscalCalendar;
+import com.sysco.rps.dto.pp.masterdata.FiscalCalendarDTO;
+import com.sysco.rps.entity.pp.masterdata.FiscalCalendar;
 import com.sysco.rps.service.masterdata.FiscalCalendarService;
 import com.sysco.rps.util.DateUtil;
 import org.junit.jupiter.api.Test;

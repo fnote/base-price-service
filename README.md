@@ -332,5 +332,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 ### Logging 
 
 ### Swagger API documentation
+Swagger API Documentation can be accessed via http://localhost:8082/swagger-ui.html
 
 ### Secure Coding Practices

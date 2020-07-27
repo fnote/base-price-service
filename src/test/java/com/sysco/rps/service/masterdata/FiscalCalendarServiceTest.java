@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.sysco.rps.dto.masterdata.FiscalCalendarDTO;
+import com.sysco.rps.dto.pp.masterdata.FiscalCalendarDTO;
 import com.sysco.rps.service.exception.RecordNotFoundException;
 import com.sysco.rps.util.DateUtil;
 import java.text.ParseException;

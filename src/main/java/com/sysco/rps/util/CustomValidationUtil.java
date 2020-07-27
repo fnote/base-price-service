@@ -1,8 +1,8 @@
 package com.sysco.rps.util;
 
-import com.sysco.rps.dto.ErrorDTO;
-import com.sysco.rps.dto.masterdata.BaseGlobalDTO;
-import com.sysco.rps.dto.masterdata.BaseOpCoDTO;
+import com.sysco.rps.dto.pp.ErrorDTO;
+import com.sysco.rps.dto.pp.masterdata.BaseGlobalDTO;
+import com.sysco.rps.dto.pp.masterdata.BaseOpCoDTO;
 import com.sysco.rps.service.exception.ValidationException;
 
 import javax.validation.ConstraintViolation;

@@ -1,7 +1,7 @@
 package com.sysco.rps.controller.masterdata;
 
-import com.sysco.rps.dto.masterdata.KeyValueDTO;
-import com.sysco.rps.entity.masterdata.enums.*;
+import com.sysco.rps.dto.pp.masterdata.KeyValueDTO;
+import com.sysco.rps.entity.pp.masterdata.enums.*;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;

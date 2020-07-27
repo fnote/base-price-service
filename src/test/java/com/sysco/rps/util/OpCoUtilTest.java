@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.sysco.rps.dto.masterdata.OpCoDTO;
-import com.sysco.rps.dto.masterdata.OpCoDTOTestUtil;
-import com.sysco.rps.entity.masterdata.OpCo;
+import com.sysco.rps.dto.pp.masterdata.OpCoDTO;
+import com.sysco.rps.dto.pp.masterdata.OpCoDTOTestUtil;
+import com.sysco.rps.entity.pp.masterdata.OpCo;
 import com.sysco.rps.service.exception.DuplicateRecordException;
 import com.sysco.rps.service.exception.ErrorCode;
 import com.sysco.rps.service.exception.RecordNotFoundException;

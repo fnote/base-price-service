@@ -1,10 +1,10 @@
 package com.sysco.rps.controller.masterdata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sysco.rps.dto.masterdata.OpCoDTO;
-import com.sysco.rps.entity.masterdata.enums.ActivationStatus;
-import com.sysco.rps.entity.masterdata.enums.Market;
-import com.sysco.rps.entity.masterdata.enums.Timezone;
+import com.sysco.rps.dto.pp.masterdata.OpCoDTO;
+import com.sysco.rps.entity.pp.masterdata.enums.ActivationStatus;
+import com.sysco.rps.entity.pp.masterdata.enums.Market;
+import com.sysco.rps.entity.pp.masterdata.enums.Timezone;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;

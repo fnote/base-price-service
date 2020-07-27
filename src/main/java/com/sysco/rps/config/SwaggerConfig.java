@@ -6,10 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
-import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
@@ -28,25 +26,17 @@ public class SwaggerConfig {
   public Docket api() {
     return new Docket(DocumentationType.SWAGGER_2)
         .useDefaultResponseMessages(false)
-        .globalOperationParameters(
-            Collections.singletonList(new ParameterBuilder()
-                .name("Authorization")
-                .description("Bearer Token")
-                .modelRef(new ModelRef("string"))
-                .parameterType("header")
-                .required(true)
-                .build()))
         .select()
         .apis(RequestHandlerSelectors.any())
-        .paths(Predicates.not(PathSelectors.regex("/health.*|/error.*")))
+        .paths(Predicates.not(PathSelectors.regex("/health.*|/error.*|/ref-price/v1.*")))
         .build()
         .apiInfo(apiInfo());
   }
 
   private ApiInfo apiInfo() {
     return new ApiInfo(
-        "Pay Plus API ",
-        "API services required by pay plus",
+        "Reference Pricing Service",
+        "APIs to expose reference pricing",
         "v1",
         "Terms of service",
         new Contact("Rohana Kumara", "www.sysco.com", "rohana.kumara@sysco.com"),

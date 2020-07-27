@@ -7,7 +7,7 @@ import static com.sysco.rps.service.exception.ErrorCode.RECORD_LOCKED;
 import static com.sysco.rps.service.exception.ErrorCode.RECORD_NOT_FOUND;
 import static com.sysco.rps.service.exception.ErrorCode.VALIDATION_FAILURE;
 
-import com.sysco.rps.dto.ErrorDTO;
+import com.sysco.rps.dto.pp.ErrorDTO;
 import com.sysco.rps.service.exception.DuplicateRecordException;
 import com.sysco.rps.service.exception.ErrorCode;
 import com.sysco.rps.service.exception.RecordLockedException;

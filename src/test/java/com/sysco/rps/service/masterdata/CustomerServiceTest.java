@@ -1,10 +1,10 @@
 package com.sysco.rps.service.masterdata;
 
-import com.sysco.rps.dto.masterdata.BaseCustomerDTO;
-import com.sysco.rps.dto.masterdata.CustomerDTO;
-import com.sysco.rps.dto.masterdata.OpCoDTO;
-import com.sysco.rps.entity.masterdata.Customer;
-import com.sysco.rps.entity.masterdata.enums.*;
+import com.sysco.rps.dto.pp.masterdata.BaseCustomerDTO;
+import com.sysco.rps.dto.pp.masterdata.CustomerDTO;
+import com.sysco.rps.dto.pp.masterdata.OpCoDTO;
+import com.sysco.rps.entity.pp.masterdata.Customer;
+import com.sysco.rps.entity.pp.masterdata.enums.*;
 import com.sysco.rps.service.exception.DuplicateRecordException;
 import com.sysco.rps.service.exception.ErrorCode;
 import com.sysco.rps.service.exception.RecordNotFoundException;

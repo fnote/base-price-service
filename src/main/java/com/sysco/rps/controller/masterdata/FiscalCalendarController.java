@@ -1,6 +1,6 @@
 package com.sysco.rps.controller.masterdata;
 
-import com.sysco.rps.dto.masterdata.FiscalCalendarDTO;
+import com.sysco.rps.dto.pp.masterdata.FiscalCalendarDTO;
 import com.sysco.rps.service.masterdata.FiscalCalendarService;
 import com.sysco.rps.service.exception.RecordNotFoundException;
 import io.swagger.annotations.ApiOperation;

@@ -30,16 +30,16 @@ public class AppConfig implements WebMvcConfigurer {
   private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 
-  @Autowired
-  @Qualifier("requestLoggingInterceptor")
-  HandlerInterceptor requestLoggingInterceptor;
+//  @Autowired
+//  @Qualifier("requestLoggingInterceptor")
+//  HandlerInterceptor requestLoggingInterceptor;
   @Autowired
   HandlerInterceptor correlationIdInterceptor;
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(correlationIdInterceptor);
-    registry.addInterceptor(requestLoggingInterceptor);
+//    registry.addInterceptor(requestLoggingInterceptor);
   }
 
   @Bean

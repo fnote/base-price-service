@@ -2,9 +2,9 @@ package com.sysco.rps.util;
 
 import static com.sysco.rps.service.exception.ErrorCode.DUPLICATE_RECORD;
 
-import com.sysco.rps.dto.ErrorDTO;
-import com.sysco.rps.dto.masterdata.OpCoDTO;
-import com.sysco.rps.entity.masterdata.OpCo;
+import com.sysco.rps.dto.pp.ErrorDTO;
+import com.sysco.rps.dto.pp.masterdata.OpCoDTO;
+import com.sysco.rps.entity.pp.masterdata.OpCo;
 import com.sysco.rps.service.exception.DuplicateRecordException;
 import com.sysco.rps.service.exception.RecordNotFoundException;
 import java.text.MessageFormat;
