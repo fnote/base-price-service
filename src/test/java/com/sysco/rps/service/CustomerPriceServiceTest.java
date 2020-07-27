@@ -71,8 +71,8 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(result.getSuccessfulItems().size(), 0);
-                  assertEquals(result.getFailedItems().size(), 5);
+                  assertEquals(0, result.getSuccessfulItems().size());
+                  assertEquals(5, result.getFailedItems().size());
 
                   ErrorDTO errorDTO = result.getFailedItems().get(0);
                   assertEquals("102020", errorDTO.getCode());

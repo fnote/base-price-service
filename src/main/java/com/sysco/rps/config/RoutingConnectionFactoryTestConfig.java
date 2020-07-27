@@ -15,18 +15,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-
-import static com.sysco.rps.common.Constants.JdbcProperties.PRICINGDB;
 
 /**
  * Provides DB connection configurations to connect with an in-memory H2 DB
- *
+ * Used for unit testing
+ * Note: Though this serves as configurations for a RoutingConnectionFactory, currently only a single DB can be used due to a limitation in the
+ * data loader
  * @author Sanjaya Amarasinghe
  * (C) 2020, Sysco Corporation
  * Created: 7/17/20. Fri 2020 11:20
@@ -39,18 +37,27 @@ public class RoutingConnectionFactoryTestConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutingConnectionFactoryTestConfig.class);
     private BusinessUnitLoaderService businessUnitLoaderService;
 
+    /***
+     * Allows setting a business loader service
+     * @param businessUnitLoaderService
+     */
     @Autowired
     public RoutingConnectionFactoryTestConfig(BusinessUnitLoaderService businessUnitLoaderService) {
         this.businessUnitLoaderService = businessUnitLoaderService;
     }
 
+    /***
+     * Method to create RoutingConnectionFactory bean.
+     * @param jdbcUser
+     * @param jdbcPassword
+     * @param dbFilePath
+     * @return RoutingConnectionFactory
+     */
     @Bean
-    public RoutingConnectionFactory routingConnectionFactory(@Value("${pricing.db.username}") String jdbcHost,
-                                                             @Value("${pricing.db.username}") String jdbcUser,
-                                                             @Value("${pricing.db.password}") String jdbcPassword,
-                                                             @Value("${pricing.db.h2.file.path}") String dbFilePath,
-                                                             @Value("${pricing.db.max.life.lower.limit}") Long pricingDbMaxLifeLowerLimit,
-                                                             @Value("${pricing.db.max.life.upper.limit}") Long pricingDbMaxLifeUpperLimit) {
+    public RoutingConnectionFactory routingConnectionFactory(
+          @Value("${pricing.db.username}") String jdbcUser,
+          @Value("${pricing.db.password}") String jdbcPassword,
+          @Value("${pricing.db.h2.file.path}") String dbFilePath) {
         RoutingConnectionFactory router = new RoutingConnectionFactory();
 
         ConnectionFactory defaultConnectionFactory = null;
@@ -59,23 +66,17 @@ public class RoutingConnectionFactoryTestConfig {
 
         Set<String> activeBusinessUnitIds = loadActiveBusinessUnits();
 
+        // TODO: consider using business unit ID for DB File path
+
         for (String businessUnitId : activeBusinessUnitIds) {
 
-            String db = PRICINGDB + businessUnitId;
-
-            Duration maxLife = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits(pricingDbMaxLifeLowerLimit, pricingDbMaxLifeUpperLimit));
-            Duration maxIdle = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits(pricingDbMaxLifeLowerLimit, pricingDbMaxLifeUpperLimit));
-
-            LOGGER.debug("Setting max times for conn pool [{}] Max Lifetime: [{} S], Max Idle Time [{} S]", db, maxLife.toSeconds(),
-                  maxIdle.toSeconds());
-
-            //@TODO sanjayaa: remove commented lines
+            // Note: Can use H2 db in memory by using .inMemory("REF_PRICE_020") where REF_PRICE_020 refers to the DB name
+            // However, an in memory instance is private for the connection. Hence using the file based DB in the connection config below
+            // If required DB can be started in TCP mode using .tcp("localhost", "~/tmp/test")
             ConnectionFactory connectionFactory = new H2ConnectionFactory(
                   H2ConnectionConfiguration.builder()
                         .username(jdbcUser)
                         .password(jdbcPassword)
-//                  .tcp("localhost", "/Users/sanjayaa/Desktop/pricing/db/test")
-//                  .inMemory("REF_PRICE_020")
                         .file(dbFilePath)
                         .property(H2ConnectionOption.MODE, MYSQL)
                         .build()
@@ -84,7 +85,10 @@ public class RoutingConnectionFactoryTestConfig {
             if (defaultConnectionFactory == null) {
                 defaultConnectionFactory = connectionFactory;
             }
+
             factories.put(businessUnitId, connectionFactory);
+
+            LOGGER.info("Created connection factory for DB [{}]", businessUnitId);
         }
 
         router.setTargetConnectionFactories(factories);
@@ -97,10 +101,6 @@ public class RoutingConnectionFactoryTestConfig {
               .stream()
               .map(BusinessUnit::getBusinessUnitNumber)
               .collect(Collectors.toSet());
-    }
-
-    private long getMaxLifeTimeRandomlyBasedOnLimits(Long pricingDbMaxLifeLowerLimit, Long pricingDbMaxLifeUpperLimit) {
-        return ThreadLocalRandom.current().nextLong(pricingDbMaxLifeLowerLimit, pricingDbMaxLifeUpperLimit + 1);
     }
 
 }

@@ -28,5 +28,4 @@ public class DatabaseClientConfig {
         return DatabaseClient.create(routingConnectionFactory);
     }
 
-
 }
