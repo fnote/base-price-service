@@ -1,6 +1,5 @@
 package com.sysco.rps.dto.refpricing;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -13,28 +12,18 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public class Product {
 
-//    @JsonProperty("supc")
     private String supc;
-
-//    @JsonProperty("price_zone_id")
     private String priceZoneId;
-
-//    @JsonProperty("reference_price")
     private Double referencePrice;
-
-//    @JsonProperty("effective_from_date")
     private String effectiveFromDate;
-
-//    @JsonProperty("price_export_date")
     private String priceExportDate;
 
-    public Product(String supc, String priceZoneId, Double referencePrice, String effectiveFromDate,
-                   String priceExportDate) {
+    public Product(String supc, String priceZoneId, Double referencePrice, String effectiveFromDate) {
         this.supc = supc;
         this.priceZoneId = priceZoneId;
         this.referencePrice = referencePrice;
         this.effectiveFromDate = effectiveFromDate;
-        this.priceExportDate = priceExportDate;
+        //TODO add price export date when DBs are ready
     }
 
     public String getSupc() {

@@ -26,7 +26,6 @@ public class JAsyncPoolConfig {
     private static String password = "gvt12345";
     private static int maxActiveConnections = 200;
 
-
     @Bean(name = "jAsyncDataSource")
     public ConnectionPool<MySQLConnection> getDataSource() {
 
