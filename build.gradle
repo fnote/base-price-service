@@ -104,6 +104,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
 
+    // https://mvnrepository.com/artifact/commons-validator/commons-validator
+    implementation group: 'commons-validator', name: 'commons-validator', version: '1.6'
+
     // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-aws-autoconfigure
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-aws-autoconfigure', version: '2.1.4.RELEASE'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws-parameter-store-config', version: '2.1.4.RELEASE'

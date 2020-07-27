@@ -8,9 +8,9 @@ import com.sysco.rps.dto.Product;
 import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.refpricing.CustomerPriceRepository;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
-import com.sysco.rps.util.PricingUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import static com.sysco.rps.common.Constants.PRICE_REQUEST_DATE_PATTERN;
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
 
 /**
@@ -112,7 +113,7 @@ public class CustomerPriceService {
             return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.PRODUCTS_NOT_FOUND_IN_REQUEST, Errors.Messages.MSG_PRODUCTS_NOT_FOUND_IN_REQUEST);
         }
 
-        if (!PricingUtils.isValidDate(request.getPriceRequestDate())) {
+        if (!GenericValidator.isDate(request.getPriceRequestDate(), PRICE_REQUEST_DATE_PATTERN, false)) {
             return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST,
                   Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST);
         }
