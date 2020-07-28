@@ -46,16 +46,7 @@ public class Constants {
     }
 
     public static class JdbcProperties {
-        public static final String JDBC_DRIVER_NAME = "com.mysql.cj.jdbc.Driver";
-        public static final String HIKARI_POOL_NAME_SUFFIX = "-hikari-pool";
-
-        public static final String JDBC_MYSQL = "jdbc:mysql://";
-        public static final String PORT = ":3306";
         public static final String PRICINGDB = "REF_PRICE_";
-
-        public static final String NETWORK_ADDRESS = "networkAddress";
-        public static final String USER_ID = "userId";
-        public static final String PASSWORD = "password";
 
         private JdbcProperties() {
             // default constructor
