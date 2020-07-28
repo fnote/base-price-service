@@ -477,7 +477,7 @@ class CustomerPriceServiceTest extends BaseTest {
         // SUPC -> 7565088 is not in the database
         CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020",
               "68579367", "2020-02-02",
-              Arrays.asList("2512527", "7565045","7565088", "3982204")
+              Arrays.asList("2512527", "7565045", "2000000", "3982204")
         );
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
         StepVerifier.create(customerPriceResponseMono)
@@ -487,7 +487,35 @@ class CustomerPriceServiceTest extends BaseTest {
 
                   String errorData = "Price not found for SUPC: %s Customer: %s";
                   String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "7565088", "68579367")), response.getFailedItems().get(0));
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "2000000", "68579367")), response.getFailedItems().get(0));
+
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setProducts(Arrays.asList("2512527", "7565045","2000002", "3982204"));
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getSuccessfulItems().size());
+                  assertEquals(1, response.getFailedItems().size());
+
+                  String errorData = "Price not found for SUPC: %s Customer: %s";
+                  String errorMsg = "Price not found for given SUPC/customer combination";
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "2000002", "68579367")), response.getFailedItems().get(0));
+
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setProducts(Arrays.asList("2512527", "7565045","$20001.47", "3982204"));
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getSuccessfulItems().size());
+                  assertEquals(1, response.getFailedItems().size());
+
+                  String errorData = "Price not found for SUPC: %s Customer: %s";
+                  String errorMsg = "Price not found for given SUPC/customer combination";
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "$20001.47", "68579367")), response.getFailedItems().get(0));
 
               })
               .verifyComplete();
@@ -521,6 +549,23 @@ class CustomerPriceServiceTest extends BaseTest {
 
               })
               .verifyComplete();
+
+        customerPriceRequest.setProducts(Arrays.asList("test","$20001.47","A2000002"));
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(0, response.getSuccessfulItems().size());
+                  assertEquals(3, response.getFailedItems().size());
+
+                  String errorData = "Price not found for SUPC: %s Customer: %s";
+                  String errorMsg = "Price not found for given SUPC/customer combination";
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "test", "68579367")), response.getFailedItems().get(0));
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "$20001.47", "68579367")), response.getFailedItems().get(1));
+                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "A2000002", "68579367")), response.getFailedItems().get(2));
+
+              })
+              .verifyComplete();
+
 
     }
 
