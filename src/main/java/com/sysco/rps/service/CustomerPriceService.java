@@ -3,7 +3,7 @@ package com.sysco.rps.service;
 import com.sysco.rps.common.Errors;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
-import com.sysco.rps.dto.ErrorDTO;
+import com.sysco.rps.dto.MinorErrorDTO;
 import com.sysco.rps.dto.Product;
 import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.refpricing.CustomerPriceRepository;
@@ -102,7 +102,7 @@ public class CustomerPriceService {
         }
 
         if (!businessUnitLoaderService.isOpcoExist(request.getBusinessUnitNumber())) {
-            return new RefPriceAPIException(HttpStatus.NOT_FOUND, Errors.Codes.OPCO_NOT_FOUND, Errors.Messages.MSG_OPCO_NOT_FOUND);
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.OPCO_NOT_FOUND, Errors.Messages.MSG_OPCO_NOT_FOUND);
         }
 
         if (StringUtils.isEmpty(request.getCustomerAccount())) {
@@ -122,9 +122,8 @@ public class CustomerPriceService {
 
     private CustomerPriceResponse formResponse(CustomerPriceRequest request, List<String> requestedSUPCs, Map<String, Product> foundProductsMap) {
 
-        List<ErrorDTO> errors = new ArrayList<>();
+        List<MinorErrorDTO> errors = new ArrayList<>();
         List<Product> products = new ArrayList<>();
-        String customer = request.getCustomerAccount();
 
         if (foundProductsMap.size() == requestedSUPCs.size()) {
             products.addAll(foundProductsMap.values());
@@ -134,8 +133,7 @@ public class CustomerPriceService {
 
                 Product product = foundProductsMap.get(productId);
                 if (product == null) {
-                    String errorData = String.format("Price not found for SUPC: %s Customer: %s", productId, customer);
-                    errors.add(new ErrorDTO(Errors.Codes.MAPPING_NOT_FOUND, Errors.Messages.MAPPING_NOT_FOUND, errorData));
+                    errors.add(new MinorErrorDTO(productId, Errors.Codes.MAPPING_NOT_FOUND, Errors.Messages.MAPPING_NOT_FOUND));
                 } else {
                     products.add(product);
                 }

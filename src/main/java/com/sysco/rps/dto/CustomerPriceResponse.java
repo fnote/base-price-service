@@ -20,7 +20,7 @@ public class CustomerPriceResponse extends BaseResponse<Product> {
     private String customerAccount;
     private String priceRequestDate;
 
-    public CustomerPriceResponse(CustomerPriceRequest customerPriceRequest, List<Product> products, List<ErrorDTO> errors) {
+    public CustomerPriceResponse(CustomerPriceRequest customerPriceRequest, List<Product> products, List<MinorErrorDTO> errors) {
         super(products, errors);
         this.businessUnitNumber = customerPriceRequest.getBusinessUnitNumber();
         this.customerAccount = customerPriceRequest.getCustomerAccount();

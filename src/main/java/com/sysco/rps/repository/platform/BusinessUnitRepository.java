@@ -35,7 +35,7 @@ public class BusinessUnitRepository {
         businessUnitSet = new HashSet<>();
     }
 
-    public List<BusinessUnit> getBusinessUnitList( ) {
+    public List<BusinessUnit> getBusinessUnitList() {
         // TODO: Consider retrieve business units from a different source (e.g. a DB table)
 
         if (businessUnits.isEmpty()) {

@@ -41,17 +41,17 @@ public class CustomerPriceController extends AbstractController {
           @ApiResponse(code = org.apache.http.HttpStatus.SC_OK, message = "Data fetch successful"),
           @ApiResponse(code = org.apache.http.HttpStatus.SC_BAD_REQUEST, response = ErrorDTO.class,
                 message = "<table>" +
-                            "  <tr> <th>code</th> <th>message</th> </tr>" +
-                            "  <tr> <td>102040</td> <td>OpCo ID is either null or empty</td> </tr>" +
-                            "  <tr> <td>102030</td> <td>Products not found in the requesty</td> </tr>" +
-                            "  <tr> <td>102050</td> <td>Customer ID is either null or empty</td> </tr>" +
-                            "  <tr> <td>102060</td> <td>Price request date is either null, empty or invalid</td> </tr>" +
-                            "</table>"),
+                      "  <tr> <th>code</th> <th>message</th> </tr>" +
+                      "  <tr> <td>102040</td> <td>OpCo ID is either null or empty</td> </tr>" +
+                      "  <tr> <td>102030</td> <td>Products not found in the requesty</td> </tr>" +
+                      "  <tr> <td>102050</td> <td>Customer ID is either null or empty</td> </tr>" +
+                      "  <tr> <td>102060</td> <td>Price request date is either null, empty or invalid</td> </tr>" +
+                      "</table>"),
           @ApiResponse(code = org.apache.http.HttpStatus.SC_NOT_FOUND,
                 message = "<table>" +
-                "  <tr> <th>code</th> <th>message</th> <th>error data</th> </tr>" +
-                "  <tr> <td>102010</td> <td>OpCo Invalid</td> <td>Couldn't find a matching DB for the requested OpCo</td> </tr>" +
-                "</table>"),
+                      "  <tr> <th>code</th> <th>message</th> <th>error data</th> </tr>" +
+                      "  <tr> <td>102010</td> <td>OpCo Invalid</td> <td>Couldn't find a matching DB for the requested OpCo</td> </tr>" +
+                      "</table>"),
     })
     public @ResponseBody
     Mono<CustomerPriceResponse> getCustomerPrices(@RequestBody CustomerPriceRequest request, @RequestParam(required = false) Integer supcsPerQuery) {

@@ -2,6 +2,7 @@ package com.sysco.rps.entity;
 
 /**
  * Bean to hold Price Zone data
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc

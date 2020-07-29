@@ -12,7 +12,7 @@ class ReferencePriceServiceTests {
 
     private String activeProfile;
 
-    ReferencePriceServiceTests(@Value("${spring.profiles.active}") String activeProfile){
+    ReferencePriceServiceTests(@Value("${spring.profiles.active}") String activeProfile) {
         this.activeProfile = activeProfile;
     }
 
