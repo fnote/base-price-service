@@ -471,7 +471,7 @@ class CustomerPriceServiceTest extends BaseTest {
         // SUPC -> 7565088 is not in the database
         CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020",
               "68579367", "2020-02-02",
-              Arrays.asList("2512527", "7565045", "7565088", "3982204")
+              Arrays.asList("2512527", "7565045", "2000000", "3982204")
         );
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
         StepVerifier.create(customerPriceResponseMono)
@@ -480,8 +480,35 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, response.getFailedProducts().size());
 
                   String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new MinorErrorDTO("7565088", "102020", errorMsg), response.getFailedProducts().get(0));
+                  assertEquals(new MinorErrorDTO("2000000", "102020", errorMsg), response.getFailedProducts().get(0));
+              })
+              .verifyComplete();
 
+        customerPriceRequest.setProducts(Arrays.asList("2512527", "7565045", "2000002", "3982204"));
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getProducts().size());
+                  assertEquals(1, response.getFailedProducts().size());
+
+                  String errorData = "Price not found for SUPC: %s Customer: %s";
+                  String errorMsg = "Price not found for given SUPC/customer combination";
+                  assertEquals(new MinorErrorDTO("2000002", "102020", errorMsg),
+                        response.getFailedProducts().get(0));
+
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setProducts(Arrays.asList("2512527", "7565045", "$20001.47", "3982204"));
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getProducts().size());
+                  assertEquals(1, response.getFailedProducts().size());
+
+                  String errorData = "Price not found for SUPC: %s Customer: %s";
+                  String errorMsg = "Price not found for given SUPC/customer combination";
+                  assertEquals(new MinorErrorDTO("$20001.47", "102020", errorMsg), response.getFailedProducts().get(0));
               })
               .verifyComplete();
     }
@@ -514,6 +541,22 @@ class CustomerPriceServiceTest extends BaseTest {
               })
               .verifyComplete();
 
+        customerPriceRequest.setProducts(Arrays.asList("test", "$20001.47", "A2000002"));
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(0, response.getProducts().size());
+                  assertEquals(3, response.getFailedProducts().size());
+
+                  String errorData = "Price not found for SUPC: %s Customer: %s";
+                  String errorMsg = "Price not found for given SUPC/customer combination";
+                  assertEquals(new MinorErrorDTO("test", "102020", errorMsg),
+                        response.getFailedProducts().get(0));
+                  assertEquals(new MinorErrorDTO("$20001.47", "102020", errorMsg), response.getFailedProducts().get(1));
+                  assertEquals(new MinorErrorDTO("A2000002", "102020", errorMsg), response.getFailedProducts().get(2));
+
+              })
+              .verifyComplete();
     }
 
     /**
@@ -592,6 +635,15 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
               })
               .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("5020-05-15");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getProducts().size());
+              })
+              .verifyComplete();
+
 
         customerPriceRequest.setPriceRequestDate("2019-02-29");
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
