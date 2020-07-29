@@ -13,19 +13,20 @@ import reactor.util.context.Context;
 import java.util.List;
 import java.util.UUID;
 
+import static com.sysco.rps.common.Constants.CLIENT_ID;
 import static com.sysco.rps.common.Constants.CORRELATION_ID_HEADER;
 import static com.sysco.rps.common.Constants.CORRELATION_ID_KEY;
 
 /**
- * Web Filter to add correlation id to the required contexts.
+ * Web Filter to extract and add IDs from the requests like correlation id and client ID  to the required contexts.
  *
  * @author Buddhika Karunatilleke
  * @author Sanjaya Amarasinghe
  * Date: 06/03/20
  */
 @Component
-public class CorrelationIDFilter implements WebFilter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CorrelationIDFilter.class);
+public class RequestIDFilter implements WebFilter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestIDFilter.class);
 
     @Override
     public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {
@@ -40,8 +41,11 @@ public class CorrelationIDFilter implements WebFilter {
             correlationId = correlationIds.get(0);
         }
 
-        LOGGER.info("setting correlation ID: {}", correlationId);
+        List<String> clientIds = serverWebExchange.getRequest().getHeaders().get(CLIENT_ID);
+        final String clientId = CollectionUtils.isEmpty(clientIds) ? "" : clientIds.get(0);
 
-        return webFilterChain.filter(serverWebExchange).subscriberContext((Context context) -> context.put(CORRELATION_ID_KEY, correlationId));
+        LOGGER.info("setting correlation ID: [{}], client ID [{}]", correlationId, clientId);
+
+        return webFilterChain.filter(serverWebExchange).subscriberContext((Context context) -> context.put(CORRELATION_ID_KEY, correlationId).put(CLIENT_ID, clientId));
     }
 }
