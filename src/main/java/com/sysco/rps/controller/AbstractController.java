@@ -64,13 +64,13 @@ public abstract class AbstractController {
      */
     @ExceptionHandler(Exception.class)
     ResponseEntity<Mono<ErrorDTO>> handleUnknownException(Exception e) {
-        LOGGER.error("Unknown exception occurred", e);
+        LOGGER.error("Unknown exception occurred [{}]", e.getMessage());
 
         String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, Errors.Codes.UNEXPECTED_ERROR), new Object[]{}, UNKNOWN_ERROR,
               Locale.getDefault());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        ErrorDTO error = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, e.getMessage());
+        ErrorDTO error = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, null);
         return new ResponseEntity<>(Mono.just(error), headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
