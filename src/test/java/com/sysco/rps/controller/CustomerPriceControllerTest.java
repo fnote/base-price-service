@@ -3,7 +3,7 @@ package com.sysco.rps.controller;
 import com.sysco.rps.BaseTest;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
-import com.sysco.rps.dto.ErrorDTO;
+import com.sysco.rps.dto.MinorErrorDTO;
 import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.TestUtilsRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -61,7 +61,7 @@ class CustomerPriceControllerTest extends BaseTest {
     @Test
     void getCustomerPrices_PRCP_2078() {
 
-        RefPriceAPIException opcoInvalidException = new RefPriceAPIException(HttpStatus.NOT_FOUND, "102010", "Couldn't find a matching DB for the requested OpCo");
+        RefPriceAPIException opcoInvalidException = new RefPriceAPIException(HttpStatus.BAD_REQUEST, "102010", "Couldn't find a matching DB for the requested OpCo");
         RefPriceAPIException opCoEmptyException = new RefPriceAPIException(HttpStatus.BAD_REQUEST, "102040", "OpCo ID should not be null/empty");
 
         // with correct data
@@ -72,8 +72,8 @@ class CustomerPriceControllerTest extends BaseTest {
         StepVerifier.create(customerPrices)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(3, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(3, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
               })
               .verifyComplete();
 
@@ -176,16 +176,14 @@ class CustomerPriceControllerTest extends BaseTest {
         StepVerifier.create(customerPrices)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(0, result.getSuccessfulItems().size());
-                  assertEquals(3, result.getFailedItems().size());
+                  assertEquals(0, result.getProducts().size());
+                  assertEquals(3, result.getFailedProducts().size());
 
-                  String errorData = "Price not found for SUPC: %s Customer: %s";
                   String errorMsg = "Price not found for given SUPC/customer combination";
 
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, 2512527, s)), result.getFailedItems().get(0));
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, 3325677, s)), result.getFailedItems().get(1));
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, 8328971, s)), result.getFailedItems().get(2));
-
+                  assertEquals(new MinorErrorDTO("2512527", "102020", errorMsg), result.getFailedProducts().get(0));
+                  assertEquals(new MinorErrorDTO("3325677", "102020", errorMsg), result.getFailedProducts().get(1));
+                  assertEquals(new MinorErrorDTO("8328971", "102020", errorMsg), result.getFailedProducts().get(2));
               })
               .verifyComplete();
     }

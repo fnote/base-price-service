@@ -32,28 +32,28 @@ public class CustomerPriceRepository {
 
     private String query =
           "SELECT paOuter.SUPC," +
-          "       paOuter.PRICE_ZONE," +
-          "       paOuter.PRICE," +
-          "       paOuter.EFFECTIVE_DATE," +
-          "       paOuter.EXPORTED_DATE," +
-          "       paOuter.SPLIT_INDICATOR" +
-          " FROM PA paOuter force index (`PRIMARY`)" +
-          "         INNER JOIN (SELECT Max(paInner.EFFECTIVE_DATE) max_eff_date," +
-          "                            paInner.SUPC," +
-          "                            paInner.PRICE_ZONE" +
-          "                     FROM (SELECT e.SUPC," +
-          "                                  e.PRICE_ZONE," +
-          "                                  e.CUSTOMER_ID" +
-          "                           FROM PRICE_ZONE_01 e force index (`PRIMARY`)" +
-          "                           WHERE e.CUSTOMER_ID = :customerId " +
-          "                             AND SUPC IN ( :supcs )) pz" +
-          "                              INNER JOIN PA paInner force index (`PRIMARY`)" +
-          "                                         ON pz.SUPC = paInner.SUPC" +
-          "                                             AND pz.PRICE_ZONE = paInner.PRICE_ZONE" +
-          "                                             AND paInner.EFFECTIVE_DATE <=:effectiveDate" +
-          "                     GROUP BY paInner.SUPC, paInner.PRICE_ZONE) c" +
-          "                    ON c.SUPC = paOuter.SUPC AND c.PRICE_ZONE = paOuter.PRICE_ZONE AND" +
-          "                       c.MAX_EFF_DATE = paOuter.EFFECTIVE_DATE";
+                "       paOuter.PRICE_ZONE," +
+                "       paOuter.PRICE," +
+                "       paOuter.EFFECTIVE_DATE," +
+                "       paOuter.EXPORTED_DATE," +
+                "       paOuter.SPLIT_INDICATOR" +
+                " FROM PA paOuter force index (`PRIMARY`)" +
+                "         INNER JOIN (SELECT Max(paInner.EFFECTIVE_DATE) max_eff_date," +
+                "                            paInner.SUPC," +
+                "                            paInner.PRICE_ZONE" +
+                "                     FROM (SELECT e.SUPC," +
+                "                                  e.PRICE_ZONE," +
+                "                                  e.CUSTOMER_ID" +
+                "                           FROM PRICE_ZONE_01 e force index (`PRIMARY`)" +
+                "                           WHERE e.CUSTOMER_ID = :customerId " +
+                "                             AND SUPC IN ( :supcs )) pz" +
+                "                              INNER JOIN PA paInner force index (`PRIMARY`)" +
+                "                                         ON pz.SUPC = paInner.SUPC" +
+                "                                             AND pz.PRICE_ZONE = paInner.PRICE_ZONE" +
+                "                                             AND paInner.EFFECTIVE_DATE <=:effectiveDate" +
+                "                     GROUP BY paInner.SUPC, paInner.PRICE_ZONE) c" +
+                "                    ON c.SUPC = paOuter.SUPC AND c.PRICE_ZONE = paOuter.PRICE_ZONE AND" +
+                "                       c.MAX_EFF_DATE = paOuter.EFFECTIVE_DATE";
 
 
     CustomerPriceRepository(@Value("${query.get.price:}") String queryToOverride) {
@@ -100,7 +100,7 @@ public class CustomerPriceRepository {
             return "";
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return formatter.format(date);
     }
 }

@@ -4,7 +4,7 @@ import com.sysco.rps.BaseTest;
 import com.sysco.rps.common.Errors;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
-import com.sysco.rps.dto.ErrorDTO;
+import com.sysco.rps.dto.MinorErrorDTO;
 import com.sysco.rps.dto.Product;
 import com.sysco.rps.entity.PAData;
 import com.sysco.rps.entity.PriceZoneData;
@@ -51,12 +51,12 @@ class CustomerPriceServiceTest extends BaseTest {
     private void validateFirstSuccessItem(CustomerPriceResponse result, String supc, Integer priceZoneId, Double referencePrice,
                                           String effectiveFromDate, Long priceExportDate, Character splitIndicator) {
         Product product = new Product(supc, priceZoneId, referencePrice, effectiveFromDate, priceExportDate, splitIndicator);
-        assertEquals(product, result.getSuccessfulItems().get(0));
+        assertEquals(product, result.getProducts().get(0));
     }
 
-    private void validateFirstMinorError(CustomerPriceResponse result, String code, String message, Object errorData) {
-        ErrorDTO error = new ErrorDTO(code, message, errorData);
-        assertEquals(result.getFailedItems().get(0), error);
+    private void validateFirstMinorError(CustomerPriceResponse result, String supc, String errorCode, String message) {
+        MinorErrorDTO error = new MinorErrorDTO(supc, errorCode, message);
+        assertEquals(result.getFailedProducts().get(0), error);
     }
 
 
@@ -71,13 +71,13 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(0, result.getSuccessfulItems().size());
-                  assertEquals(5, result.getFailedItems().size());
+                  assertEquals(0, result.getProducts().size());
+                  assertEquals(5, result.getFailedProducts().size());
 
-                  ErrorDTO errorDTO = result.getFailedItems().get(0);
-                  assertEquals("102020", errorDTO.getCode());
+                  MinorErrorDTO errorDTO = result.getFailedProducts().get(0);
+                  assertEquals("102020", errorDTO.getErrorCode());
                   assertEquals("Price not found for given SUPC/customer combination", errorDTO.getMessage());
-                  assertEquals("Price not found for SUPC: 1000001 Customer: 100001", errorDTO.getErrorData());
+                  assertEquals("1000001", errorDTO.getSupc());
 
               })
               .verifyComplete();
@@ -96,8 +96,8 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(1, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
 
               })
               .verifyComplete();
@@ -117,10 +117,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-03-01 00:00:00", 1595308212L, 'C');
+                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-03-01", 1595308212L, 'C');
 
               })
               .verifyComplete();
@@ -144,11 +144,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(0, result.getSuccessfulItems().size());
-                  assertEquals(1, result.getFailedItems().size());
+                  assertEquals(0, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
-                        "Price not found for SUPC: 1000001 Customer: 100001");
+                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
 
               })
               .verifyComplete();
@@ -160,10 +159,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-03-06 00:00:00", 1595308212L, 'C');
+                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-03-06", 1595308212L, 'C');
 
               })
               .verifyComplete();
@@ -175,10 +174,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-03-06 00:00:00", 1595308212L, 'C');
+                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-03-06", 1595308212L, 'C');
 
               })
               .verifyComplete();
@@ -190,10 +189,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 125.24, "2021-03-10 00:00:00", 1595308212L, 'C');
+                  validateFirstSuccessItem(result, "1000001", 3, 125.24, "2021-03-10", 1595308212L, 'C');
 
               })
               .verifyComplete();
@@ -205,10 +204,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 125.24, "2021-03-10 00:00:00", 1595308212L, 'C');
+                  validateFirstSuccessItem(result, "1000001", 3, 125.24, "2021-03-10", 1595308212L, 'C');
 
               })
               .verifyComplete();
@@ -237,11 +236,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(0, result.getSuccessfulItems().size());
-                  assertEquals(1, result.getFailedItems().size());
+                  assertEquals(0, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
-                        "Price not found for SUPC: 1000001 Customer: 100001");
+                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
 
               })
               .verifyComplete();
@@ -253,11 +251,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(0, result.getSuccessfulItems().size());
-                  assertEquals(1, result.getFailedItems().size());
+                  assertEquals(0, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
-                        "Price not found for SUPC: 1000001 Customer: 100001");
+                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
               })
               .verifyComplete();
 
@@ -268,10 +265,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-04-10 00:00:00", 1624527666L, 'C');
+                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-04-10", 1624527666L, 'C');
 
               })
               .verifyComplete();
@@ -283,10 +280,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-04-10 00:00:00", 1624527666L, 'C');
+                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "2021-04-10", 1624527666L, 'C');
 
               })
               .verifyComplete();
@@ -315,11 +312,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(0, result.getSuccessfulItems().size());
-                  assertEquals(1, result.getFailedItems().size());
+                  assertEquals(0, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
-                        "Price not found for SUPC: 1000001 Customer: 100001");
+                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
 
               })
               .verifyComplete();
@@ -331,11 +327,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(0, result.getSuccessfulItems().size());
-                  assertEquals(1, result.getFailedItems().size());
+                  assertEquals(0, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
-                        "Price not found for SUPC: 1000001 Customer: 100001");
+                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
               })
               .verifyComplete();
 
@@ -346,11 +341,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(0, result.getSuccessfulItems().size());
-                  assertEquals(1, result.getFailedItems().size());
+                  assertEquals(0, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "102020", "Price not found for given SUPC/customer combination",
-                        "Price not found for SUPC: 1000001 Customer: 100001");
+                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
               })
               .verifyComplete();
 
@@ -361,10 +355,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.00, "2021-04-12 00:00:00", 1616578866L, 'C');
+                  validateFirstSuccessItem(result, "1000001", 3, 200.00, "2021-04-12", 1616578866L, 'C');
 
               })
               .verifyComplete();
@@ -376,10 +370,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 300.00, "2021-04-13 00:00:00", 1614159666L, 'C');
+                  validateFirstSuccessItem(result, "1000001", 3, 300.00, "2021-04-13", 1614159666L, 'C');
 
               })
               .verifyComplete();
@@ -391,10 +385,10 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(1, result.getSuccessfulItems().size());
-                  assertEquals(0, result.getFailedItems().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 300.00, "2021-04-13 00:00:00", 1614159666L, 'C');
+                  validateFirstSuccessItem(result, "1000001", 3, 300.00, "2021-04-13", 1614159666L, 'C');
 
               })
               .verifyComplete();
@@ -418,17 +412,17 @@ class CustomerPriceServiceTest extends BaseTest {
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(0, response.getSuccessfulItems().size());
-                  assertEquals(9, response.getFailedItems().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(1).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(2).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(3).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(4).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(5).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(6).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(7).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(8).getMessage());
+                  assertEquals(0, response.getProducts().size());
+                  assertEquals(9, response.getFailedProducts().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(1).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(2).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(3).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(4).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(5).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(6).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(7).getMessage());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(8).getMessage());
               })
               .verifyComplete();
 
@@ -437,10 +431,10 @@ class CustomerPriceServiceTest extends BaseTest {
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(1, response.getSuccessfulItems().size());
-                  assertEquals(1, response.getFailedItems().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
-                  validateFirstSuccessItem(response, "2512527", 1, 1.00, "2020-02-01 00:00:00", 1578960300L, 'p');
+                  assertEquals(1, response.getProducts().size());
+                  assertEquals(1, response.getFailedProducts().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
+                  validateFirstSuccessItem(response, "2512527", 1, 1.00, "2020-02-01", 1578960300L, 'p');
               })
               .verifyComplete();
 
@@ -449,8 +443,8 @@ class CustomerPriceServiceTest extends BaseTest {
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(0, response.getSuccessfulItems().size());
-                  assertEquals(0, response.getFailedItems().size());
+                  assertEquals(0, response.getProducts().size());
+                  assertEquals(0, response.getFailedProducts().size());
               })
               .verifyComplete();
 
@@ -482,41 +476,39 @@ class CustomerPriceServiceTest extends BaseTest {
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(3, response.getSuccessfulItems().size());
-                  assertEquals(1, response.getFailedItems().size());
+                  assertEquals(3, response.getProducts().size());
+                  assertEquals(1, response.getFailedProducts().size());
+
+                  String errorMsg = "Price not found for given SUPC/customer combination";
+                  assertEquals(new MinorErrorDTO("2000000", "102020", errorMsg), response.getFailedProducts().get(0));
+              })
+              .verifyComplete();
+
+        customerPriceRequest.setProducts(Arrays.asList("2512527", "7565045", "2000002", "3982204"));
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(response -> {
+                  assertEquals(3, response.getProducts().size());
+                  assertEquals(1, response.getFailedProducts().size());
 
                   String errorData = "Price not found for SUPC: %s Customer: %s";
                   String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "2000000", "68579367")), response.getFailedItems().get(0));
+                  assertEquals(new MinorErrorDTO("2000002", "102020", errorMsg),
+                        response.getFailedProducts().get(0));
 
               })
               .verifyComplete();
 
-        customerPriceRequest.setProducts(Arrays.asList("2512527", "7565045","2000002", "3982204"));
+        customerPriceRequest.setProducts(Arrays.asList("2512527", "7565045", "$20001.47", "3982204"));
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(3, response.getSuccessfulItems().size());
-                  assertEquals(1, response.getFailedItems().size());
+                  assertEquals(3, response.getProducts().size());
+                  assertEquals(1, response.getFailedProducts().size());
 
                   String errorData = "Price not found for SUPC: %s Customer: %s";
                   String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "2000002", "68579367")), response.getFailedItems().get(0));
-
-              })
-              .verifyComplete();
-
-        customerPriceRequest.setProducts(Arrays.asList("2512527", "7565045","$20001.47", "3982204"));
-        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
-        StepVerifier.create(customerPriceResponseMono)
-              .consumeNextWith(response -> {
-                  assertEquals(3, response.getSuccessfulItems().size());
-                  assertEquals(1, response.getFailedItems().size());
-
-                  String errorData = "Price not found for SUPC: %s Customer: %s";
-                  String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "$20001.47", "68579367")), response.getFailedItems().get(0));
-
+                  assertEquals(new MinorErrorDTO("$20001.47", "102020", errorMsg), response.getFailedProducts().get(0));
               })
               .verifyComplete();
     }
@@ -539,34 +531,32 @@ class CustomerPriceServiceTest extends BaseTest {
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(0, response.getSuccessfulItems().size());
-                  assertEquals(2, response.getFailedItems().size());
+                  assertEquals(0, response.getProducts().size());
+                  assertEquals(2, response.getFailedProducts().size());
 
                   String errorData = "Price not found for SUPC: %s Customer: %s";
                   String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "7565088", "68579367")), response.getFailedItems().get(0));
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "3982205", "68579367")), response.getFailedItems().get(1));
-
+                  assertEquals(new MinorErrorDTO("7565088", "102020", errorMsg), response.getFailedProducts().get(0));
+                  assertEquals(new MinorErrorDTO("3982205", "102020", errorMsg), response.getFailedProducts().get(1));
               })
               .verifyComplete();
 
-        customerPriceRequest.setProducts(Arrays.asList("test","$20001.47","A2000002"));
+        customerPriceRequest.setProducts(Arrays.asList("test", "$20001.47", "A2000002"));
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(0, response.getSuccessfulItems().size());
-                  assertEquals(3, response.getFailedItems().size());
+                  assertEquals(0, response.getProducts().size());
+                  assertEquals(3, response.getFailedProducts().size());
 
                   String errorData = "Price not found for SUPC: %s Customer: %s";
                   String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "test", "68579367")), response.getFailedItems().get(0));
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "$20001.47", "68579367")), response.getFailedItems().get(1));
-                  assertEquals(new ErrorDTO("102020", errorMsg, String.format(errorData, "A2000002", "68579367")), response.getFailedItems().get(2));
+                  assertEquals(new MinorErrorDTO("test", "102020", errorMsg),
+                        response.getFailedProducts().get(0));
+                  assertEquals(new MinorErrorDTO("$20001.47", "102020", errorMsg), response.getFailedProducts().get(1));
+                  assertEquals(new MinorErrorDTO("A2000002", "102020", errorMsg), response.getFailedProducts().get(2));
 
               })
               .verifyComplete();
-
-
     }
 
     /**
@@ -587,8 +577,8 @@ class CustomerPriceServiceTest extends BaseTest {
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 1);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(3, response.getFailedItems().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+                  assertEquals(3, response.getFailedProducts().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
               })
               .verifyComplete();
 
@@ -596,8 +586,8 @@ class CustomerPriceServiceTest extends BaseTest {
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(3, response.getFailedItems().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+                  assertEquals(3, response.getFailedProducts().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
               })
               .verifyComplete();
 
@@ -605,8 +595,8 @@ class CustomerPriceServiceTest extends BaseTest {
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(3, response.getFailedItems().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+                  assertEquals(3, response.getFailedProducts().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
               })
               .verifyComplete();
 
@@ -614,8 +604,8 @@ class CustomerPriceServiceTest extends BaseTest {
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(3, response.getFailedItems().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+                  assertEquals(3, response.getFailedProducts().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
               })
               .verifyComplete();
 
@@ -623,8 +613,8 @@ class CustomerPriceServiceTest extends BaseTest {
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(3, response.getFailedItems().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+                  assertEquals(3, response.getFailedProducts().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
               })
               .verifyComplete();
 
@@ -632,8 +622,8 @@ class CustomerPriceServiceTest extends BaseTest {
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(3, response.getFailedItems().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+                  assertEquals(3, response.getFailedProducts().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
               })
               .verifyComplete();
 
@@ -641,8 +631,8 @@ class CustomerPriceServiceTest extends BaseTest {
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(3, response.getFailedItems().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedItems().get(0).getMessage());
+                  assertEquals(3, response.getFailedProducts().size());
+                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
               })
               .verifyComplete();
 
@@ -650,7 +640,7 @@ class CustomerPriceServiceTest extends BaseTest {
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
-                  assertEquals(3, response.getSuccessfulItems().size());
+                  assertEquals(3, response.getProducts().size());
               })
               .verifyComplete();
 
@@ -822,8 +812,8 @@ class CustomerPriceServiceTest extends BaseTest {
               .consumeNextWith(response -> {
                   assertEquals(
                         new Product("3982206", 4, 28.00,
-                              "2020-02-01 00:00:00", 1580947560L, 'p'),
-                        response.getSuccessfulItems().get(0)
+                              "2020-02-01", 1580947560L, 'p'),
+                        response.getProducts().get(0)
                   );
               })
               .verifyComplete();
@@ -835,8 +825,8 @@ class CustomerPriceServiceTest extends BaseTest {
               .consumeNextWith(response -> {
                   assertEquals(
                         new Product("3982206", 4, 28.00,
-                              "2020-02-01 00:00:00", 1580947560L, 'p'),
-                        response.getSuccessfulItems().get(0)
+                              "2020-02-01", 1580947560L, 'p'),
+                        response.getProducts().get(0)
                   );
               })
               .verifyComplete();
@@ -847,8 +837,8 @@ class CustomerPriceServiceTest extends BaseTest {
               .consumeNextWith(response -> {
                   assertEquals(
                         new Product("3982206", 4, 30.00,
-                              "2020-02-05 00:00:00", 1580947560L, 'c'),
-                        response.getSuccessfulItems().get(0)
+                              "2020-02-05", 1580947560L, 'c'),
+                        response.getProducts().get(0)
                   );
               })
               .verifyComplete();
@@ -859,8 +849,8 @@ class CustomerPriceServiceTest extends BaseTest {
               .consumeNextWith(response -> {
                   assertEquals(
                         new Product("3982206", 4, 30.00,
-                              "2020-02-05 00:00:00", 1580947560L, 'c'),
-                        response.getSuccessfulItems().get(0)
+                              "2020-02-05", 1580947560L, 'c'),
+                        response.getProducts().get(0)
                   );
               })
               .verifyComplete();

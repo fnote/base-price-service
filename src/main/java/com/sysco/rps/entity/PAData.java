@@ -4,6 +4,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Bean to hold Price Advisor Data (supc-priceZone-price mapping)
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -56,7 +57,7 @@ public class PAData {
     }
 
     public void setEffectiveDate(String effectiveDate) {
-        if(StringUtils.isEmpty(effectiveDate)) {
+        if (StringUtils.isEmpty(effectiveDate)) {
             this.effectiveDate = effectiveDate;
         } else {
             this.effectiveDate = effectiveDate.replace("/", "-");

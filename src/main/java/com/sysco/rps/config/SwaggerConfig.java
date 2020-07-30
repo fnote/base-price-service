@@ -42,7 +42,7 @@ public class SwaggerConfig {
               "APIs to expose reference pricing",
               "v1",
               "Terms of service",
-              new Contact("Rohana Kumara", "www.sysco.com", "rohana.kumara@sysco.com"),
+              new Contact("Cloud Pricing Team", "www.sysco.com", "btspricing@Sysco.com"),
               "License of API", "API license URL", Collections.emptyList());
     }
 }

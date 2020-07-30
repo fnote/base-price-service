@@ -4,7 +4,8 @@
               name="Console">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-                %d{YYYY-MM-dd-HH:mm:ss.SSS}-%(%level)-[%(%t)]-[%(%replace(%X{Correlation-Id}){'^$', 'system'})]-%(%C{1.})-%msg%n%throwable
+                %d{YYYY-MM-dd-HH:mm:ss.SSS}-%(%level)-[%(%t)]-[%(%replace(%X{Correlation-Id}){'^$',
+                'system'})]-[%X{clientId}]-%(%C{1.})-%msg%n%throwable
             </Pattern>
         </layout>
     </appender>
