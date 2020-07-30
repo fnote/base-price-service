@@ -77,7 +77,7 @@ public class RoutingConnectionFactoryConfig {
      * @return RoutingConnectionFactory
      */
     @Bean
-    public RoutingConnectionFactory routingConnectionFactory(@Value("${pricing.db.jdbcHost}") String jdbcHost,
+    public RoutingConnectionFactory routingConnectionFactory(@Value("${pricing.db.host}") String jdbcHost,
                                                              @Value("${pricing.db.username}") String jdbcUser,
                                                              @Value("${pricing.db.password}") String jdbcPassword,
                                                              @Value("${pricing.db.max.pool.size}") String maxPoolSize,
