@@ -1,10 +1,9 @@
 package com.sysco.rps.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import java.util.Objects;
 
 /**
  * Bean that can be used to include error data for responses
@@ -20,27 +19,37 @@ public class ErrorDTO {
     private String message;
     private Object errorData;
     private Object originalData;
+    private String traceId;
 
     public ErrorDTO(String code) {
         this.code = code;
     }
 
-    public ErrorDTO(String code, String message) {
+    private ErrorDTO(String code, String message) {
         this.code = code;
         this.message = message;
     }
 
-    public ErrorDTO(String code, String message, Object errorData) {
-        this.code = code;
-        this.message = message;
+    private ErrorDTO(String code, String message, Object errorData) {
+        this(code, message);
         this.errorData = errorData;
     }
 
-    public ErrorDTO(String code, String message, Object originalData, Object errorData) {
-        this.code = code;
-        this.message = message;
+    public ErrorDTO(String code, String message, Object errorData, String traceId) {
+        this(code, message, errorData);
+        this.traceId = traceId;
+    }
+
+
+    public ErrorDTO(String code, String message, String traceId) {
+        this(code, message);
+        this.traceId = traceId;
+    }
+
+
+    public ErrorDTO(String code, String message, Object errorData, Object originalData) {
+        this(code, message, errorData);
         this.originalData = originalData;
-        this.errorData = errorData;
     }
 
     public Object getOriginalData() {
@@ -72,32 +81,43 @@ public class ErrorDTO {
         this.errorData = errorData;
     }
 
+    public void setOriginalData(Object originalData) {
+        this.originalData = originalData;
+    }
+
+    public String getTraceId() {
+        return traceId;
+    }
+
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
+        if (this == o) return true;
 
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (!(o instanceof ErrorDTO)) return false;
 
         ErrorDTO errorDTO = (ErrorDTO) o;
 
-        return Objects.equals(code, errorDTO.code) &&
-              Objects.equals(message, errorDTO.message) &&
-              Objects.equals(errorData, errorDTO.errorData) &&
-              Objects.equals(originalData, errorDTO.originalData);
+        return new EqualsBuilder()
+              .append(code, errorDTO.code)
+              .append(message, errorDTO.message)
+              .append(errorData, errorDTO.errorData)
+              .append(originalData, errorDTO.originalData)
+              .append(traceId, errorDTO.traceId)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-              .appendSuper(super.hashCode())
               .append(code)
               .append(message)
               .append(errorData)
               .append(originalData)
+              .append(traceId)
               .toHashCode();
     }
 
@@ -108,6 +128,7 @@ public class ErrorDTO {
               .append("message", message)
               .append("errorData", errorData)
               .append("originalData", originalData)
+              .append("traceId", traceId)
               .toString();
     }
 
