@@ -113,10 +113,10 @@ public class RoutingConnectionFactoryConfig {
                         .option(USER, jdbcUser)
                         .option(PASSWORD, jdbcPassword)
                         .option(DATABASE, db)
-                        .option(MAX_SIZE, getInt(maxPoolSize, 10))/*
-                        .option(INITIAL_SIZE, getInt(maxPoolSize, 1))
-                        .option(MAX_IDLE_TIME, maxIdle)
-                        .option(MAX_LIFE_TIME, maxLife)*/
+                        .option(MAX_SIZE, getInt(maxPoolSize, 10))
+//                        .option(INITIAL_SIZE, getInt(maxPoolSize, 1))
+                        .option(MAX_IDLE_TIME, Duration.ofMillis(1000))
+                        .option(MAX_LIFE_TIME, maxLife)
                         .build()
             );
 
