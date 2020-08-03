@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static com.sysco.rps.common.Constants.JdbcProperties.PRICINGDB;
-//import static io.r2dbc.pool.PoolingConnectionFactoryProvider.INITIAL_SIZE;
+import static io.r2dbc.pool.PoolingConnectionFactoryProvider.INITIAL_SIZE;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_IDLE_TIME;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_LIFE_TIME;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_SIZE;
@@ -117,17 +117,18 @@ public class RoutingConnectionFactoryConfig {
                         .option(PASSWORD, jdbcPassword)
                         .option(DATABASE, db)
                         .option(MAX_SIZE, getInt(maxPoolSize, 10))
-//                        .option(INITIAL_SIZE, getInt(maxPoolSize, 1))
-                        .option(MAX_IDLE_TIME, Duration.ofMillis(1000))
+                        .option(INITIAL_SIZE, getInt(initialPoolSize, 5))
                         .option(MAX_LIFE_TIME, maxLife)
+                        .option(MAX_IDLE_TIME, maxIdle)
                         .option(VALIDATION_QUERY, validationQuery)
                         .build()
             );
 
             ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
-                  .maxIdleTime(Duration.ofMillis(1000))
                   .maxSize(getInt(maxPoolSize, 10))
+                  .initialSize(getInt(initialPoolSize, 5))
                   .maxLifeTime(maxLife)
+                  .maxIdleTime(maxIdle)
                   .validationQuery(validationQuery)
                   .build();
 
