@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -75,12 +75,18 @@ public class CustomerPriceService {
                   return t.getT2();
               })
               .subscriberContext(Context.of(ROUTING_KEY, request.getBusinessUnitNumber()))
-              .sort(Comparator.comparing(Product::getPriceExportDate).reversed())
-              .distinct(Product::getSupc)
-              .collectMap(Product::getSupc)
+              .collectList()
               .flatMap(v -> {
+                  Map<String, Product> productMap = new HashMap<>();
+                  v.forEach(p -> {
+                      String supc = p.getSupc();
+                      Product existingProduct = productMap.get(supc);
+                      if (existingProduct == null || (existingProduct.getPriceExportDate() < p.getPriceExportDate())) {
+                          productMap.put(supc, p);
+                      }
+                  });
                   logger.info("TOTAL-DB-TIME : [{}]", timeConsumedForDbActivities.get());
-                  return Mono.just(formResponse(request, requestedSUPCs, v));
+                  return Mono.just(formResponse(request, requestedSUPCs, productMap));
               }).doOnError(e -> {
                   logger.error("Request Payload: [{}]", request);
                   logger.error(e.getMessage(), e);
