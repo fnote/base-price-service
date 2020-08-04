@@ -37,7 +37,7 @@ public abstract class AbstractController {
     @ExceptionHandler(RefPriceAPIException.class)
     ResponseEntity<Mono<ErrorDTO>> handleRefPriceApiException(RefPriceAPIException e) {
 
-        LOGGER.error("RefPriceAPIException occurred", e.getMessage());
+        LOGGER.error("RefPriceAPIException occurred", e);
 
         String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, (e.getErrorCode())), new Object[]{},
               UNKNOWN_ERROR, Locale.getDefault());
