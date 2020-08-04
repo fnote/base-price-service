@@ -75,8 +75,7 @@ public class RoutingConnectionFactoryConfig {
      * @param jdbcPassword
      * @param maxPoolSize
      * @param initialPoolSize
-     * @param maxIdleTime
-     * @param maxLifeTime
+     * @param validationQuery
      * @return RoutingConnectionFactory
      */
     @Bean
@@ -85,8 +84,7 @@ public class RoutingConnectionFactoryConfig {
                                                              @Value("${pricing.db.password}") String jdbcPassword,
                                                              @Value("${pricing.db.max.pool.size}") String maxPoolSize,
                                                              @Value("${pricing.db.initial.pool.size}") String initialPoolSize,
-                                                             @Value("${pricing.db.max.idle.time}") String maxIdleTime,
-                                                             @Value("${pricing.db.max.life.time}") String maxLifeTime
+                                                             @Value("${pricing.db.connection.validation.query}") String validationQuery
     ) {
         RoutingConnectionFactory routingConnectionFactory = new RoutingConnectionFactory();
 
@@ -95,8 +93,6 @@ public class RoutingConnectionFactoryConfig {
         Map<String, ConnectionFactory> factories = new HashMap<>();
 
         Set<String> activeBusinessUnitIds = loadActiveBusinessUnits();
-
-        String validationQuery = "SELECT 1";
 
         for (String businessUnitId : activeBusinessUnitIds) {
 
@@ -134,11 +130,12 @@ public class RoutingConnectionFactoryConfig {
 
             ConnectionPool pool = new ConnectionPool(configuration);
 
-
             if (defaultConnectionFactory == null) {
                 defaultConnectionFactory = pool;
             }
             factories.put(businessUnitId, pool);
+            pool.warmup()
+                  .subscribe(connectionCount -> LOGGER.info("Created [{}] db connections for businessUnitId [{}]", connectionCount, businessUnitId));
         }
 
         routingConnectionFactory.setTargetConnectionFactories(factories);
