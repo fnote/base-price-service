@@ -58,6 +58,9 @@ class CustomerPriceControllerTest extends BaseTest {
     void tearDown() {
     }
 
+    /***
+     * Testing PRCP-2078
+     */
     @Test
     void getCustomerPrices_PRCP_2078() {
 
@@ -121,6 +124,9 @@ class CustomerPriceControllerTest extends BaseTest {
               .verify();
     }
 
+    /***
+     * Testing PRCP-2079
+     */
     @Test
     void getCustomerPrices_PRCP_2079_invalid_customer() {
 
