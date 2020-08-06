@@ -44,7 +44,7 @@ public class RequestIDFilter implements WebFilter {
         List<String> clientIds = serverWebExchange.getRequest().getHeaders().get(CLIENT_ID);
         final String clientId = CollectionUtils.isEmpty(clientIds) ? "" : clientIds.get(0);
 
-        LOGGER.info("setting correlation ID: [{}], client ID [{}]", correlationId, clientId);
+        LOGGER.info("setting correlation ID: [{}], client ID: [{}]", correlationId, clientId);
 
         return webFilterChain.filter(serverWebExchange).subscriberContext((Context context) -> context.put(CORRELATION_ID_KEY, correlationId).put(CLIENT_ID, clientId));
     }
