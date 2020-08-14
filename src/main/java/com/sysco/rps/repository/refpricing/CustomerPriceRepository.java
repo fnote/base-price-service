@@ -44,7 +44,7 @@ public class CustomerPriceRepository {
                 "                     FROM (SELECT e.SUPC," +
                 "                                  e.PRICE_ZONE," +
                 "                                  e.CUSTOMER_ID" +
-                "                           FROM PRICE_ZONE_02 e force index (`PRIMARY`)" +
+                "                           FROM PRICE_ZONE_01 e force index (`PRIMARY`)" +
                 "                           WHERE e.CUSTOMER_ID = :customerId " +
                 "                             AND SUPC IN ( :supcs )) pz" +
                 "                              INNER JOIN PA paInner force index (`PRIMARY`)" +
