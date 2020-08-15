@@ -116,7 +116,6 @@ public class RoutingConnectionFactoryConfig {
                         .option(INITIAL_SIZE, getInt(initialPoolSize, 5))
                         .option(MAX_LIFE_TIME, maxLife)
                         .option(MAX_IDLE_TIME, maxIdle)
-                        .option(VALIDATION_QUERY, validationQuery)
                         .build()
             );
 
@@ -125,7 +124,6 @@ public class RoutingConnectionFactoryConfig {
                   .initialSize(getInt(initialPoolSize, 5))
                   .maxLifeTime(maxLife)
                   .maxIdleTime(maxIdle)
-                  .validationQuery(validationQuery)
                   .build();
 
             ConnectionPool pool = new ConnectionPool(configuration);
