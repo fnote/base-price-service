@@ -59,11 +59,16 @@ jacocoTestReport {
     }
 }
 
+configurations {
+    // exclude Reactor Netty
+    compile.exclude module: 'spring-boot-starter-reactor-netty'
+}
 
 //Do not use compile or complieTest instead use implementation or testImplementation. https://docs.gradle.org/current/userguide/java_plugin.html
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-tomcat'
     runtimeOnly 'dev.miku:r2dbc-mysql'
     runtimeOnly 'mysql:mysql-connector-java'
 
