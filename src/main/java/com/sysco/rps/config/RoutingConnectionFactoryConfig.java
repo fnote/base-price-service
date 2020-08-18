@@ -129,7 +129,7 @@ public class RoutingConnectionFactoryConfig {
                         .build()
             );
 
-            ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
+/*            ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
                   .maxSize(getInt(maxPoolSize, 10))
                   .initialSize(getInt(initialPoolSize, 5))
                   .maxLifeTime(maxLife)
@@ -139,14 +139,14 @@ public class RoutingConnectionFactoryConfig {
                   .validationQuery(validationQuery)
                   .build();
 
-            ConnectionPool pool = new ConnectionPool(configuration);
+            ConnectionPool pool = new ConnectionPool(configuration);*/
 
             if (defaultConnectionFactory == null) {
-                defaultConnectionFactory = pool;
+                defaultConnectionFactory = connectionFactory;
             }
-            factories.put(businessUnitId, pool);
-            pool.warmup()
-                  .subscribe(connectionCount -> LOGGER.info("Created [{}] db connections for businessUnitId [{}]", connectionCount, businessUnitId));
+            factories.put(businessUnitId, connectionFactory);
+/*            pool.warmup()
+                  .subscribe(connectionCount -> LOGGER.info("Created [{}] db connections for businessUnitId [{}]", connectionCount, businessUnitId));*/
         }
 
         routingConnectionFactory.setTargetConnectionFactories(factories);
