@@ -104,8 +104,8 @@ public class RoutingConnectionFactoryConfig {
             Duration maxLife = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
             Duration maxIdle = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
             Duration connectionTimeout = Duration.ofSeconds(20000);
-            Duration maxConnectionCreateTime = Duration.ofMillis(5000);
-            Duration maxConnectionAcquireTime = Duration.ofMillis(5000);
+            Duration maxConnectionCreateTime = Duration.ofMillis(10000);
+            Duration maxConnectionAcquireTime = Duration.ofMillis(12000);
 
             LOGGER.debug("Setting max times for conn pool [{}] Max Lifetime: [{} S], Max Idle Time [{} S]", db, maxLife.toSeconds(),
                   maxIdle.toSeconds());
