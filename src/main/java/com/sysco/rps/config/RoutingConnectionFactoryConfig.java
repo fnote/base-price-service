@@ -25,10 +25,13 @@ import java.util.stream.Collectors;
 
 import static com.sysco.rps.common.Constants.JdbcProperties.PRICINGDB;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.INITIAL_SIZE;
+import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_ACQUIRE_TIME;
+import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_CREATE_CONNECTION_TIME;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_IDLE_TIME;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_LIFE_TIME;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_SIZE;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.VALIDATION_QUERY;
+import static io.r2dbc.spi.ConnectionFactoryOptions.CONNECT_TIMEOUT;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
 import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
@@ -100,6 +103,9 @@ public class RoutingConnectionFactoryConfig {
 
             Duration maxLife = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
             Duration maxIdle = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
+            Duration connectionTimeout = Duration.ofSeconds(3);
+            Duration connectionCreateTime = Duration.ofSeconds(3);
+            Duration connectionAquireTime = Duration.ofSeconds(5);
 
             LOGGER.debug("Setting max times for conn pool [{}] Max Lifetime: [{} S], Max Idle Time [{} S]", db, maxLife.toSeconds(),
                   maxIdle.toSeconds());
@@ -116,6 +122,9 @@ public class RoutingConnectionFactoryConfig {
                         .option(INITIAL_SIZE, getInt(initialPoolSize, 5))
                         .option(MAX_LIFE_TIME, maxLife)
                         .option(MAX_IDLE_TIME, maxIdle)
+                        .option(CONNECT_TIMEOUT, connectionTimeout)
+                        .option(MAX_ACQUIRE_TIME, connectionAquireTime)
+                        .option(MAX_CREATE_CONNECTION_TIME, connectionCreateTime)
                         .build()
             );
 
@@ -124,6 +133,8 @@ public class RoutingConnectionFactoryConfig {
                   .initialSize(getInt(initialPoolSize, 5))
                   .maxLifeTime(maxLife)
                   .maxIdleTime(maxIdle)
+                  .maxAcquireTime(connectionAquireTime)
+                  .maxCreateConnectionTime(connectionCreateTime)
                   .build();
 
             ConnectionPool pool = new ConnectionPool(configuration);
