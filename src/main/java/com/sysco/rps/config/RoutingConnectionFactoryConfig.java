@@ -135,7 +135,7 @@ public class RoutingConnectionFactoryConfig {
                   .maxIdleTime(maxIdle)
                   .maxAcquireTime(maxConnectionAcquireTime)
                   .maxCreateConnectionTime(maxConnectionCreateTime)
-//                  .validationQuery(validationQuery)
+                  .validationQuery(validationQuery)
                   .build();
 
             ConnectionPool pool = new ConnectionPool(configuration);
