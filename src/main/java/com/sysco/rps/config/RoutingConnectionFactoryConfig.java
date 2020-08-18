@@ -103,50 +103,49 @@ public class RoutingConnectionFactoryConfig {
 
             Duration maxLife = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
             Duration maxIdle = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
-            Duration connectionTimeout = Duration.ofSeconds(6000);
+            Duration connectionTimeout = Duration.ofSeconds(20000);
             Duration maxConnectionCreateTime = Duration.ofMillis(5000);
-            Duration maxConnectionAcquireTime = Duration.ofMillis(10000);
+            Duration maxConnectionAcquireTime = Duration.ofMillis(5000);
 
             LOGGER.debug("Setting max times for conn pool [{}] Max Lifetime: [{} S], Max Idle Time [{} S]", db, maxLife.toSeconds(),
                   maxIdle.toSeconds());
 
             ConnectionFactory connectionFactory = ConnectionFactories.get(
                   ConnectionFactoryOptions.builder()
-                        .option(DRIVER, "pool")
-                        .option(PROTOCOL, "mysql")
+                        .option(DRIVER, "mysql")
                         .option(HOST, jdbcHost)
                         .option(USER, jdbcUser)
                         .option(PASSWORD, jdbcPassword)
                         .option(DATABASE, db)
+                        .option(CONNECT_TIMEOUT, connectionTimeout)/*
                         .option(MAX_SIZE, getInt(maxPoolSize, 10))
                         .option(INITIAL_SIZE, getInt(initialPoolSize, 5))
                         .option(MAX_LIFE_TIME, maxLife)
                         .option(MAX_IDLE_TIME, maxIdle)
-                        .option(CONNECT_TIMEOUT, connectionTimeout)
                         .option(MAX_ACQUIRE_TIME, maxConnectionAcquireTime)
                         .option(MAX_CREATE_CONNECTION_TIME, maxConnectionCreateTime)
-                        .option(VALIDATION_QUERY, validationQuery)
+                        .option(VALIDATION_QUERY, validationQuery)*/
                         .build()
             );
 
-/*            ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
+            ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
                   .maxSize(getInt(maxPoolSize, 10))
-                  .initialSize(getInt(initialPoolSize, 5))
+//                  .initialSize(getInt(initialPoolSize, 5))
                   .maxLifeTime(maxLife)
                   .maxIdleTime(maxIdle)
                   .maxAcquireTime(maxConnectionAcquireTime)
                   .maxCreateConnectionTime(maxConnectionCreateTime)
-                  .validationQuery(validationQuery)
+//                  .validationQuery(validationQuery)
                   .build();
 
-            ConnectionPool pool = new ConnectionPool(configuration);*/
+            ConnectionPool pool = new ConnectionPool(configuration);
 
             if (defaultConnectionFactory == null) {
-                defaultConnectionFactory = connectionFactory;
+                defaultConnectionFactory = pool;
             }
-            factories.put(businessUnitId, connectionFactory);
-/*            pool.warmup()
-                  .subscribe(connectionCount -> LOGGER.info("Created [{}] db connections for businessUnitId [{}]", connectionCount, businessUnitId));*/
+            factories.put(businessUnitId, pool);
+            pool.warmup()
+                  .subscribe(connectionCount -> LOGGER.info("Created [{}] db connections for businessUnitId [{}]", connectionCount, businessUnitId));
         }
 
         routingConnectionFactory.setTargetConnectionFactories(factories);
