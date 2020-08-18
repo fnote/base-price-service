@@ -103,7 +103,7 @@ public class RoutingConnectionFactoryConfig {
 
             Duration maxLife = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
             Duration maxIdle = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
-//            Duration connectionTimeout = Duration.ofSeconds(0);
+            Duration connectionTimeout = Duration.ofSeconds(6000);
             Duration maxConnectionCreateTime = Duration.ofMillis(5000);
             Duration maxConnectionAcquireTime = Duration.ofMillis(10000);
 
@@ -121,8 +121,8 @@ public class RoutingConnectionFactoryConfig {
                         .option(MAX_SIZE, getInt(maxPoolSize, 10))
                         .option(INITIAL_SIZE, getInt(initialPoolSize, 5))
                         .option(MAX_LIFE_TIME, maxLife)
-                        .option(MAX_IDLE_TIME, maxIdle)/*
-                        .option(CONNECT_TIMEOUT, connectionTimeout)*/
+                        .option(MAX_IDLE_TIME, maxIdle)
+                        .option(CONNECT_TIMEOUT, connectionTimeout)
                         .option(MAX_ACQUIRE_TIME, maxConnectionAcquireTime)
                         .option(MAX_CREATE_CONNECTION_TIME, maxConnectionCreateTime)
                         .build()
