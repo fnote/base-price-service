@@ -24,7 +24,8 @@ public class Errors {
         public static final String REQUESTED_OPCO_NULL_OR_EMPTY = "OpCo ID should not be null/empty";
         public static final String MSG_CUSTOMER_NOT_FOUND_ON_REQUEST = "Customer not found in the request";
         public static final String MSG_PRODUCTS_NOT_FOUND_IN_REQUEST = "Products not found in the request";
-        public static final String MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST = "Price request date is either null, empty or not in the valid format(yyyy-mm-dd)";
+        public static final String MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST = "Price request date is either null, empty or not in the valid format" +
+              "(yyyyMMdd)";
 
         private Messages() {
             // default constructor

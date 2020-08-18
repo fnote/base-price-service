@@ -68,7 +68,7 @@ class CustomerPriceControllerTest extends BaseTest {
         RefPriceAPIException opCoEmptyException = new RefPriceAPIException(HttpStatus.BAD_REQUEST, "102040", "OpCo ID should not be null/empty");
 
         // with correct data
-        CustomerPriceRequest request = new CustomerPriceRequest("020", "68579367", "2020-02-10", new ArrayList<>(Arrays.asList("2512527", "3325677", "8328971")));
+        CustomerPriceRequest request = new CustomerPriceRequest("020", "68579367", "20200210", new ArrayList<>(Arrays.asList("2512527", "3325677", "8328971")));
 
         Mono<CustomerPriceResponse> customerPrices = customerPriceController.getCustomerPrices(request, null);
 
@@ -133,7 +133,7 @@ class CustomerPriceControllerTest extends BaseTest {
         RefPriceAPIException opCoEmptyException = new RefPriceAPIException(HttpStatus.BAD_REQUEST, "102030", "Customer ID should not be null/empty");
 
         // with correct data
-        CustomerPriceRequest request = new CustomerPriceRequest("020", "68579367", "2020-02-10", new ArrayList<>(Arrays.asList("2512527", "3325677",
+        CustomerPriceRequest request = new CustomerPriceRequest("020", "68579367", "20200210", new ArrayList<>(Arrays.asList("2512527", "3325677",
               "8328971")));
 
         Mono<CustomerPriceResponse> customerPrices;
