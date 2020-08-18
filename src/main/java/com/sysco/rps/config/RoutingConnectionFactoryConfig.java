@@ -103,9 +103,9 @@ public class RoutingConnectionFactoryConfig {
 
             Duration maxLife = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
             Duration maxIdle = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
-            Duration connectionTimeout = Duration.ofSeconds(3);
-            Duration connectionCreateTime = Duration.ofSeconds(3);
-            Duration connectionAquireTime = Duration.ofSeconds(5);
+//            Duration connectionTimeout = Duration.ofSeconds(0);
+            Duration maxConnectionCreateTime = Duration.ofMillis(3000);
+            Duration maxConnectionAcquireTime = Duration.ofMillis(5000);
 
             LOGGER.debug("Setting max times for conn pool [{}] Max Lifetime: [{} S], Max Idle Time [{} S]", db, maxLife.toSeconds(),
                   maxIdle.toSeconds());
@@ -121,10 +121,10 @@ public class RoutingConnectionFactoryConfig {
                         .option(MAX_SIZE, getInt(maxPoolSize, 10))
                         .option(INITIAL_SIZE, getInt(initialPoolSize, 5))
                         .option(MAX_LIFE_TIME, maxLife)
-                        .option(MAX_IDLE_TIME, maxIdle)
-                        .option(CONNECT_TIMEOUT, connectionTimeout)
-                        .option(MAX_ACQUIRE_TIME, connectionAquireTime)
-                        .option(MAX_CREATE_CONNECTION_TIME, connectionCreateTime)
+                        .option(MAX_IDLE_TIME, maxIdle)/*
+                        .option(CONNECT_TIMEOUT, connectionTimeout)*/
+                        .option(MAX_ACQUIRE_TIME, maxConnectionAcquireTime)
+                        .option(MAX_CREATE_CONNECTION_TIME, maxConnectionCreateTime)
                         .build()
             );
 
@@ -133,8 +133,8 @@ public class RoutingConnectionFactoryConfig {
                   .initialSize(getInt(initialPoolSize, 5))
                   .maxLifeTime(maxLife)
                   .maxIdleTime(maxIdle)
-                  .maxAcquireTime(connectionAquireTime)
-                  .maxCreateConnectionTime(connectionCreateTime)
+                  .maxAcquireTime(maxConnectionAcquireTime)
+                  .maxCreateConnectionTime(maxConnectionCreateTime)
                   .build();
 
             ConnectionPool pool = new ConnectionPool(configuration);
