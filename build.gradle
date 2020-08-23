@@ -82,6 +82,8 @@ dependencies {
     }
     testImplementation 'io.projectreactor:reactor-test'
 
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     implementation 'com.h2database:h2'
     // https://mvnrepository.com/artifact/io.r2dbc/r2dbc-h2
     implementation group: 'io.r2dbc', name: 'r2dbc-h2', version: '0.8.4.RELEASE'
