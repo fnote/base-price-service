@@ -113,7 +113,7 @@ public class CustomerPriceService {
             return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.PRODUCTS_NOT_FOUND_IN_REQUEST, Errors.Messages.MSG_PRODUCTS_NOT_FOUND_IN_REQUEST);
         }
 
-        if (!GenericValidator.isDate(request.getPriceRequestDate(), PRICE_REQUEST_DATE_PATTERN, false)) {
+        if (!GenericValidator.isDate(request.getPriceRequestDate(), PRICE_REQUEST_DATE_PATTERN, true)) {
             return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST,
                   Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST);
         }

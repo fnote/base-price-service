@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static com.sysco.rps.common.Constants.PRICE_REQUEST_DATE_PATTERN;
+
 /**
  * Repository that provides access to customer price data from PA and PRICE_ZONE tables
  *
@@ -62,6 +64,11 @@ public class CustomerPriceRepository {
         }
     }
 
+    /**
+     * Queries the DB for ref price for given supcs for a given date
+     * The requested effectiveDate is in yyyMMdd format, since MySql accepts that as a valid format, we will be doing no format changes
+     * Ref: https://dev.mysql.com/doc/refman/5.7/en/date-and-time-literals.html
+     * */
     public Flux<Product> getPricesByOpCo(CustomerPriceRequest customerPriceRequest, List<String> supcsPartition) {
 
         StopWatch stopWatch = new StopWatch();
@@ -100,7 +107,7 @@ public class CustomerPriceRepository {
             return "";
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PRICE_REQUEST_DATE_PATTERN);
         return formatter.format(date);
     }
 }

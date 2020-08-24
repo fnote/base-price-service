@@ -23,7 +23,11 @@ public class CustomerPriceRequest {
     @ApiModelProperty(example = "1")
     private String customerAccount;
 
-    @ApiModelProperty(example = "2020-05-31")
+    /**
+     * Specifies the date which the reference price is required for
+     * Format:yyyyMMdd (e.g. 20200818)
+     * */
+    @ApiModelProperty(example = "20200531")
     private String priceRequestDate;
 
     @ApiModelProperty(example = "[ \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]")
