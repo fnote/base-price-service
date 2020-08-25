@@ -19,15 +19,15 @@ public class Product {
     private Double referencePrice;
     private String effectiveFromDate;
     private Long priceExportDate;
-    private Character splitIndicator;
+    private Character catchWeightIndicator;
 
-    public Product(String supc, Integer priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportDate, Character splitIndicator) {
+    public Product(String supc, Integer priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportDate, Character catchWeightIndicator) {
         this.supc = supc;
         this.priceZoneId = priceZoneId;
         this.referencePrice = referencePrice;
         this.effectiveFromDate = effectiveFromDate;
         this.priceExportDate = priceExportDate;
-        this.splitIndicator = splitIndicator;
+        this.catchWeightIndicator = catchWeightIndicator;
     }
 
     public String getSupc() {
@@ -70,12 +70,12 @@ public class Product {
         this.priceExportDate = priceExportDate;
     }
 
-    public Character getSplitIndicator() {
-        return splitIndicator;
+    public Character getCatchWeightIndicator() {
+        return catchWeightIndicator;
     }
 
-    public void setSplitIndicator(Character splitIndicator) {
-        this.splitIndicator = splitIndicator;
+    public void setCatchWeightIndicator(Character catchWeightIndicator) {
+        this.catchWeightIndicator = catchWeightIndicator;
     }
 
     @Override
@@ -92,7 +92,7 @@ public class Product {
               .append(referencePrice, product.referencePrice)
               .append(effectiveFromDate, product.effectiveFromDate)
               .append(priceExportDate, product.priceExportDate)
-              .append(splitIndicator, product.splitIndicator)
+              .append(catchWeightIndicator, product.catchWeightIndicator)
               .isEquals();
     }
 
@@ -104,7 +104,7 @@ public class Product {
               .append(referencePrice)
               .append(effectiveFromDate)
               .append(priceExportDate)
-              .append(splitIndicator)
+              .append(catchWeightIndicator)
               .toHashCode();
     }
 
@@ -116,7 +116,7 @@ public class Product {
               .append("referencePrice", referencePrice)
               .append("effectiveFromDate", effectiveFromDate)
               .append("priceExportDate", priceExportDate)
-              .append("splitIndicator", splitIndicator)
+              .append("catchWeightIndicator", catchWeightIndicator)
               .toString();
     }
 

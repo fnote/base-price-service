@@ -49,8 +49,8 @@ class CustomerPriceServiceTest extends BaseTest {
     }
 
     private void validateFirstSuccessItem(CustomerPriceResponse result, String supc, Integer priceZoneId, Double referencePrice,
-                                          String effectiveFromDate, Long priceExportDate, Character splitIndicator) {
-        Product product = new Product(supc, priceZoneId, referencePrice, effectiveFromDate, priceExportDate, splitIndicator);
+                                          String effectiveFromDate, Long priceExportDate, Character catchWeightIndicator) {
+        Product product = new Product(supc, priceZoneId, referencePrice, effectiveFromDate, priceExportDate, catchWeightIndicator);
         assertEquals(product, result.getProducts().get(0));
     }
 

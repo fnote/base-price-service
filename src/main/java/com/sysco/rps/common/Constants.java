@@ -56,7 +56,7 @@ public class Constants {
 
 
     public static class DBNames {
-        public static final String PA = "PA";
+        public static final String PA = "PRICE";
         public static final String PRICE_ZONE_01 = "PRICE_ZONE_01";
 
         private DBNames() {
