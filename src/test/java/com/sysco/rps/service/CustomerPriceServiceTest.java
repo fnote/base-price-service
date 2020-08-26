@@ -48,9 +48,9 @@ class CustomerPriceServiceTest extends BaseTest {
     void tearDown() {
     }
 
-    private void validateFirstSuccessItem(CustomerPriceResponse result, String supc, Integer priceZoneId, Double referencePrice,
-                                          String effectiveFromDate, Long priceExportDate, Boolean catchWeightIndicator) {
-        Product product = new Product(supc, priceZoneId, referencePrice, effectiveFromDate, priceExportDate, catchWeightIndicator);
+    private void validateFirstSuccessItem(CustomerPriceResponse result, String supc, String priceZoneId, Double referencePrice,
+                                          String effectiveFromDate, Long priceExportTimestamp, Boolean catchWeightIndicator) {
+        Product product = new Product(supc, priceZoneId, referencePrice, effectiveFromDate, priceExportTimestamp, catchWeightIndicator);
         assertEquals(product, result.getProducts().get(0));
     }
 
@@ -120,7 +120,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "20210301", 1595308212L, Boolean.FALSE);
+                  validateFirstSuccessItem(result, "1000001", "3", 200.24, "20210301", 1595308212L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -162,7 +162,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "20210306", 1595308212L, Boolean.FALSE);
+                  validateFirstSuccessItem(result, "1000001", "3", 200.24, "20210306", 1595308212L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -177,7 +177,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "20210306", 1595308212L, Boolean.FALSE);
+                  validateFirstSuccessItem(result, "1000001", "3", 200.24, "20210306", 1595308212L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -192,7 +192,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 125.24, "20210310", 1595308212L, Boolean.FALSE);
+                  validateFirstSuccessItem(result, "1000001", "3", 125.24, "20210310", 1595308212L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -207,7 +207,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 125.24, "20210310", 1595308212L, Boolean.FALSE);
+                  validateFirstSuccessItem(result, "1000001", "3", 125.24, "20210310", 1595308212L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -268,7 +268,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "20210410", 1624527666L, Boolean.FALSE);
+                  validateFirstSuccessItem(result, "1000001", "3", 200.24, "20210410", 1624527666L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -283,7 +283,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "20210410", 1624527666L, Boolean.FALSE);
+                  validateFirstSuccessItem(result, "1000001", "3", 200.24, "20210410", 1624527666L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -358,7 +358,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.00, "20210412", 1616578866L, Boolean.FALSE);
+                  validateFirstSuccessItem(result, "1000001", "3", 200.00, "20210412", 1616578866L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -373,7 +373,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 300.00, "20210413", 1614159666L, Boolean.FALSE);
+                  validateFirstSuccessItem(result, "1000001", "3", 300.00, "20210413", 1614159666L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -388,7 +388,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 300.00, "20210413", 1614159666L, Boolean.FALSE);
+                  validateFirstSuccessItem(result, "1000001", "3", 300.00, "20210413", 1614159666L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -434,7 +434,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, response.getProducts().size());
                   assertEquals(1, response.getFailedProducts().size());
                   assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
-                  validateFirstSuccessItem(response, "2512527", 1, 1.00, "20200201", 1578960300L, Boolean.TRUE);
+                  validateFirstSuccessItem(response, "2512527", "1", 1.00, "20200201", 1578960300L, Boolean.TRUE);
               })
               .verifyComplete();
 
@@ -658,7 +658,7 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(
-                        new Product("3982206", 4, 28.00,
+                        new Product("3982206", "4", 28.00,
                               "20200201", 1580947560L, Boolean.TRUE),
                         response.getProducts().get(0)
                   );
@@ -671,7 +671,7 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(
-                        new Product("3982206", 4, 28.00,
+                        new Product("3982206", "4", 28.00,
                               "20200201", 1580947560L, Boolean.TRUE),
                         response.getProducts().get(0)
                   );
@@ -683,7 +683,7 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(
-                        new Product("3982206", 4, 30.00,
+                        new Product("3982206", "4", 30.00,
                               "20200205", 1580947560L, Boolean.FALSE),
                         response.getProducts().get(0)
                   );
@@ -695,7 +695,7 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(
-                        new Product("3982206", 4, 30.00,
+                        new Product("3982206", "4", 30.00,
                               "20200205", 1580947560L, Boolean.FALSE),
                         response.getProducts().get(0)
                   );

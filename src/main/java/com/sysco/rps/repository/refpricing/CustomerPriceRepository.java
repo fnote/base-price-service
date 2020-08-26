@@ -87,7 +87,7 @@ public class CustomerPriceRepository {
                         }
 
                         return new Product(row.get("SUPC", String.class),
-                              row.get("PRICE_ZONE", Integer.class),
+                              intToString(row.get("PRICE_ZONE", Integer.class)),
                               row.get("PRICE", Double.class),
                               getDate(row.get("EFFECTIVE_DATE", LocalDateTime.class)),
                               row.get("EXPORTED_DATE", Long.class),
@@ -97,6 +97,10 @@ public class CustomerPriceRepository {
                     }
 
               ).all();
+    }
+
+    private String intToString(Integer intValue) {
+        return intValue == null ? "" : Integer.toString(intValue);
     }
 
     private Boolean getCatchWeightIndicator(String str) {

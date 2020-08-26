@@ -81,7 +81,7 @@ public class CustomerPriceService {
                   v.forEach(p -> {
                       String supc = p.getSupc();
                       Product existingProduct = productMap.get(supc);
-                      if (existingProduct == null || (existingProduct.getPriceExportDate() < p.getPriceExportDate())) {
+                      if (existingProduct == null || (existingProduct.getPriceExportTimestamp() < p.getPriceExportTimestamp())) {
                           productMap.put(supc, p);
                       }
                   });
