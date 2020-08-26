@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import static com.sysco.rps.common.Constants.DEFAULT_SUPCS_PER_QUERY;
 import static com.sysco.rps.common.Constants.PRICE_REQUEST_DATE_PATTERN;
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
 
@@ -47,8 +46,8 @@ public class CustomerPriceService {
     private static final Logger logger = LoggerFactory.getLogger(CustomerPriceService.class);
     private final Integer configuredSUPCsPerQuery;
 
-    CustomerPriceService(@Value("${supcs.per.query}") Integer configuredSUPCsPerQuery) {
-        this.configuredSUPCsPerQuery = (configuredSUPCsPerQuery == null || configuredSUPCsPerQuery == 0) ? DEFAULT_SUPCS_PER_QUERY : configuredSUPCsPerQuery;
+    CustomerPriceService(@Value("${supcs.per.query:5}") Integer configuredSUPCsPerQuery) {
+        this.configuredSUPCsPerQuery = configuredSUPCsPerQuery;
     }
 
     @Autowired

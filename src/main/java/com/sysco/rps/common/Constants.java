@@ -13,7 +13,6 @@ public class Constants {
     public static final String ROUTING_KEY = "businessUnitId";
     public static final String PRICE_REQUEST_DATE_PATTERN = "yyyyMMdd";
     public static final String IS_CATCH_WEIGHT = "Y";
-    public static final Integer DEFAULT_SUPCS_PER_QUERY = 5;
 
     private Constants() {
         // default constructor
