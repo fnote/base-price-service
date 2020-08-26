@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static com.sysco.rps.common.Constants.IS_CATCH_WEIGHT;
 import static com.sysco.rps.common.Constants.PRICE_REQUEST_DATE_PATTERN;
 
 /**
@@ -90,7 +91,7 @@ public class CustomerPriceRepository {
                               row.get("PRICE", Double.class),
                               getDate(row.get("EFFECTIVE_DATE", LocalDateTime.class)),
                               row.get("EXPORTED_DATE", Long.class),
-                              getChar(row.get("CATCH_WEIGHT_INDICATOR", String.class))
+                              getCatchWeightIndicator(row.get("CATCH_WEIGHT_INDICATOR", String.class))
                         );
 
                     }
@@ -98,8 +99,8 @@ public class CustomerPriceRepository {
               ).all();
     }
 
-    private Character getChar(String str) {
-        return StringUtils.isEmpty(str) ? null : str.charAt(0);
+    private Boolean getCatchWeightIndicator(String str) {
+        return StringUtils.isEmpty(str) ? Boolean.FALSE : str.equalsIgnoreCase(IS_CATCH_WEIGHT);
     }
 
     private String getDate(LocalDateTime date) {

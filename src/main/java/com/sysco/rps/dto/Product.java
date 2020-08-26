@@ -19,9 +19,9 @@ public class Product {
     private Double referencePrice;
     private String effectiveFromDate;
     private Long priceExportDate;
-    private Character catchWeightIndicator;
+    private Boolean catchWeightIndicator;
 
-    public Product(String supc, Integer priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportDate, Character catchWeightIndicator) {
+    public Product(String supc, Integer priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportDate, Boolean catchWeightIndicator) {
         this.supc = supc;
         this.priceZoneId = priceZoneId;
         this.referencePrice = referencePrice;
@@ -70,11 +70,11 @@ public class Product {
         this.priceExportDate = priceExportDate;
     }
 
-    public Character getCatchWeightIndicator() {
+    public Boolean getCatchWeightIndicator() {
         return catchWeightIndicator;
     }
 
-    public void setCatchWeightIndicator(Character catchWeightIndicator) {
+    public void setCatchWeightIndicator(Boolean catchWeightIndicator) {
         this.catchWeightIndicator = catchWeightIndicator;
     }
 
