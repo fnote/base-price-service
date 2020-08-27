@@ -12,11 +12,11 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static com.sysco.rps.common.Constants.IS_CATCH_WEIGHT;
-import static com.sysco.rps.common.Constants.PRICE_REQUEST_DATE_PATTERN;
+import static com.sysco.rps.util.PricingUtils.getCatchWeightIndicator;
+import static com.sysco.rps.util.PricingUtils.formatDate;
+import static com.sysco.rps.util.PricingUtils.intToString;
 
 /**
  * Repository that provides access to customer price data from PRICE (PA) and PRICE_ZONE tables
@@ -89,7 +89,7 @@ public class CustomerPriceRepository {
                         return new Product(row.get("SUPC", String.class),
                               intToString(row.get("PRICE_ZONE", Integer.class)),
                               row.get("PRICE", Double.class),
-                              getDate(row.get("EFFECTIVE_DATE", LocalDateTime.class)),
+                              formatDate(row.get("EFFECTIVE_DATE", LocalDateTime.class)),
                               row.get("EXPORTED_DATE", Long.class),
                               getCatchWeightIndicator(row.get("CATCH_WEIGHT_INDICATOR", String.class))
                         );
@@ -97,22 +97,5 @@ public class CustomerPriceRepository {
                     }
 
               ).all();
-    }
-
-    private String intToString(Integer intValue) {
-        return intValue == null ? "" : Integer.toString(intValue);
-    }
-
-    private Boolean getCatchWeightIndicator(String str) {
-        return StringUtils.isEmpty(str) ? Boolean.FALSE : str.equalsIgnoreCase(IS_CATCH_WEIGHT);
-    }
-
-    private String getDate(LocalDateTime date) {
-        if (date == null) {
-            return "";
-        }
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PRICE_REQUEST_DATE_PATTERN);
-        return formatter.format(date);
     }
 }

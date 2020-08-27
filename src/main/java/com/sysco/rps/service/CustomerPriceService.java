@@ -58,7 +58,6 @@ public class CustomerPriceService {
 
     public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
 
-        // TODO: See whether Mono.error can be achieved through Aspects or by some other means
         RefPriceAPIException validationException = validateRequest(request);
 
         if (validationException != null) {
