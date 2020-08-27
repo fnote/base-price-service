@@ -22,7 +22,7 @@ import org.springframework.data.r2dbc.connectionfactory.init.ResourceDatabasePop
 @SpringBootTest
 @EnableConfigurationProperties
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class BaseTest {
+public abstract class BaseTest {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseTest.class);
 
