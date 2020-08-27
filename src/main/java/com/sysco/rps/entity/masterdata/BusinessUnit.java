@@ -36,8 +36,7 @@ public class BusinessUnit {
     }
 
     private void setBusinessUnitNumber(String businessUnitNumber) {
-        businessUnitNumber = PricingUtils.convertOpCoIdToDBField(businessUnitNumber);
-        this.businessUnitNumber = PricingUtils.trimSafely(businessUnitNumber, "000");
+        this.businessUnitNumber = PricingUtils.convertOpCoIdToDBField(businessUnitNumber);
     }
 
     public String getBusinessName() {

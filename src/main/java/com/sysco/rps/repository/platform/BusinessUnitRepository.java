@@ -36,7 +36,6 @@ public class BusinessUnitRepository {
     }
 
     public List<BusinessUnit> getBusinessUnitList() {
-        // TODO: Consider retrieve business units from a different source (e.g. a DB table)
 
         if (businessUnits.isEmpty()) {
             String[] businessUnitIds = businessUnitsStr.split(",");
