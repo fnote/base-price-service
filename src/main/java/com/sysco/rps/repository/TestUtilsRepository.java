@@ -57,9 +57,7 @@ public class TestUtilsRepository {
                   return row;
               })
               .all()
-              .doOnError(r -> {
-                  LOGGER.error("Failed to execute query", r);
-              })
+              .doOnError(r -> LOGGER.error("Failed to execute query", r))
               .subscribe();
     }
 
