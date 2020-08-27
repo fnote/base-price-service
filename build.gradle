@@ -40,10 +40,10 @@ sonarqube {
         props.each { prop ->
             property "${prop.key}", "${prop.value}"
         }
-        property "sonar.host.url", "https://infra.labseag-np.us-east-1.aws.sysco.net:9000/"
-        property "sonar.login", "d3a6f8fa30b1df9a8c6cf28b199e7363d38aba2d"
-        property "sonar.scm.forceReloadAll", "true"
-        property 'sonar.core.codeCoveragePlugin', 'jacoco'
+        property "sonar.host.url", "https://cloudpricing-sonar-dev.prcp-np.us-east-1.aws.sysco.net/"
+        property "sonar.login", "2bd4c258b4109a08739b27b76f512af1c1dc17fe"
+		property "sonar.scm.forceReloadAll", "true"
+		property 'sonar.core.codeCoveragePlugin', 'jacoco'
         property 'sonar.coverage.jacoco.xmlReportPaths', "${buildDir}/reports/jacoco.xml"
         if (!(getCurrentBranchName().equals("develop") || getCurrentBranchName().equals("master") || project.hasProperty('pullrequest'))) {
             property "sonar.branch.name", getCurrentBranchName()
@@ -65,12 +65,18 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     runtimeOnly 'dev.miku:r2dbc-mysql'
-
     runtimeOnly 'mysql:mysql-connector-java'
+
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation 'io.projectreactor:reactor-test'
+
+    implementation 'com.h2database:h2'
+    // https://mvnrepository.com/artifact/io.r2dbc/r2dbc-h2
+    implementation group: 'io.r2dbc', name: 'r2dbc-h2', version: '0.8.4.RELEASE'
+
+//    testCompile("ch.vorburger.mariaDB4j:mariaDB4j-springboot:2.4.0")
 
     // https://mvnrepository.com/artifact/io.springfox/springfox-swagger2
     implementation(group: 'io.springfox', name: 'springfox-swagger2', version: '2.10.5') {
@@ -78,6 +84,9 @@ dependencies {
         exclude module: 'swagger-models'
         exclude group: 'com.google.guava', module: 'guava'
     }
+
+    // https://mvnrepository.com/artifact/io.projectreactor.netty/reactor-netty
+    implementation group: 'io.projectreactor.netty', name: 'reactor-netty', version: '0.9.10.RELEASE'
 
     // https://mvnrepository.com/artifact/io.swagger/swagger-annotations
     implementation group: 'io.swagger', name: 'swagger-annotations', version: '1.6.1'
@@ -98,17 +107,33 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
 
+    // https://mvnrepository.com/artifact/commons-validator/commons-validator
+    implementation group: 'commons-validator', name: 'commons-validator', version: '1.6'
+
     // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-aws-autoconfigure
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-aws-autoconfigure', version: '2.1.4.RELEASE'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws-parameter-store-config', version: '2.1.4.RELEASE'
 
     // https://mvnrepository.com/artifact/com.google.guava/guava/29.0-jre
     implementation group: 'com.google.guava', name: 'guava', version: '29.0-jre'
+
+    // https://mvnrepository.com/artifact/org.aspectj/aspectjweaver
+    implementation group: 'org.aspectj', name: 'aspectjweaver', version: '1.9.5'
+
 }
 
 test {
+    systemProperty 'spring.profiles.active', 'test'
     finalizedBy jacocoTestReport
     useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        showExceptions true
+        exceptionFormat "full"
+        showCauses true
+        showStackTraces true
+    }
+
 }
 
 project.tasks["sonarqube"].dependsOn "compileJava"

@@ -3,6 +3,8 @@ package com.sysco.rps.config;
 import com.sysco.rps.entity.masterdata.BusinessUnit;
 import com.sysco.rps.repository.common.RoutingConnectionFactory;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
+import io.r2dbc.pool.ConnectionPool;
+import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
@@ -26,6 +28,7 @@ import static io.r2dbc.pool.PoolingConnectionFactoryProvider.INITIAL_SIZE;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_IDLE_TIME;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_LIFE_TIME;
 import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_SIZE;
+import static io.r2dbc.pool.PoolingConnectionFactoryProvider.VALIDATION_QUERY;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
 import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
@@ -33,58 +36,57 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
 import static io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL;
 import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
-
 /**
+ * Configuration for Routing connection factory.
+ * Uses the available business units and create a db config pool for each.
+ * maxIdle and maxLifeTime values are randomized to better use Aurora load balancing.
+ *
  * @author Tharuka Jayalath
- * (C) 2019, Sysco Labs
+ * (C) 2020, Sysco Corporation
  * Created: 7/6/20. Mon 2020 09:50
  */
 @Configuration
 public class RoutingConnectionFactoryConfig {
 
-    @Value("${pricing.db.jdbcHost}")
-    private String jdbcHost;
-
-    @Value("${pricing.db.username}")
-    private String jdbcUser;
-
-    @Value("${pricing.db.password}")
-    private String jdbcPassword;
-
-    @Value("${pricing.db.max.pool.size}")
-    private String maxPoolSize;
-
-    @Value("${pricing.db.initial.pool.size}")
-    private String initialPoolSize;
-
-    @Value("${pricing.db.max.idle.time}")
-    private String maxIdleTime;
-
-    @Value("${pricing.db.max.life.time}")
-    private String maxLifeTime;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoutingConnectionFactoryConfig.class);
     @Value("${pricing.db.max.life.lower.limit}")
     private Long pricingDbMaxLifeLowerLimit;
-
     @Value("${pricing.db.max.life.upper.limit}")
     private Long pricingDbMaxLifeUpperLimit;
-
-    @Value("${pricing.db.protocol}")
-    private String dbProtocol;
-
     private BusinessUnitLoaderService businessUnitLoaderService;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoutingConnectionFactoryConfig.class);
-
+    /***
+     * Allows setting a business loader service
+     * @param businessUnitLoaderService
+     */
     @Autowired
     public RoutingConnectionFactoryConfig(BusinessUnitLoaderService businessUnitLoaderService) {
         this.businessUnitLoaderService = businessUnitLoaderService;
     }
 
-
+    /***
+     * Method to create RoutingConnectionFactory bean.
+     * Will go through all the available business units and create a connection factory for each.
+     * businessUnitId is used as the key when adding factories to the RoutingConnectionFactory.
+     * See RoutingConnectionFactory's determineCurrentLookupKey implementation where it is defined how to determine this business unit ID as the
+     * lookup key
+     * @param jdbcHost
+     * @param jdbcUser
+     * @param jdbcPassword
+     * @param maxPoolSize
+     * @param initialPoolSize
+     * @param validationQuery
+     * @return RoutingConnectionFactory
+     */
     @Bean
-    public RoutingConnectionFactory routingConnectionFactory() {
-        RoutingConnectionFactory router = new RoutingConnectionFactory();
+    public RoutingConnectionFactory routingConnectionFactory(@Value("${pricing.db.host}") String jdbcHost,
+                                                             @Value("${pricing.db.username}") String jdbcUser,
+                                                             @Value("${pricing.db.password}") String jdbcPassword,
+                                                             @Value("${pricing.db.max.pool.size}") String maxPoolSize,
+                                                             @Value("${pricing.db.initial.pool.size}") String initialPoolSize,
+                                                             @Value("${pricing.db.connection.validation.query}") String validationQuery
+    ) {
+        RoutingConnectionFactory routingConnectionFactory = new RoutingConnectionFactory();
 
         ConnectionFactory defaultConnectionFactory = null;
 
@@ -105,27 +107,40 @@ public class RoutingConnectionFactoryConfig {
             ConnectionFactory connectionFactory = ConnectionFactories.get(
                   ConnectionFactoryOptions.builder()
                         .option(DRIVER, "pool")
-                        .option(PROTOCOL, dbProtocol)
+                        .option(PROTOCOL, "mysql")
                         .option(HOST, jdbcHost)
                         .option(USER, jdbcUser)
                         .option(PASSWORD, jdbcPassword)
                         .option(DATABASE, db)
                         .option(MAX_SIZE, getInt(maxPoolSize, 10))
-                        .option(INITIAL_SIZE, getInt(maxPoolSize, 1))
-                        .option(MAX_IDLE_TIME, maxIdle)
+                        .option(INITIAL_SIZE, getInt(initialPoolSize, 5))
                         .option(MAX_LIFE_TIME, maxLife)
+                        .option(MAX_IDLE_TIME, maxIdle)
+                        .option(VALIDATION_QUERY, validationQuery)
                         .build()
             );
 
+            ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
+                  .maxSize(getInt(maxPoolSize, 10))
+                  .initialSize(getInt(initialPoolSize, 5))
+                  .maxLifeTime(maxLife)
+                  .maxIdleTime(maxIdle)
+                  .validationQuery(validationQuery)
+                  .build();
+
+            ConnectionPool pool = new ConnectionPool(configuration);
+
             if (defaultConnectionFactory == null) {
-                defaultConnectionFactory = connectionFactory;
+                defaultConnectionFactory = pool;
             }
-            factories.put(businessUnitId, connectionFactory);
+            factories.put(businessUnitId, pool);
+            pool.warmup()
+                  .subscribe(connectionCount -> LOGGER.info("Created [{}] db connections for businessUnitId [{}]", connectionCount, businessUnitId));
         }
 
-        router.setTargetConnectionFactories(factories);
-        router.setDefaultTargetConnectionFactory(defaultConnectionFactory);
-        return router;
+        routingConnectionFactory.setTargetConnectionFactories(factories);
+        routingConnectionFactory.setDefaultTargetConnectionFactory(defaultConnectionFactory);
+        return routingConnectionFactory;
     }
 
     private Set<String> loadActiveBusinessUnits() {
@@ -142,5 +157,4 @@ public class RoutingConnectionFactoryConfig {
     private int getInt(String strVal, int defaultVal) {
         return StringUtils.isEmpty(strVal) ? defaultVal : Integer.parseInt(strVal);
     }
-
 }

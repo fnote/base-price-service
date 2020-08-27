@@ -1,7 +1,8 @@
 package com.sysco.rps.controller;
 
-import com.sysco.rps.dto.CustomerPriceResponse;
 import com.sysco.rps.dto.CustomerPriceRequest;
+import com.sysco.rps.dto.CustomerPriceResponse;
+import com.sysco.rps.dto.ErrorDTO;
 import com.sysco.rps.service.CustomerPriceService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 /**
+ * Controller class that defines the Customer Price endpoints
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -23,7 +26,7 @@ import reactor.core.publisher.Mono;
  */
 @RestController
 @RequestMapping("/ref-price/")
-public class CustomerPriceController extends AbstractController{
+public class CustomerPriceController extends AbstractController {
 
     @Autowired
     private CustomerPriceService customerPriceService;
@@ -31,13 +34,23 @@ public class CustomerPriceController extends AbstractController{
     @PostMapping("/customer-prices")
     @ApiOperation(
           value = "Gets the reference pricing for the customer item",
-          notes = "If effectiveDate is provided in the req body, that will be used as the max effective date." +
-                "Else current day will be used. Uses NamedJDBCTemplate to fetch data",
+          notes = "Effective reference prices will be identified considering the priceRequestDate provided in the req body.",
           response = CustomerPriceResponse.class)
     @ApiResponses(value = {
           @ApiResponse(code = org.apache.http.HttpStatus.SC_OK, message = "Data fetch successful"),
-          @ApiResponse(code = org.apache.http.HttpStatus.SC_BAD_REQUEST, message = "Request validation failed."),
-          @ApiResponse(code = org.apache.http.HttpStatus.SC_NOT_FOUND, message = "OpCo not found."),
+          @ApiResponse(code = org.apache.http.HttpStatus.SC_BAD_REQUEST, response = ErrorDTO.class,
+                message = "<table>" +
+                      "  <tr> <th>code</th> <th>message</th> </tr>" +
+                      "  <tr> <td>102040</td> <td>OpCo ID is either null or empty</td> </tr>" +
+                      "  <tr> <td>102030</td> <td>Products not found in the request</td> </tr>" +
+                      "  <tr> <td>102050</td> <td>Customer ID is either null or empty</td> </tr>" +
+                      "  <tr> <td>102060</td> <td>Price request date is either null, empty or invalid</td> </tr>" +
+                      "</table>"),
+          @ApiResponse(code = org.apache.http.HttpStatus.SC_NOT_FOUND,
+                message = "<table>" +
+                      "  <tr> <th>code</th> <th>message</th> <th>error data</th> </tr>" +
+                      "  <tr> <td>102010</td> <td>OpCo Invalid</td> <td>Couldn't find a matching DB for the requested OpCo</td> </tr>" +
+                      "</table>"),
     })
     public @ResponseBody
     Mono<CustomerPriceResponse> getCustomerPrices(@RequestBody CustomerPriceRequest request, @RequestParam(required = false) Integer supcsPerQuery) {

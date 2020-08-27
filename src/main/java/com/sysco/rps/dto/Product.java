@@ -5,6 +5,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
+ * Product bean that contains information about customer supc mapping with price info
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -13,17 +15,19 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class Product {
 
     private String supc;
-    private Integer priceZoneId;
+    private String priceZoneId;
     private Double referencePrice;
     private String effectiveFromDate;
-    private Long priceExportDate;
+    private Long priceExportTimestamp;
+    private Boolean catchWeightIndicator;
 
-    public Product(String supc, Integer priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportDate) {
+    public Product(String supc, String priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportTimestamp, Boolean catchWeightIndicator) {
         this.supc = supc;
         this.priceZoneId = priceZoneId;
         this.referencePrice = referencePrice;
         this.effectiveFromDate = effectiveFromDate;
-        this.priceExportDate = priceExportDate;
+        this.priceExportTimestamp = priceExportTimestamp;
+        this.catchWeightIndicator = catchWeightIndicator;
     }
 
     public String getSupc() {
@@ -34,11 +38,11 @@ public class Product {
         this.supc = supc;
     }
 
-    public Integer getPriceZoneId() {
+    public String getPriceZoneId() {
         return priceZoneId;
     }
 
-    public void setPriceZoneId(Integer priceZoneId) {
+    public void setPriceZoneId(String priceZoneId) {
         this.priceZoneId = priceZoneId;
     }
 
@@ -58,12 +62,20 @@ public class Product {
         this.effectiveFromDate = effectiveFromDate;
     }
 
-    public Long getPriceExportDate() {
-        return priceExportDate;
+    public Long getPriceExportTimestamp() {
+        return priceExportTimestamp;
     }
 
-    public void setPriceExportDate(Long priceExportDate) {
-        this.priceExportDate = priceExportDate;
+    public void setPriceExportTimestamp(Long priceExportTimestamp) {
+        this.priceExportTimestamp = priceExportTimestamp;
+    }
+
+    public Boolean getCatchWeightIndicator() {
+        return catchWeightIndicator;
+    }
+
+    public void setCatchWeightIndicator(Boolean catchWeightIndicator) {
+        this.catchWeightIndicator = catchWeightIndicator;
     }
 
     @Override
@@ -79,7 +91,8 @@ public class Product {
               .append(priceZoneId, product.priceZoneId)
               .append(referencePrice, product.referencePrice)
               .append(effectiveFromDate, product.effectiveFromDate)
-              .append(priceExportDate, product.priceExportDate)
+              .append(priceExportTimestamp, product.priceExportTimestamp)
+              .append(catchWeightIndicator, product.catchWeightIndicator)
               .isEquals();
     }
 
@@ -90,7 +103,8 @@ public class Product {
               .append(priceZoneId)
               .append(referencePrice)
               .append(effectiveFromDate)
-              .append(priceExportDate)
+              .append(priceExportTimestamp)
+              .append(catchWeightIndicator)
               .toHashCode();
     }
 
@@ -101,7 +115,8 @@ public class Product {
               .append("priceZoneId", priceZoneId)
               .append("referencePrice", referencePrice)
               .append("effectiveFromDate", effectiveFromDate)
-              .append("priceExportDate", priceExportDate)
+              .append("priceExportTimestamp", priceExportTimestamp)
+              .append("catchWeightIndicator", catchWeightIndicator)
               .toString();
     }
 

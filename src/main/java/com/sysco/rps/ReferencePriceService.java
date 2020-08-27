@@ -6,14 +6,18 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 
 /**
- * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 3/13/20 Time: 12:54 PM
+ * Main class to bootstrap the app
+ *
+ * @author Rohana Kumara
+ * @copyright (C) 2020, Sysco Corporation
+ * @end Created : 3/13/20 Time: 12:54 PM
  */
-@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @EnableR2dbcRepositories
 public class ReferencePriceService {
 
-  public static void main(String[] args) {
-    SpringApplication.run(ReferencePriceService.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(ReferencePriceService.class, args);
+    }
 
 }

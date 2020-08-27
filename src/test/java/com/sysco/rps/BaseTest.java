@@ -3,7 +3,10 @@ package com.sysco.rps;
 import com.sysco.rps.repository.common.RoutingConnectionFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -16,19 +19,25 @@ import org.springframework.data.r2dbc.connectionfactory.init.ResourceDatabasePop
  * @doc
  * @end Created : 13. Jul 2020 18:21
  */
-//@SpringBootTest
+@SpringBootTest
+@EnableConfigurationProperties
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class BaseTest {
+public abstract class BaseTest {
 
-//    @Autowired
-//    RoutingConnectionFactory routingConnectionFactory;
-//
-//    @BeforeAll
-//    void updateDBs() {
-//        ResourceLoader resourceLoader = new DefaultResourceLoader();
-//        Resource[] scripts = new Resource[]{resourceLoader.getResource("classpath:schema.sql"),
-//              resourceLoader.getResource("classpath:data.sql")};
-//
-//        new ResourceDatabasePopulator(scripts).execute(routingConnectionFactory).block();
-//    }
+    private static final Logger logger = LoggerFactory.getLogger(BaseTest.class);
+
+    @Autowired
+    RoutingConnectionFactory routingConnectionFactory;
+
+    @BeforeAll
+    void updateDBs() {
+        ResourceLoader resourceLoader = new DefaultResourceLoader();
+        Resource[] scripts = new Resource[]{resourceLoader.getResource("classpath:schema.sql"),
+              resourceLoader.getResource("classpath:data.sql")};
+
+        new ResourceDatabasePopulator(scripts).execute(routingConnectionFactory)
+              .doOnError(e -> logger.error("Failed to load initial data", e))
+              .doOnSuccess(s -> logger.info("Successfully loaded initial data"))
+              .block();
+    }
 }

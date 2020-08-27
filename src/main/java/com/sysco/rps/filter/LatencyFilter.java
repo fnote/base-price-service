@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * Logs the overall request-response latency
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc

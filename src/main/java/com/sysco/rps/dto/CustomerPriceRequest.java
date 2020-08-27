@@ -8,6 +8,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.util.List;
 
 /**
+ * The bean that defines the cutomer price request
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -21,15 +23,20 @@ public class CustomerPriceRequest {
     @ApiModelProperty(example = "1")
     private String customerAccount;
 
-    @ApiModelProperty(example = "2020-05-31")
+    /**
+     * Specifies the date which the reference price is required for
+     * Format:yyyyMMdd (e.g. 20200818)
+     * */
+    @ApiModelProperty(example = "20200531")
     private String priceRequestDate;
 
     @ApiModelProperty(example = "[ \"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\", \"10\"]")
     private List<String> products;
 
-    public CustomerPriceRequest(){
+    public CustomerPriceRequest() {
         // default constructor
     }
+
     public CustomerPriceRequest(String businessUnitNumber, String customerAccount, String priceRequestDate,
                                 List<String> products) {
         this.businessUnitNumber = businessUnitNumber;

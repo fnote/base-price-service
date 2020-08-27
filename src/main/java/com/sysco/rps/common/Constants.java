@@ -1,24 +1,22 @@
 package com.sysco.rps.common;
 
 /**
- * This class provides constants platform to all components of cloud pricing
+ * This class contains constants to the whole reference pricing API
  * <p>
  * Copyright (C) 2015 SYSCO Corp. All Rights Reserved.
  */
 public class Constants {
 
+    public static final String CORRELATION_ID_HEADER = "X-Syy-Correlation-ID";
+    public static final String CLIENT_ID = "clientId";
+    public static final String CORRELATION_ID_KEY = "Correlation-Id";
+    public static final String ROUTING_KEY = "businessUnitId";
+    public static final String PRICE_REQUEST_DATE_PATTERN = "yyyyMMdd";
+    public static final String IS_CATCH_WEIGHT = "Y";
 
     private Constants() {
+        // default constructor
     }
-
-
-    public static final long PRICINGDB_MAXAGE_LOWER_LIMIT_DEFAULT = 180000;
-    public static final long PRICINGDB_MAXAGE_UPPER_LIMIT_DEFAULT = 300000;
-
-    public static final String CORRELATION_ID_HEADER = "X-Syy-Correlation-ID";
-    public static final String CORRELATION_ID_KEY = "Correlation-Id";
-
-    public static final String ROUTING_KEY = "businessUnitId";
 
     public static class FieldsLength {
         public static final int SUPC_NUMBER = 7;
@@ -29,7 +27,7 @@ public class Constants {
         public static final int OPCO_NUMBER = 3;
 
         private FieldsLength() {
-
+            // default constructor
         }
     }
 
@@ -45,32 +43,34 @@ public class Constants {
         public static final String PRODUCTION = "PROD";
 
         private EnvironmentValue() {
-
+            // default constructor
         }
     }
 
     public static class JdbcProperties {
-        public static final String JDBC_DRIVER_NAME = "com.mysql.cj.jdbc.Driver";
-        public static final String HIKARI_POOL_NAME_SUFFIX = "-hikari-pool";
-
-        public static final String JDBC_MYSQL = "jdbc:mysql://";
-        public static final String PORT = ":3306";
         public static final String PRICINGDB = "REF_PRICE_";
 
-        public static final String NETWORK_ADDRESS = "networkAddress";
-        public static final String USER_ID = "userId";
-        public static final String PASSWORD = "password";
-
         private JdbcProperties() {
+            // default constructor
         }
     }
 
 
     public static class DBNames {
-        public static final String PA = "PA";
-        public static final String EATS = "EATS";
+        public static final String PA = "PRICE";
+        public static final String PRICE_ZONE_01 = "PRICE_ZONE_01";
 
         private DBNames() {
+            // default constructor
+        }
+    }
+
+    public static class SplitIndicators {
+        public static final Character CASE = 'c';
+        public static final Character POUND = 'p';
+
+        private SplitIndicators() {
+            // default constructor
         }
     }
 

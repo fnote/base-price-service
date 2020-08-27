@@ -4,36 +4,43 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA. Author: rohana.kumara@sysco.com Date: 4/1/20 Time: 12:54 PM
+ * The Base Response class that can be extended by other sub classes related to responses
+ *
+ * @author rohana.kumara@sysco.com
+ * @copyright (C) 2020, Sysco Corporation
+ * @end Created : 4/1/20 Time: 12:54 PM
  */
 
 public class BaseResponse<T> {
-    private final List<T> successfulItems;
-    private final List<ErrorDTO> failedItems;
+    private final List<T> products;
+
+    // contains info about requested objects that resulted in minor errors
+    private final List<MinorErrorDTO> failedProducts;
 
 
-    BaseResponse(List<T> successfulItems, List<ErrorDTO> failedItems) {
-        this.successfulItems = successfulItems;
-        this.failedItems = failedItems;
+    BaseResponse(List<T> products, List<MinorErrorDTO> failedProducts) {
+        this.products = products;
+        this.failedProducts = failedProducts;
     }
 
-    public List<T> getSuccessfulItems() {
-        return successfulItems;
+    public List<T> getProducts() {
+        return products;
     }
 
-    public List<ErrorDTO> getFailedItems() {
-        return failedItems;
+    public List<MinorErrorDTO> getFailedProducts() {
+        return failedProducts;
     }
 
-    public void addSuccessfulItem(T item) {
-        this.successfulItems.add(item);
+    public void addSuccessfulProduct(T product) {
+        this.products.add(product);
     }
 
-    public void addFailedItem(ErrorDTO errorDTO) {
-        this.failedItems.add(errorDTO);
+    public void addFailedProduct(MinorErrorDTO errorDTO) {
+        this.failedProducts.add(errorDTO);
     }
 
     @Override
@@ -45,26 +52,25 @@ public class BaseResponse<T> {
         BaseResponse<?> that = (BaseResponse<?>) o;
 
         return new EqualsBuilder()
-              .append(successfulItems, that.successfulItems)
-              .append(failedItems, that.failedItems)
+              .append(products, that.products)
+              .append(failedProducts, that.failedProducts)
               .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-              .append(successfulItems)
-              .append(failedItems)
+              .append(products)
+              .append(failedProducts)
               .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-              .append("successfulItems", successfulItems)
-              .append("failedItems", failedItems)
+              .append("products", (products == null) ? null : Arrays.toString(products.toArray()))
+              .append("failedProducts", (failedProducts == null) ? null : Arrays.toString(failedProducts.toArray()))
               .toString();
     }
-
 
 }

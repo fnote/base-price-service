@@ -10,29 +10,34 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Repository used to load business unit info
+ *
+ * @author Tharuka Jayalath
+ * @copyright (C) 2020, Sysco Corporation
+ * @end Created : 6/21/20. Sun 2020 10:50
+ */
 @Repository
 public class BusinessUnitRepository {
 
-    @Value("${active.business.units}")
-    private String businessUnitsStr;
-
     private List<BusinessUnit> businessUnits;
     private Set<String> businessUnitSet;
+    private String businessUnitsStr;
 
     /**
      * Constructor
      */
     @Autowired
-    public BusinessUnitRepository() {
+    public BusinessUnitRepository(@Value("${active.business.units}") String businessUnitsStr) {
         super();
+        this.businessUnitsStr = businessUnitsStr;
         businessUnits = new ArrayList<>();
         businessUnitSet = new HashSet<>();
     }
 
     public List<BusinessUnit> getBusinessUnitList() {
-        // TODO: Retrieve business units from a different source (e.g. a DB table)
 
-        if(businessUnits.isEmpty()) {
+        if (businessUnits.isEmpty()) {
             String[] businessUnitIds = businessUnitsStr.split(",");
 
             for (String businessUnitId : businessUnitIds) {

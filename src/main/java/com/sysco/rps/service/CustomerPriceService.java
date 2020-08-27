@@ -3,16 +3,18 @@ package com.sysco.rps.service;
 import com.sysco.rps.common.Errors;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
-import com.sysco.rps.dto.ErrorDTO;
+import com.sysco.rps.dto.MinorErrorDTO;
 import com.sysco.rps.dto.Product;
 import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.refpricing.CustomerPriceRepository;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -24,12 +26,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
+import static com.sysco.rps.common.Constants.PRICE_REQUEST_DATE_PATTERN;
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
-import static com.sysco.rps.common.Errors.Codes.OPCO_NOT_FOUND;
-import static com.sysco.rps.common.Errors.Messages.MSG_OPCO_NOT_FOUND;
 
 /**
+ * Contains logic on processing the price request by calling repositories
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -40,6 +44,11 @@ import static com.sysco.rps.common.Errors.Messages.MSG_OPCO_NOT_FOUND;
 public class CustomerPriceService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerPriceService.class);
+    private final Integer configuredSUPCsPerQuery;
+
+    CustomerPriceService(@Value("${supcs.per.query:5}") Integer configuredSUPCsPerQuery) {
+        this.configuredSUPCsPerQuery = configuredSUPCsPerQuery;
+    }
 
     @Autowired
     private CustomerPriceRepository repository;
@@ -49,11 +58,17 @@ public class CustomerPriceService {
 
     public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
 
-        validateRequest(request);
+        RefPriceAPIException validationException = validateRequest(request);
 
-        int supcsPerQuery = (requestedSupcsPerQuery == null) ? request.getProducts().size() : requestedSupcsPerQuery;
+        if (validationException != null) {
+            return Mono.error(validationException);
+        }
 
-        List<List<String>> supcsPartitions = ListUtils.partition(request.getProducts(), supcsPerQuery);
+        List<String> requestedSUPCs = request.getProducts().stream().distinct().collect(Collectors.toList());
+
+        int supcsPerQuery = (requestedSupcsPerQuery == null || requestedSupcsPerQuery == 0) ? configuredSUPCsPerQuery : requestedSupcsPerQuery;
+
+        List<List<String>> supcsPartitions = ListUtils.partition(requestedSUPCs, supcsPerQuery);
 
         AtomicLong timeConsumedForDbActivities = new AtomicLong(0);
 
@@ -71,12 +86,12 @@ public class CustomerPriceService {
                   v.forEach(p -> {
                       String supc = p.getSupc();
                       Product existingProduct = productMap.get(supc);
-                      if (existingProduct == null || (existingProduct.getPriceExportDate() < p.getPriceExportDate())) {
+                      if (existingProduct == null || (existingProduct.getPriceExportTimestamp() < p.getPriceExportTimestamp())) {
                           productMap.put(supc, p);
                       }
                   });
                   logger.info("TOTAL-DB-TIME : [{}]", timeConsumedForDbActivities.get());
-                  return Mono.just(formResponse(request, productMap));
+                  return Mono.just(formResponse(request, requestedSUPCs, productMap));
               }).doOnError(e -> {
                   logger.error("Request Payload: [{}]", request);
                   logger.error(e.getMessage(), e);
@@ -84,34 +99,46 @@ public class CustomerPriceService {
 
     }
 
-    private void validateRequest(CustomerPriceRequest request) {
+    private RefPriceAPIException validateRequest(CustomerPriceRequest request) {
         // Validate the OpCo
-        if(!businessUnitLoaderService.isOpcoExist(request.getBusinessUnitNumber())) {
-            throw new RefPriceAPIException(HttpStatus.NOT_FOUND, OPCO_NOT_FOUND, MSG_OPCO_NOT_FOUND);
+
+        if (StringUtils.isEmpty(request.getBusinessUnitNumber())) {
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.REQUESTED_OPCO_NULL_OR_EMPTY, Errors.Messages.REQUESTED_OPCO_NULL_OR_EMPTY);
         }
 
-        if(StringUtils.isEmpty(request.getCustomerAccount())) {
-            throw new RefPriceAPIException(HttpStatus.BAD_REQUEST, OPCO_NOT_FOUND, MSG_OPCO_NOT_FOUND);
+        if (!businessUnitLoaderService.isOpcoExist(request.getBusinessUnitNumber())) {
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.OPCO_NOT_FOUND, Errors.Messages.MSG_OPCO_NOT_FOUND);
         }
+
+        if (StringUtils.isEmpty(request.getCustomerAccount())) {
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.CUSTOMER_NULL_OR_EMPTY, Errors.Messages.CUSTOMER_NULL_OR_EMPTY);
+        }
+
+        if (request.getProducts() == null) {
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.PRODUCTS_NOT_FOUND_IN_REQUEST, Errors.Messages.MSG_PRODUCTS_NOT_FOUND_IN_REQUEST);
+        }
+
+        if (!GenericValidator.isDate(request.getPriceRequestDate(), PRICE_REQUEST_DATE_PATTERN, true)) {
+            return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST,
+                  Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST);
+        }
+        return null;
     }
 
-    private CustomerPriceResponse formResponse(CustomerPriceRequest request, Map<String, Product> foundProductsMap) {
+    private CustomerPriceResponse formResponse(CustomerPriceRequest request, List<String> requestedSUPCs, Map<String, Product> foundProductsMap) {
 
-        List<String> reqProducts = request.getProducts();
-        List<ErrorDTO> errors = new ArrayList<>();
+        List<MinorErrorDTO> errors = new ArrayList<>();
         List<Product> products = new ArrayList<>();
-        String customer = request.getCustomerAccount();
 
-        if (foundProductsMap.size() == reqProducts.size()) {
+        if (foundProductsMap.size() == requestedSUPCs.size()) {
             products.addAll(foundProductsMap.values());
         } else {
 
-            for (String productId : reqProducts) {
+            for (String productId : requestedSUPCs) {
 
                 Product product = foundProductsMap.get(productId);
                 if (product == null) {
-                    String errorData = String.format("Price not found for SUPC: %s Customer: %s", productId, customer);
-                    errors.add(new ErrorDTO(Errors.Messages.MSG_CUSTOMER_INVALID, Errors.Codes.CUSTOMER_INVALID, errorData));
+                    errors.add(new MinorErrorDTO(productId, Errors.Codes.MAPPING_NOT_FOUND, Errors.Messages.MAPPING_NOT_FOUND));
                 } else {
                     products.add(product);
                 }

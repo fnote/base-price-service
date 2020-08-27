@@ -7,18 +7,20 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.util.List;
 
 /**
+ * The bean that defines the customer price response
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
  * @end Created : 12. Jun 2020 16:22
  */
-public class CustomerPriceResponse extends BaseResponse {
+public class CustomerPriceResponse extends BaseResponse<Product> {
 
     private String businessUnitNumber;
     private String customerAccount;
     private String priceRequestDate;
 
-    public CustomerPriceResponse(CustomerPriceRequest customerPriceRequest, List<Product> products, List<ErrorDTO> errors) {
+    public CustomerPriceResponse(CustomerPriceRequest customerPriceRequest, List<Product> products, List<MinorErrorDTO> errors) {
         super(products, errors);
         this.businessUnitNumber = customerPriceRequest.getBusinessUnitNumber();
         this.customerAccount = customerPriceRequest.getCustomerAccount();
@@ -78,6 +80,7 @@ public class CustomerPriceResponse extends BaseResponse {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+              .appendSuper(super.toString())
               .append("businessUnitNumber", businessUnitNumber)
               .append("customerAccount", customerAccount)
               .append("priceRequestDate", priceRequestDate)

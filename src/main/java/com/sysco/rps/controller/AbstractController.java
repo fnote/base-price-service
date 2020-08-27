@@ -12,14 +12,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import static java.text.MessageFormat.format;
 
 /**
- * @author hasithag
+ * Class based global exception handlers
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -35,23 +38,40 @@ public abstract class AbstractController {
 
     @ExceptionHandler(RefPriceAPIException.class)
     ResponseEntity<Mono<ErrorDTO>> handleRefPriceApiException(RefPriceAPIException e) {
+        String traceId = UUID.randomUUID().toString();
 
-        LOGGER.error("RefPriceAPIException occurred", e);
+        LOGGER.error("[{}] RefPriceAPIException occurred", traceId, e);
 
         String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, (e.getErrorCode())), new Object[]{},
               UNKNOWN_ERROR, Locale.getDefault());
 
         ErrorDTO error;
         if (e.getAdditionalInfo() != null) {
-            error = new ErrorDTO(e.getErrorCode(), message, e.getAdditionalInfo());
+            error = new ErrorDTO(e.getErrorCode(), message, e.getAdditionalInfo(), traceId);
         } else {
-            error = new ErrorDTO(e.getErrorCode(), message, e.getMessage());
+            error = new ErrorDTO(e.getErrorCode(), message, e.getMessage(), traceId);
         }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         return new ResponseEntity<>(Mono.just(error), headers, e.getHttpStatusCode());
+    }
+
+    /**
+     * Handle Exceptions associated with specific HTTP response status codes
+     *
+     * @param e ResponseStatusException
+     * @return
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    ResponseEntity<Mono<ErrorDTO>> handleResponseStatusException(ResponseStatusException e) {
+        String traceId = UUID.randomUUID().toString();
+        LOGGER.error("[{}] ResponseStatusException occurred", traceId, e);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ErrorDTO error = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, e.getStatus().getReasonPhrase(), traceId);
+        return new ResponseEntity<>(Mono.just(error), headers, e.getStatus());
     }
 
 
@@ -63,13 +83,14 @@ public abstract class AbstractController {
      */
     @ExceptionHandler(Exception.class)
     ResponseEntity<Mono<ErrorDTO>> handleUnknownException(Exception e) {
-        LOGGER.error("Unknown exception occurred", e);
+        String traceId = UUID.randomUUID().toString();
+        LOGGER.error("[{}] Unknown exception occurred", traceId, e);
 
         String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, Errors.Codes.UNEXPECTED_ERROR), new Object[]{}, UNKNOWN_ERROR,
               Locale.getDefault());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        ErrorDTO error = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, e.getMessage());
+        ErrorDTO error = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, traceId);
         return new ResponseEntity<>(Mono.just(error), headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
