@@ -17,14 +17,14 @@ public class PAData {
     private Double price;
     private String effectiveDate;
     private long exportedDate;
-    private char splitIndicator;
+    private char catchWeightIndicator;
 
-    public PAData(String supc, Integer priceZone, Double price, String effectiveDate, long exportedDate, char splitIndicator) {
+    public PAData(String supc, Integer priceZone, Double price, String effectiveDate, long exportedDate, char catchWeightIndicator) {
         this.supc = supc;
         this.priceZone = priceZone;
         this.price = price;
         this.exportedDate = exportedDate;
-        this.splitIndicator = splitIndicator;
+        this.catchWeightIndicator = catchWeightIndicator;
         setEffectiveDate(effectiveDate);
     }
 
@@ -72,11 +72,11 @@ public class PAData {
         this.exportedDate = exportedDate;
     }
 
-    public char getSplitIndicator() {
-        return splitIndicator;
+    public char getCatchWeightIndicator() {
+        return catchWeightIndicator;
     }
 
-    public void setSplitIndicator(char splitIndicator) {
-        this.splitIndicator = splitIndicator;
+    public void setCatchWeightIndicator(char catchWeightIndicator) {
+        this.catchWeightIndicator = catchWeightIndicator;
     }
 }

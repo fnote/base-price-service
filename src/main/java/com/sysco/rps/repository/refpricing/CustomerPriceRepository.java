@@ -15,10 +15,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static com.sysco.rps.common.Constants.IS_CATCH_WEIGHT;
 import static com.sysco.rps.common.Constants.PRICE_REQUEST_DATE_PATTERN;
 
 /**
- * Repository that provides access to customer price data from PA and PRICE_ZONE tables
+ * Repository that provides access to customer price data from PRICE (PA) and PRICE_ZONE tables
  *
  * @author Tharuka Jayalath
  * (C) 2020, Sysco Corporation
@@ -38,8 +39,8 @@ public class CustomerPriceRepository {
                 "       paOuter.PRICE," +
                 "       paOuter.EFFECTIVE_DATE," +
                 "       paOuter.EXPORTED_DATE," +
-                "       paOuter.SPLIT_INDICATOR" +
-                " FROM PA paOuter force index (`PRIMARY`)" +
+                "       paOuter.CATCH_WEIGHT_INDICATOR" +
+                " FROM PRICE paOuter force index (`PRIMARY`)" +
                 "         INNER JOIN (SELECT Max(paInner.EFFECTIVE_DATE) max_eff_date," +
                 "                            paInner.SUPC," +
                 "                            paInner.PRICE_ZONE" +
@@ -49,7 +50,7 @@ public class CustomerPriceRepository {
                 "                           FROM PRICE_ZONE_01 e force index (`PRIMARY`)" +
                 "                           WHERE e.CUSTOMER_ID = :customerId " +
                 "                             AND SUPC IN ( :supcs )) pz" +
-                "                              INNER JOIN PA paInner force index (`PRIMARY`)" +
+                "                              INNER JOIN PRICE paInner force index (`PRIMARY`)" +
                 "                                         ON pz.SUPC = paInner.SUPC" +
                 "                                             AND pz.PRICE_ZONE = paInner.PRICE_ZONE" +
                 "                                             AND paInner.EFFECTIVE_DATE <=:effectiveDate" +
@@ -86,11 +87,11 @@ public class CustomerPriceRepository {
                         }
 
                         return new Product(row.get("SUPC", String.class),
-                              row.get("PRICE_ZONE", Integer.class),
+                              intToString(row.get("PRICE_ZONE", Integer.class)),
                               row.get("PRICE", Double.class),
                               getDate(row.get("EFFECTIVE_DATE", LocalDateTime.class)),
                               row.get("EXPORTED_DATE", Long.class),
-                              getChar(row.get("SPLIT_INDICATOR", String.class))
+                              getCatchWeightIndicator(row.get("CATCH_WEIGHT_INDICATOR", String.class))
                         );
 
                     }
@@ -98,8 +99,12 @@ public class CustomerPriceRepository {
               ).all();
     }
 
-    private Character getChar(String str) {
-        return StringUtils.isEmpty(str) ? null : str.charAt(0);
+    private String intToString(Integer intValue) {
+        return intValue == null ? "" : Integer.toString(intValue);
+    }
+
+    private Boolean getCatchWeightIndicator(String str) {
+        return StringUtils.isEmpty(str) ? Boolean.FALSE : str.equalsIgnoreCase(IS_CATCH_WEIGHT);
     }
 
     private String getDate(LocalDateTime date) {

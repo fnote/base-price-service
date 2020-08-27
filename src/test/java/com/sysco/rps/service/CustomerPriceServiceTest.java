@@ -48,9 +48,9 @@ class CustomerPriceServiceTest extends BaseTest {
     void tearDown() {
     }
 
-    private void validateFirstSuccessItem(CustomerPriceResponse result, String supc, Integer priceZoneId, Double referencePrice,
-                                          String effectiveFromDate, Long priceExportDate, Character splitIndicator) {
-        Product product = new Product(supc, priceZoneId, referencePrice, effectiveFromDate, priceExportDate, splitIndicator);
+    private void validateFirstSuccessItem(CustomerPriceResponse result, String supc, String priceZoneId, Double referencePrice,
+                                          String effectiveFromDate, Long priceExportTimestamp, Boolean catchWeightIndicator) {
+        Product product = new Product(supc, priceZoneId, referencePrice, effectiveFromDate, priceExportTimestamp, catchWeightIndicator);
         assertEquals(product, result.getProducts().get(0));
     }
 
@@ -86,7 +86,7 @@ class CustomerPriceServiceTest extends BaseTest {
     @Test
     void testRequestingDuplicateProducts() {
 
-        testUtilsRepository.addPARecord(new PAData("1000001", 6, 100.20, "20241212", 1595229000, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 6, 100.20, "20241212", 1595229000, 'N'));
         testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 6, "100001", "20241212"));
 
         List<String> products = new ArrayList<>(Arrays.asList("1000001", "1000001", "1000002", "1000002"));
@@ -106,8 +106,8 @@ class CustomerPriceServiceTest extends BaseTest {
     // Testing query edge cases
     @Test
     void testSingleEffDateWithMultipleExportedDates() {
-        testUtilsRepository.addPARecord(new PAData("1000001", 3, 125.24, "20210301", 1495308212, 'C'));
-        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.24, "20210301", 1595308212, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 125.24, "20210301", 1495308212, 'N'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.24, "20210301", 1595308212, 'N'));
         testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 3, "100001", "20210202"));
 
         List<String> products = new ArrayList<>(Collections.singletonList("1000001"));
@@ -120,7 +120,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "20210301", 1595308212L, 'C');
+                  validateFirstSuccessItem(result, "1000001", "3", 200.24, "20210301", 1595308212L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -131,8 +131,8 @@ class CustomerPriceServiceTest extends BaseTest {
      */
     @Test
     void testMultipleEffDatesWithSingleExportedDates() {
-        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.24, "20210306", 1595308212, 'C'));
-        testUtilsRepository.addPARecord(new PAData("1000001", 3, 125.24, "20210310", 1595308212, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.24, "20210306", 1595308212, 'N'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 125.24, "20210310", 1595308212, 'N'));
         testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 3, "100001", "20210202"));
 
         List<String> products = new ArrayList<>(Collections.singletonList("1000001"));
@@ -162,7 +162,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "20210306", 1595308212L, 'C');
+                  validateFirstSuccessItem(result, "1000001", "3", 200.24, "20210306", 1595308212L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -177,7 +177,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "20210306", 1595308212L, 'C');
+                  validateFirstSuccessItem(result, "1000001", "3", 200.24, "20210306", 1595308212L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -192,7 +192,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 125.24, "20210310", 1595308212L, 'C');
+                  validateFirstSuccessItem(result, "1000001", "3", 125.24, "20210310", 1595308212L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -207,7 +207,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 125.24, "20210310", 1595308212L, 'C');
+                  validateFirstSuccessItem(result, "1000001", "3", 125.24, "20210310", 1595308212L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -221,9 +221,9 @@ class CustomerPriceServiceTest extends BaseTest {
     void testMaxEffDateLessThanMaxExportedDate() {
 
         // Exported date: 2021-03-24
-        testUtilsRepository.addPARecord(new PAData("1000001", 3, 125.24, "20210410", 1616578866, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 125.24, "20210410", 1616578866, 'N'));
         // Exported date: 2021-06-24
-        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.24, "20210410", 1624527666, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.24, "20210410", 1624527666, 'N'));
         testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 3, "100001", "20210202"));
 
 
@@ -268,7 +268,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "20210410", 1624527666L, 'C');
+                  validateFirstSuccessItem(result, "1000001", "3", 200.24, "20210410", 1624527666L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -283,7 +283,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.24, "20210410", 1624527666L, 'C');
+                  validateFirstSuccessItem(result, "1000001", "3", 200.24, "20210410", 1624527666L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -296,10 +296,10 @@ class CustomerPriceServiceTest extends BaseTest {
     void testMaxEffDateGreaterThanMaxExportedDate() {
 
         // Exported date: 2021-02-24
-        testUtilsRepository.addPARecord(new PAData("1000001", 3, 100.00, "20210412", 1614159666, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 100.00, "20210412", 1614159666, 'N'));
         // Exported date: 2021-03-24
-        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.00, "20210412", 1616578866, 'C'));
-        testUtilsRepository.addPARecord(new PAData("1000001", 3, 300.00, "20210413", 1614159666, 'C'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 200.00, "20210412", 1616578866, 'N'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 300.00, "20210413", 1614159666, 'N'));
         testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 3, "100001", "20210402"));
 
 
@@ -358,7 +358,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 200.00, "20210412", 1616578866L, 'C');
+                  validateFirstSuccessItem(result, "1000001", "3", 200.00, "20210412", 1616578866L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -373,7 +373,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 300.00, "20210413", 1614159666L, 'C');
+                  validateFirstSuccessItem(result, "1000001", "3", 300.00, "20210413", 1614159666L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -388,7 +388,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, result.getProducts().size());
                   assertEquals(0, result.getFailedProducts().size());
 
-                  validateFirstSuccessItem(result, "1000001", 3, 300.00, "20210413", 1614159666L, 'C');
+                  validateFirstSuccessItem(result, "1000001", "3", 300.00, "20210413", 1614159666L, Boolean.FALSE);
 
               })
               .verifyComplete();
@@ -434,7 +434,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(1, response.getProducts().size());
                   assertEquals(1, response.getFailedProducts().size());
                   assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
-                  validateFirstSuccessItem(response, "2512527", 1, 1.00, "20200201", 1578960300L, 'p');
+                  validateFirstSuccessItem(response, "2512527", "1", 1.00, "20200201", 1578960300L, Boolean.TRUE);
               })
               .verifyComplete();
 
@@ -658,8 +658,8 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(
-                        new Product("3982206", 4, 28.00,
-                              "20200201", 1580947560L, 'p'),
+                        new Product("3982206", "4", 28.00,
+                              "20200201", 1580947560L, Boolean.TRUE),
                         response.getProducts().get(0)
                   );
               })
@@ -671,8 +671,8 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(
-                        new Product("3982206", 4, 28.00,
-                              "20200201", 1580947560L, 'p'),
+                        new Product("3982206", "4", 28.00,
+                              "20200201", 1580947560L, Boolean.TRUE),
                         response.getProducts().get(0)
                   );
               })
@@ -683,8 +683,8 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(
-                        new Product("3982206", 4, 30.00,
-                              "20200205", 1580947560L, 'c'),
+                        new Product("3982206", "4", 30.00,
+                              "20200205", 1580947560L, Boolean.FALSE),
                         response.getProducts().get(0)
                   );
               })
@@ -695,8 +695,8 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(
-                        new Product("3982206", 4, 30.00,
-                              "20200205", 1580947560L, 'c'),
+                        new Product("3982206", "4", 30.00,
+                              "20200205", 1580947560L, Boolean.FALSE),
                         response.getProducts().get(0)
                   );
               })

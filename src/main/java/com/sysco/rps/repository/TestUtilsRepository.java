@@ -65,7 +65,7 @@ public class TestUtilsRepository {
 
     public boolean addPARecord(PAData paData) {
         String query = INSERT_INTO + Constants.DBNames.PA + "` VALUES (:supc, :priceZone, :price, :effectiveDate, :exportedDate, " +
-              ":splitIndicator);";
+              ":catchWeightIndicator);";
 
         AtomicBoolean isSuccess = new AtomicBoolean(false);
 
@@ -75,7 +75,7 @@ public class TestUtilsRepository {
               .bind("price", paData.getPrice())
               .bind("effectiveDate", paData.getEffectiveDate())
               .bind("exportedDate", paData.getExportedDate())
-              .bind("splitIndicator", String.valueOf(paData.getSplitIndicator()))
+              .bind("catchWeightIndicator", String.valueOf(paData.getCatchWeightIndicator()))
               .map((row, rowMetaData) -> {
                   LOGGER.debug(RESULT_ROW, row);
                   return row;
@@ -116,7 +116,7 @@ public class TestUtilsRepository {
         AtomicBoolean success = new AtomicBoolean(true);
         Optional<String> bulkValues = generatePARecords(readCsv(fileName), formatExportedDate)
               .stream()
-              .map(r -> "('" + r.getSupc() + "'," + r.getPriceZone() + "," + r.getPrice() + ",'" + r.getEffectiveDate() + "'," + r.getExportedDate() + ",'" + r.getSplitIndicator() + "')")
+              .map(r -> "('" + r.getSupc() + "'," + r.getPriceZone() + "," + r.getPrice() + ",'" + r.getEffectiveDate() + "'," + r.getExportedDate() + ",'" + r.getCatchWeightIndicator() + "')")
               .reduce((a, b) -> a.concat(",").concat(b));
 
         bulkValues.ifPresent(v -> {
@@ -184,7 +184,7 @@ public class TestUtilsRepository {
 
     /**
      * CSV data column order should be according to this
-     * SUPC,PRICE_ZONE,PRICE,EFFECTIVE_DATE,EXPORTED_DATE,SPLIT_INDICATOR
+     * SUPC,PRICE_ZONE,PRICE,EFFECTIVE_DATE,EXPORTED_DATE,CATCH_WEIGHT_INDICATOR
      *
      * @param csvData
      * @return List<PAData>
@@ -206,10 +206,10 @@ public class TestUtilsRepository {
                             exportedDate = Long.parseLong(dateField);
                         }
 
-                        char splitIndicator = (r.size() < 6 || r.get(5) == null) ? Constants.SplitIndicators.CASE : r.get(5).charAt(0);
+                        char catchWeightIndicator = (r.size() < 6 || r.get(5) == null) ? Constants.SplitIndicators.CASE : r.get(5).charAt(0);
 
                         return new PAData(r.get(0), Integer.parseInt(r.get(1)), Double.parseDouble(r.get(2)),
-                              r.get(3), exportedDate, splitIndicator);
+                              r.get(3), exportedDate, catchWeightIndicator);
                     }
               ).collect(Collectors.toList());
     }
