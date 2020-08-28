@@ -58,6 +58,8 @@ public class RoutingConnectionFactoryConfig {
     private Long pricingDbMaxLifeUpperLimit;
     private BusinessUnitLoaderService businessUnitLoaderService;
 
+    private Map<String, ConnectionPool> poolMap = new HashMap<>();
+
     /***
      * Allows setting a business loader service
      * @param businessUnitLoaderService
@@ -141,6 +143,7 @@ public class RoutingConnectionFactoryConfig {
                   .build();
 
             ConnectionPool pool = new ConnectionPool(configuration);
+            this.poolMap.put(businessUnitId, pool);
 
             if (defaultConnectionFactory == null) {
                 defaultConnectionFactory = pool;
@@ -168,5 +171,10 @@ public class RoutingConnectionFactoryConfig {
 
     private int getInt(String strVal, int defaultVal) {
         return StringUtils.isEmpty(strVal) ? defaultVal : Integer.parseInt(strVal);
+    }
+
+    @Bean
+    public Map<String, ConnectionPool> getPoolMap() {
+        return this.poolMap;
     }
 }
