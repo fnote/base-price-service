@@ -130,12 +130,14 @@ public class RoutingConnectionFactoryConfig {
 
             ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory)
                   .maxSize(getInt(maxPoolSize, 10))
-//                  .initialSize(getInt(initialPoolSize, 5))
+                  .initialSize(getInt(initialPoolSize, 5))
                   .maxLifeTime(maxLife)
                   .maxIdleTime(maxIdle)
                   .maxAcquireTime(maxConnectionAcquireTime)
                   .maxCreateConnectionTime(maxConnectionCreateTime)
                   .validationQuery(validationQuery)
+                  .name(businessUnitId)
+                  .registerJmx(true)
                   .build();
 
             ConnectionPool pool = new ConnectionPool(configuration);
