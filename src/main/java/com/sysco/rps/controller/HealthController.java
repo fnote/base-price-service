@@ -37,7 +37,7 @@ public class HealthController extends AbstractController {
               r.idleSize(),
               r.getMaxAllocatedSize(),
               r.allocatedSize(),
-              r.getMaxPendingAcquireSize(),
+              r.pendingAcquireSize(),
               r.acquiredSize(),
               r.getMaxPendingAcquireSize()
         ))));
