@@ -1,0 +1,50 @@
+package com.sysco.rps.config;
+
+import io.r2dbc.pool.ConnectionPool;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.Map;
+import java.util.Optional;
+
+/**
+ * @author Tharuka Jayalath
+ * (C) 2019, Sysco Corporation
+ * Created: 8/28/20. Fri 2020 23:53
+ */
+@Component
+public class R2dbcPoolHealthIndicator implements ReactiveHealthIndicator {
+
+    private Map<String, ConnectionPool> poolMap;
+
+    @Autowired
+    public R2dbcPoolHealthIndicator(Map<String, ConnectionPool> poolMap) {
+        this.poolMap = poolMap;
+    }
+
+    /**
+     * Provide the indicator of health.
+     *
+     * @return a {@link Mono} that provides the {@link Health}
+     */
+    @Override
+    public Mono<Health> health() {
+
+        return Flux.fromIterable(poolMap.values())
+              .map(ConnectionPool::getMetrics)
+              .filter(Optional::isPresent)
+              .map(Optional::get)
+              .filter(metrics -> (metrics.idleSize() > 0 && metrics.pendingAcquireSize() > 0))
+              .collectList()
+              .flatMap(metricsList -> {
+                  if (metricsList.isEmpty()) {
+                      return Mono.just(new Health.Builder().up().build());
+                  }
+                  return Mono.just(new Health.Builder().down().build());
+              });
+    }
+}
