@@ -16,4 +16,5 @@ COPY build/libs/ref-price-service-0.0.1-SNAPSHOT.jar /app/
 #Expose port
 EXPOSE 8081
 
-ENTRYPOINT ["java","-agentpath:/usr/local/YourKit-JavaProfiler-2019.8/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all","-jar","app/ref-price-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-Dcom.sun.management.jmxremote.port=10001","-Dcom.sun.management.jmxremote.authenticate=false","-Dcom.sun.management.jmxremote.ssl=false ","-jar","app/ref-price-service-0.0.1-SNAPSHOT.jar"]
+#ENTRYPOINT ["java","-agentpath:/usr/local/YourKit-JavaProfiler-2019.8/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all","-jar","app/ref-price-service-0.0.1-SNAPSHOT.jar"]
