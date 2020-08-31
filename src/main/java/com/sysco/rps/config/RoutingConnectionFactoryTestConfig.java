@@ -67,8 +67,6 @@ public class RoutingConnectionFactoryTestConfig {
 
         Set<String> activeBusinessUnitIds = loadActiveBusinessUnits();
 
-        // TODO: consider using business unit ID for DB File path
-
         for (String businessUnitId : activeBusinessUnitIds) {
 
             // Note: Can use H2 db in memory by using .inMemory("REF_PRICE_020") where REF_PRICE_020 refers to the DB name

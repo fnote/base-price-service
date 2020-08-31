@@ -14,6 +14,7 @@ import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -43,6 +44,11 @@ import static com.sysco.rps.common.Constants.ROUTING_KEY;
 public class CustomerPriceService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerPriceService.class);
+    private final Integer configuredSUPCsPerQuery;
+
+    CustomerPriceService(@Value("${supcs.per.query:5}") Integer configuredSUPCsPerQuery) {
+        this.configuredSUPCsPerQuery = configuredSUPCsPerQuery;
+    }
 
     @Autowired
     private CustomerPriceRepository repository;
@@ -52,7 +58,6 @@ public class CustomerPriceService {
 
     public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
 
-        // TODO: See whether Mono.error can be achieved through Aspects or by some other means
         RefPriceAPIException validationException = validateRequest(request);
 
         if (validationException != null) {
@@ -61,7 +66,7 @@ public class CustomerPriceService {
 
         List<String> requestedSUPCs = request.getProducts().stream().distinct().collect(Collectors.toList());
 
-        int supcsPerQuery = (requestedSupcsPerQuery == null) ? requestedSUPCs.size() : requestedSupcsPerQuery;
+        int supcsPerQuery = (requestedSupcsPerQuery == null || requestedSupcsPerQuery == 0) ? configuredSUPCsPerQuery : requestedSupcsPerQuery;
 
         List<List<String>> supcsPartitions = ListUtils.partition(requestedSUPCs, supcsPerQuery);
 
@@ -81,7 +86,7 @@ public class CustomerPriceService {
                   v.forEach(p -> {
                       String supc = p.getSupc();
                       Product existingProduct = productMap.get(supc);
-                      if (existingProduct == null || (existingProduct.getPriceExportDate() < p.getPriceExportDate())) {
+                      if (existingProduct == null || (existingProduct.getPriceExportTimestamp() < p.getPriceExportTimestamp())) {
                           productMap.put(supc, p);
                       }
                   });
@@ -113,7 +118,7 @@ public class CustomerPriceService {
             return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.PRODUCTS_NOT_FOUND_IN_REQUEST, Errors.Messages.MSG_PRODUCTS_NOT_FOUND_IN_REQUEST);
         }
 
-        if (!GenericValidator.isDate(request.getPriceRequestDate(), PRICE_REQUEST_DATE_PATTERN, false)) {
+        if (!GenericValidator.isDate(request.getPriceRequestDate(), PRICE_REQUEST_DATE_PATTERN, true)) {
             return new RefPriceAPIException(HttpStatus.BAD_REQUEST, Errors.Codes.INVALID_PRICE_REQUEST_DATE_IN_REQUEST,
                   Errors.Messages.MSG_INVALID_PRICE_REQUEST_DATE_IN_REQUEST);
         }

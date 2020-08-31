@@ -138,8 +138,17 @@ dependencies {
 }
 
 test {
+    systemProperty 'spring.profiles.active', 'test'
     finalizedBy jacocoTestReport
     useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        showExceptions true
+        exceptionFormat "full"
+        showCauses true
+        showStackTraces true
+    }
+
 }
 
 project.tasks["sonarqube"].dependsOn "compileJava"

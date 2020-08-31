@@ -12,11 +12,14 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static com.sysco.rps.util.PricingUtils.getCatchWeightIndicator;
+import static com.sysco.rps.util.PricingUtils.formatDate;
+import static com.sysco.rps.util.PricingUtils.intToString;
+
 /**
- * Repository that provides access to customer price data from PA and PRICE_ZONE tables
+ * Repository that provides access to customer price data from PRICE (PA) and PRICE_ZONE tables
  *
  * @author Tharuka Jayalath
  * (C) 2020, Sysco Corporation
@@ -36,8 +39,8 @@ public class CustomerPriceRepository {
                 "       paOuter.PRICE," +
                 "       paOuter.EFFECTIVE_DATE," +
                 "       paOuter.EXPORTED_DATE," +
-                "       paOuter.SPLIT_INDICATOR" +
-                " FROM PA paOuter force index (`PRIMARY`)" +
+                "       paOuter.CATCH_WEIGHT_INDICATOR" +
+                " FROM PRICE paOuter force index (`PRIMARY`)" +
                 "         INNER JOIN (SELECT Max(paInner.EFFECTIVE_DATE) max_eff_date," +
                 "                            paInner.SUPC," +
                 "                            paInner.PRICE_ZONE" +
@@ -47,7 +50,7 @@ public class CustomerPriceRepository {
                 "                           FROM PRICE_ZONE_01 e force index (`PRIMARY`)" +
                 "                           WHERE e.CUSTOMER_ID = :customerId " +
                 "                             AND SUPC IN ( :supcs )) pz" +
-                "                              INNER JOIN PA paInner force index (`PRIMARY`)" +
+                "                              INNER JOIN PRICE paInner force index (`PRIMARY`)" +
                 "                                         ON pz.SUPC = paInner.SUPC" +
                 "                                             AND pz.PRICE_ZONE = paInner.PRICE_ZONE" +
                 "                                             AND paInner.EFFECTIVE_DATE <=:effectiveDate" +
@@ -62,6 +65,11 @@ public class CustomerPriceRepository {
         }
     }
 
+    /**
+     * Queries the DB for ref price for given supcs for a given date
+     * The requested effectiveDate is in yyyMMdd format, since MySql accepts that as a valid format, we will be doing no format changes
+     * Ref: https://dev.mysql.com/doc/refman/5.7/en/date-and-time-literals.html
+     * */
     public Flux<Product> getPricesByOpCo(CustomerPriceRequest customerPriceRequest, List<String> supcsPartition) {
 
         StopWatch stopWatch = new StopWatch();
@@ -79,28 +87,15 @@ public class CustomerPriceRepository {
                         }
 
                         return new Product(row.get("SUPC", String.class),
-                              row.get("PRICE_ZONE", Integer.class),
+                              intToString(row.get("PRICE_ZONE", Integer.class)),
                               row.get("PRICE", Double.class),
-                              getDate(row.get("EFFECTIVE_DATE", LocalDateTime.class)),
+                              formatDate(row.get("EFFECTIVE_DATE", LocalDateTime.class)),
                               row.get("EXPORTED_DATE", Long.class),
-                              getChar(row.get("SPLIT_INDICATOR", String.class))
+                              getCatchWeightIndicator(row.get("CATCH_WEIGHT_INDICATOR", String.class))
                         );
 
                     }
 
               ).all();
-    }
-
-    private Character getChar(String str) {
-        return StringUtils.isEmpty(str) ? null : str.charAt(0);
-    }
-
-    private String getDate(LocalDateTime date) {
-        if (date == null) {
-            return "";
-        }
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return formatter.format(date);
     }
 }

@@ -34,8 +34,7 @@ public class CustomerPriceController extends AbstractController {
     @PostMapping("/customer-prices")
     @ApiOperation(
           value = "Gets the reference pricing for the customer item",
-          notes = "If effectiveDate is provided in the req body, that will be used as the max effective date." +
-                "Else current day will be used. Uses NamedJDBCTemplate to fetch data",
+          notes = "Effective reference prices will be identified considering the priceRequestDate provided in the req body.",
           response = CustomerPriceResponse.class)
     @ApiResponses(value = {
           @ApiResponse(code = org.apache.http.HttpStatus.SC_OK, message = "Data fetch successful"),
@@ -43,7 +42,7 @@ public class CustomerPriceController extends AbstractController {
                 message = "<table>" +
                       "  <tr> <th>code</th> <th>message</th> </tr>" +
                       "  <tr> <td>102040</td> <td>OpCo ID is either null or empty</td> </tr>" +
-                      "  <tr> <td>102030</td> <td>Products not found in the requesty</td> </tr>" +
+                      "  <tr> <td>102030</td> <td>Products not found in the request</td> </tr>" +
                       "  <tr> <td>102050</td> <td>Customer ID is either null or empty</td> </tr>" +
                       "  <tr> <td>102060</td> <td>Price request date is either null, empty or invalid</td> </tr>" +
                       "</table>"),
