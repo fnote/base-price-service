@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -79,7 +80,7 @@ public class RoutingConnectionFactoryConfig {
      * @param validationQuery
      * @return RoutingConnectionFactory
      */
-    @Bean
+    @Bean("routingConnectionFactory")
     public RoutingConnectionFactory routingConnectionFactory(@Value("${pricing.db.jdbcHost}") String jdbcHost,
                                                              @Value("${pricing.db.username}") String jdbcUser,
                                                              @Value("${pricing.db.password}") String jdbcPassword,
@@ -163,6 +164,7 @@ public class RoutingConnectionFactoryConfig {
     }
 
     @Bean
+    @DependsOn({"routingConnectionFactory"})
     public Map<String, ConnectionPool> getConnectionPoolMap() {
         return this.connectionPoolMap;
     }

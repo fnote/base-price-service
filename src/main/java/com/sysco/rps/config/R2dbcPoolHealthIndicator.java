@@ -13,28 +13,31 @@ import java.util.Optional;
 
 /**
  * @author Tharuka Jayalath
- * (C) 2019, Sysco Corporation
+ * (C) 2020, Sysco Corporation
  * Created: 8/28/20. Fri 2020 23:53
  */
 @Component
 public class R2dbcPoolHealthIndicator implements ReactiveHealthIndicator {
 
-    private Map<String, ConnectionPool> poolMap;
+    private Map<String, ConnectionPool> connectionPoolMap;
 
     @Autowired
-    public R2dbcPoolHealthIndicator(Map<String, ConnectionPool> poolMap) {
-        this.poolMap = poolMap;
+    public R2dbcPoolHealthIndicator(Map<String, ConnectionPool> connectionPoolMap) {
+        this.connectionPoolMap = connectionPoolMap;
     }
 
     /**
      * Provide the indicator of health.
+     * Verifies whether the connection pool status is stable or not by analyzing the
+     * idle connections and pending acquire connections in the pool
+     * if the pool status is stable then the idle connection count should be zero when pending acquire size is a positive value
      *
      * @return a {@link Mono} that provides the {@link Health}
      */
     @Override
     public Mono<Health> health() {
 
-        return Flux.fromIterable(poolMap.values())
+        return Flux.fromIterable(connectionPoolMap.values())
               .map(ConnectionPool::getMetrics)
               .filter(Optional::isPresent)
               .map(Optional::get)
