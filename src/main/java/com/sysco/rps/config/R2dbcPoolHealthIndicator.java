@@ -30,7 +30,8 @@ public class R2dbcPoolHealthIndicator implements ReactiveHealthIndicator {
      * Provide the indicator of health.
      * Verifies whether the connection pool status is stable or not by analyzing the
      * idle connections and pending acquire connections in the pool
-     * if the pool status is stable then the idle connection count should be zero when pending acquire size is a positive value
+     * if the pool status is stable then the idle connection count should be zero
+     * when pending acquire size is a positive value
      *
      * @return a {@link Mono} that provides the {@link Health}
      */
