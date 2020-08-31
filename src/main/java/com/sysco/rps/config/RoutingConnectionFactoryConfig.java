@@ -128,8 +128,6 @@ public class RoutingConnectionFactoryConfig {
                   .maxAcquireTime(maxConnectionAcquireTime)
                   .maxCreateConnectionTime(maxConnectionCreateTime)
                   .validationQuery(validationQuery)
-                  .name(businessUnitId)
-                  .registerJmx(true)
                   .build();
 
             ConnectionPool pool = new ConnectionPool(configuration);
