@@ -24,19 +24,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static com.sysco.rps.common.Constants.JdbcProperties.PRICINGDB;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.INITIAL_SIZE;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_ACQUIRE_TIME;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_CREATE_CONNECTION_TIME;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_IDLE_TIME;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_LIFE_TIME;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_SIZE;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.VALIDATION_QUERY;
-import static io.r2dbc.spi.ConnectionFactoryOptions.CONNECT_TIMEOUT;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
 import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
 import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL;
 import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
 /**
@@ -56,6 +47,11 @@ public class RoutingConnectionFactoryConfig {
     private Long pricingDbMaxLifeLowerLimit;
     @Value("${pricing.db.max.life.upper.limit}")
     private Long pricingDbMaxLifeUpperLimit;
+    @Value("${pricing.db.max.connection.create.time}")
+    private Long pricingDbMaxConnectionCreateTime;
+    @Value("${pricing.db.max.connection.acquire.time}")
+    private Long pricingDbMaxConnectionAcquireTime;
+
     private BusinessUnitLoaderService businessUnitLoaderService;
 
     private Map<String, ConnectionPool> poolMap = new HashMap<>();
@@ -99,15 +95,16 @@ public class RoutingConnectionFactoryConfig {
 
         Set<String> activeBusinessUnitIds = loadActiveBusinessUnits();
 
+        Duration maxConnectionCreateTime = Duration.ofMillis(pricingDbMaxConnectionCreateTime);
+        Duration maxConnectionAcquireTime = Duration.ofMillis(pricingDbMaxConnectionAcquireTime);
+
         for (String businessUnitId : activeBusinessUnitIds) {
 
             String db = PRICINGDB + businessUnitId;
 
             Duration maxLife = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
             Duration maxIdle = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
-            Duration connectionTimeout = Duration.ofSeconds(20000);
-            Duration maxConnectionCreateTime = Duration.ofMillis(5000);
-            Duration maxConnectionAcquireTime = Duration.ofMillis(6000);
+
 
             LOGGER.debug("Setting max times for conn pool [{}] Max Lifetime: [{} S], Max Idle Time [{} S]", db, maxLife.toSeconds(),
                   maxIdle.toSeconds());
@@ -119,14 +116,6 @@ public class RoutingConnectionFactoryConfig {
                         .option(USER, jdbcUser)
                         .option(PASSWORD, jdbcPassword)
                         .option(DATABASE, db)
-                        .option(CONNECT_TIMEOUT, connectionTimeout)/*
-                        .option(MAX_SIZE, getInt(maxPoolSize, 10))
-                        .option(INITIAL_SIZE, getInt(initialPoolSize, 5))
-                        .option(MAX_LIFE_TIME, maxLife)
-                        .option(MAX_IDLE_TIME, maxIdle)
-                        .option(MAX_ACQUIRE_TIME, maxConnectionAcquireTime)
-                        .option(MAX_CREATE_CONNECTION_TIME, maxConnectionCreateTime)
-                        .option(VALIDATION_QUERY, validationQuery)*/
                         .build()
             );
 
