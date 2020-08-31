@@ -54,7 +54,7 @@ public class RoutingConnectionFactoryConfig {
 
     private BusinessUnitLoaderService businessUnitLoaderService;
 
-    private Map<String, ConnectionPool> poolMap = new HashMap<>();
+    private Map<String, ConnectionPool> connectionPoolMap = new HashMap<>();
 
     /***
      * Allows setting a business loader service
@@ -132,7 +132,7 @@ public class RoutingConnectionFactoryConfig {
                   .build();
 
             ConnectionPool pool = new ConnectionPool(configuration);
-            this.poolMap.put(businessUnitId, pool);
+            this.connectionPoolMap.put(businessUnitId, pool);
 
             if (defaultConnectionFactory == null) {
                 defaultConnectionFactory = pool;
@@ -163,7 +163,7 @@ public class RoutingConnectionFactoryConfig {
     }
 
     @Bean
-    public Map<String, ConnectionPool> getPoolMap() {
-        return this.poolMap;
+    public Map<String, ConnectionPool> getConnectionPoolMap() {
+        return this.connectionPoolMap;
     }
 }
