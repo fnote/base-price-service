@@ -36,7 +36,6 @@ public class R2dbcPoolHealthIndicator implements ReactiveHealthIndicator {
      */
     @Override
     public Mono<Health> health() {
-
         return Flux.fromIterable(connectionPoolMap.values())
               .map(ConnectionPool::getMetrics)
               .filter(Optional::isPresent)
