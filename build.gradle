@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version '2.3.1.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'org.springframework.boot' version '2.3.3.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
     id 'java'
     id 'org.sonarqube' version '2.7'
     id 'jacoco'
@@ -59,7 +59,6 @@ jacocoTestReport {
     }
 }
 
-
 //Do not use compile or complieTest instead use implementation or testImplementation. https://docs.gradle.org/current/userguide/java_plugin.html
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
@@ -72,11 +71,11 @@ dependencies {
     }
     testImplementation 'io.projectreactor:reactor-test'
 
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     implementation 'com.h2database:h2'
     // https://mvnrepository.com/artifact/io.r2dbc/r2dbc-h2
     implementation group: 'io.r2dbc', name: 'r2dbc-h2', version: '0.8.4.RELEASE'
-
-//    testCompile("ch.vorburger.mariaDB4j:mariaDB4j-springboot:2.4.0")
 
     // https://mvnrepository.com/artifact/io.springfox/springfox-swagger2
     implementation(group: 'io.springfox', name: 'springfox-swagger2', version: '2.10.5') {
@@ -84,9 +83,6 @@ dependencies {
         exclude module: 'swagger-models'
         exclude group: 'com.google.guava', module: 'guava'
     }
-
-    // https://mvnrepository.com/artifact/io.projectreactor.netty/reactor-netty
-    implementation group: 'io.projectreactor.netty', name: 'reactor-netty', version: '0.9.10.RELEASE'
 
     // https://mvnrepository.com/artifact/io.swagger/swagger-annotations
     implementation group: 'io.swagger', name: 'swagger-annotations', version: '1.6.1'

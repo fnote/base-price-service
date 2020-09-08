@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -24,16 +25,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static com.sysco.rps.common.Constants.JdbcProperties.PRICINGDB;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.INITIAL_SIZE;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_IDLE_TIME;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_LIFE_TIME;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.MAX_SIZE;
-import static io.r2dbc.pool.PoolingConnectionFactoryProvider.VALIDATION_QUERY;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
 import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
 import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL;
 import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
 /**
@@ -53,7 +48,14 @@ public class RoutingConnectionFactoryConfig {
     private Long pricingDbMaxLifeLowerLimit;
     @Value("${pricing.db.max.life.upper.limit}")
     private Long pricingDbMaxLifeUpperLimit;
+    @Value("${pricing.db.max.connection.create.time}")
+    private Long pricingDbMaxConnectionCreateTime;
+    @Value("${pricing.db.max.connection.acquire.time}")
+    private Long pricingDbMaxConnectionAcquireTime;
+
     private BusinessUnitLoaderService businessUnitLoaderService;
+
+    private Map<String, ConnectionPool> connectionPoolMap = new HashMap<>();
 
     /***
      * Allows setting a business loader service
@@ -78,7 +80,7 @@ public class RoutingConnectionFactoryConfig {
      * @param validationQuery
      * @return RoutingConnectionFactory
      */
-    @Bean
+    @Bean("routingConnectionFactory")
     public RoutingConnectionFactory routingConnectionFactory(@Value("${pricing.db.host}") String jdbcHost,
                                                              @Value("${pricing.db.username}") String jdbcUser,
                                                              @Value("${pricing.db.password}") String jdbcPassword,
@@ -94,6 +96,9 @@ public class RoutingConnectionFactoryConfig {
 
         Set<String> activeBusinessUnitIds = loadActiveBusinessUnits();
 
+        Duration maxConnectionCreateTime = Duration.ofMillis(pricingDbMaxConnectionCreateTime);
+        Duration maxConnectionAcquireTime = Duration.ofMillis(pricingDbMaxConnectionAcquireTime);
+
         for (String businessUnitId : activeBusinessUnitIds) {
 
             String db = PRICINGDB + businessUnitId;
@@ -106,17 +111,11 @@ public class RoutingConnectionFactoryConfig {
 
             ConnectionFactory connectionFactory = ConnectionFactories.get(
                   ConnectionFactoryOptions.builder()
-                        .option(DRIVER, "pool")
-                        .option(PROTOCOL, "mysql")
+                        .option(DRIVER, "mysql")
                         .option(HOST, jdbcHost)
                         .option(USER, jdbcUser)
                         .option(PASSWORD, jdbcPassword)
                         .option(DATABASE, db)
-                        .option(MAX_SIZE, getInt(maxPoolSize, 10))
-                        .option(INITIAL_SIZE, getInt(initialPoolSize, 5))
-                        .option(MAX_LIFE_TIME, maxLife)
-                        .option(MAX_IDLE_TIME, maxIdle)
-                        .option(VALIDATION_QUERY, validationQuery)
                         .build()
             );
 
@@ -125,10 +124,13 @@ public class RoutingConnectionFactoryConfig {
                   .initialSize(getInt(initialPoolSize, 5))
                   .maxLifeTime(maxLife)
                   .maxIdleTime(maxIdle)
+                  .maxAcquireTime(maxConnectionAcquireTime)
+                  .maxCreateConnectionTime(maxConnectionCreateTime)
                   .validationQuery(validationQuery)
                   .build();
 
             ConnectionPool pool = new ConnectionPool(configuration);
+            this.connectionPoolMap.put(businessUnitId, pool);
 
             if (defaultConnectionFactory == null) {
                 defaultConnectionFactory = pool;
@@ -156,5 +158,11 @@ public class RoutingConnectionFactoryConfig {
 
     private int getInt(String strVal, int defaultVal) {
         return StringUtils.isEmpty(strVal) ? defaultVal : Integer.parseInt(strVal);
+    }
+
+    @Bean
+    @DependsOn({"routingConnectionFactory"})
+    public Map<String, ConnectionPool> getConnectionPoolMap() {
+        return this.connectionPoolMap;
     }
 }
