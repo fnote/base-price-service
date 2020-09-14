@@ -9,10 +9,14 @@ import com.sysco.rps.dto.Product;
 import com.sysco.rps.entity.PAData;
 import com.sysco.rps.entity.PriceZoneData;
 import com.sysco.rps.exceptions.RefPriceAPIException;
+import com.sysco.rps.misc.TestResultsLogger;
 import com.sysco.rps.repository.TestUtilsRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -31,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @doc
  * @end Created : 20. Jul 2020 10:16
  */
+@ExtendWith(TestResultsLogger.class)
 class CustomerPriceServiceTest extends BaseTest {
 
     @Autowired
@@ -60,6 +65,8 @@ class CustomerPriceServiceTest extends BaseTest {
     }
 
 
+    @DisplayName("PRCP-1234")
+    @Order(1)
     @Test
     void pricesByOpCo() {
         List<String> products = new ArrayList<>(Arrays.asList("1000001", "1000002", "1000003", "1000004", "1000005"));
