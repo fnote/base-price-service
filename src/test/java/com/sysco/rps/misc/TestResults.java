@@ -9,19 +9,16 @@ import java.util.Map;
  * @doc
  * @end Created : 14. Sep 2020 15:52
  */
-public class TestResultWrapper {
+public class TestResults {
     private String name;
     private Long startTime;
     private Long endTime;
     private Long elapsedTime;
     private Map<String, TestResult> testResultMap = new HashMap<>();
+    private String testClassName;
 
-    public TestResultWrapper() {
+    TestResults() {
         // default constructor
-    }
-
-    public TestResultWrapper(Long startTime) {
-        this.startTime = startTime;
     }
 
     public String getName() {
@@ -62,6 +59,14 @@ public class TestResultWrapper {
 
     public void setTestResultMap(Map<String, TestResult> testResultMap) {
         this.testResultMap = testResultMap;
+    }
+
+    public String getTestClassName() {
+        return testClassName;
+    }
+
+    public void setTestClassName(String testClassName) {
+        this.testClassName = testClassName;
     }
 
     @Override

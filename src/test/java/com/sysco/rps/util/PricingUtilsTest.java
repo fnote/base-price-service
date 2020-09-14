@@ -1,7 +1,10 @@
 package com.sysco.rps.util;
 
 import com.sysco.rps.BaseTest;
+import com.sysco.rps.misc.TestResultsLogger;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
@@ -16,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @end Created : 13. Jul 2020 13:01
  */
 @SpringBootTest
+@ExtendWith(TestResultsLogger.class)
+@DisplayName("REFERENCE_PRICING - PRICING_UTILS_TEST")
 class PricingUtilsTest extends BaseTest {
 
     @Test
@@ -49,7 +54,7 @@ class PricingUtilsTest extends BaseTest {
     @Test
     void formatDate() {
         assertTrue(PricingUtils.formatDate(null).isEmpty());
-        assertEquals("20200827", PricingUtils.formatDate( LocalDateTime.of(2020, 8, 27, 15, 56)));
+        assertEquals("20200827", PricingUtils.formatDate(LocalDateTime.of(2020, 8, 27, 15, 56)));
     }
 
 }

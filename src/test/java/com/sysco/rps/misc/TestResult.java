@@ -1,5 +1,8 @@
 package com.sysco.rps.misc;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020,
@@ -7,18 +10,19 @@ package com.sysco.rps.misc;
  * @end Created : 14. Sep 2020 14:30
  */
 public class TestResult {
+    @JsonIgnore
     private String id;
+    @JsonIgnore
     private Long startTime;
+    @JsonIgnore
     private Long endTime;
+    @JsonProperty("duration")
     private Long elapsedTime;
+    @JsonIgnore
     private String name;
     private TestResultStatus testResultStatus;
 
-    public TestResult(){
-        // default constructor
-    }
-
-    public TestResult(String id, Long startTime, String name) {
+    TestResult(String id, Long startTime, String name) {
         this.id = id;
         this.startTime = startTime;
         this.name = name;
@@ -32,7 +36,7 @@ public class TestResult {
         this.id = id;
     }
 
-    public Long getStartTime() {
+    Long getStartTime() {
         return startTime;
     }
 
@@ -40,11 +44,11 @@ public class TestResult {
         this.startTime = startTime;
     }
 
-    public Long getEndTime() {
+    Long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Long endTime) {
+    void setEndTime(Long endTime) {
         this.endTime = endTime;
     }
 
@@ -52,11 +56,11 @@ public class TestResult {
         return elapsedTime;
     }
 
-    public void setElapsedTime(Long elapsedTime) {
+    void setElapsedTime(Long elapsedTime) {
         this.elapsedTime = elapsedTime;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
@@ -68,7 +72,7 @@ public class TestResult {
         return testResultStatus;
     }
 
-    public void setTestResultStatus(TestResultStatus testResultStatus) {
+    void setTestResultStatus(TestResultStatus testResultStatus) {
         this.testResultStatus = testResultStatus;
     }
 

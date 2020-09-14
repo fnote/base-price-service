@@ -14,8 +14,10 @@ import com.sysco.rps.repository.TestUtilsRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
@@ -36,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @end Created : 20. Jul 2020 10:16
  */
 @ExtendWith(TestResultsLogger.class)
+@DisplayName("REFERENCE_PRICING - CUSTOMER_PRICE_SERVICE_TEST")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CustomerPriceServiceTest extends BaseTest {
 
     @Autowired

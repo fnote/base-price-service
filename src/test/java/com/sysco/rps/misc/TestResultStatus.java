@@ -7,5 +7,18 @@ package com.sysco.rps.misc;
  * @end Created : 14. Sep 2020 14:31
  */
 public enum TestResultStatus {
-    SUCCESSFUL, ABORTED, FAILED, DISABLED;
+    PASSED("passed"),
+    FAILED("failed"),
+    ABORTED("aborted"),
+    DISABLED("disabled");
+
+    private final String value;
+    TestResultStatus(final String status) {
+        this.value = status;
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }
