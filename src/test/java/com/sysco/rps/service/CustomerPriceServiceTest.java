@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -37,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @doc
  * @end Created : 20. Jul 2020 10:16
  */
-@ExtendWith(TestResultsLogger.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CustomerPriceServiceTest extends BaseTest {
 

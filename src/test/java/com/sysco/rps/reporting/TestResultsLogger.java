@@ -49,6 +49,8 @@ import static com.sysco.rps.reporting.TestReportingConstants.WRITE_TO_FILE;
  * If you like to run the tests in a particular order, use the annotation @TestMethodOrder(MethodOrderer.OrderAnnotation.class) in the
  * class level and in the test method level add the required order with Order Annotation. e.g. @Order(1)
  *
+ * If your test class does not extend from the BaseTest class, make sure you add the @ExtendWith(TestResultsLogger.class) annotation in class level
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -181,7 +183,6 @@ public class TestResultsLogger implements TestWatcher, AfterAllCallback, BeforeA
      */
     @Override
     public void afterAll(ExtensionContext context) {
-
         testResults.setEndTime(System.currentTimeMillis());
         testResults.setElapsedTime(testResults.getEndTime() - testResults.getStartTime());
 
@@ -197,7 +198,6 @@ public class TestResultsLogger implements TestWatcher, AfterAllCallback, BeforeA
     }
 
     private static void publishResults(TestResults testResults) {
-
         QCenterSubmission qCenterSubmission = generateQCenterSubmissionObject(testResults);
         ObjectMapper mapper = new ObjectMapper();
         String submission = "";

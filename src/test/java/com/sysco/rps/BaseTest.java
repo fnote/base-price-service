@@ -1,8 +1,10 @@
 package com.sysco.rps;
 
+import com.sysco.rps.reporting.TestResultsLogger;
 import com.sysco.rps.repository.common.RoutingConnectionFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 @EnableConfigurationProperties
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(initializers = ConfigFileApplicationContextInitializer.class)
+@ExtendWith(TestResultsLogger.class)
 public abstract class BaseTest {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseTest.class);
