@@ -1,4 +1,4 @@
-package com.sysco.rps.misc;
+package com.sysco.rps.reporting.model;
 
 import com.google.common.base.CaseFormat;
 
@@ -8,6 +8,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
+ * Represents a QCenter Submission request format.
+ * Object order: QCenterSubmission >> QCenterSubmissionElement >> QCenterSubmissionStep >> TestResult
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -27,14 +29,13 @@ public class QCenterSubmission {
     private String project;
     private String uri;
 
-    QCenterSubmission(TestResults testResults) {
+    public QCenterSubmission(TestResults testResults) {
         this.elements = testResults.getTestResultMap().values().stream().map(
               testResult -> {
                   QCenterSubmissionStep qCenterSubmissionStep = new QCenterSubmissionStep(testResult);
                   return new QCenterSubmissionElement(testResult.getName(), Collections.singletonList(qCenterSubmissionStep));
               }
         ).collect(Collectors.toList());
-
 
         this.duration = testResults.getElapsedTime();
 
@@ -138,5 +139,23 @@ public class QCenterSubmission {
 
     public void setElements(List<QCenterSubmissionElement> elements) {
         this.elements = elements;
+    }
+
+    @Override
+    public String toString() {
+        return "{"
+              + "                        \"elements\":" + elements
+              + ",                         \"name\":\"" + name + "\""
+              + ",                         \"id\":\"" + id + "\""
+              + ",                         \"keyword\":\"" + keyword + "\""
+              + ",                         \"description\":\"" + description + "\""
+              + ",                         \"duration\":\"" + duration + "\""
+              + ",                         \"testClassName\":\"" + testClassName + "\""
+              + ",                         \"node\":\"" + node + "\""
+              + ",                         \"env\":\"" + env + "\""
+              + ",                         \"release\":\"" + release + "\""
+              + ",                         \"project\":\"" + project + "\""
+              + ",                         \"uri\":\"" + uri + "\""
+              + "}";
     }
 }

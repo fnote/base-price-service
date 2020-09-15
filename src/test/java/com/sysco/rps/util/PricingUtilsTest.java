@@ -1,7 +1,7 @@
 package com.sysco.rps.util;
 
 import com.sysco.rps.BaseTest;
-import com.sysco.rps.misc.TestResultsLogger;
+import com.sysco.rps.reporting.TestResultsLogger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

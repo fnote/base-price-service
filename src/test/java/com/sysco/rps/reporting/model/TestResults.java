@@ -1,9 +1,11 @@
-package com.sysco.rps.misc;
+package com.sysco.rps.reporting.model;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.SortedMap;
 
 /**
+ * Used to store test result info of all tests of a class.
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -14,10 +16,10 @@ public class TestResults {
     private Long startTime;
     private Long endTime;
     private Long elapsedTime;
-    private Map<String, TestResult> testResultMap = new HashMap<>();
+    private Map<String, TestResult> testResultMap = new LinkedHashMap<>();
     private String testClassName;
 
-    TestResults() {
+    public TestResults() {
         // default constructor
     }
 
@@ -45,19 +47,22 @@ public class TestResults {
         this.endTime = endTime;
     }
 
-    public Long getElapsedTime() {
+    Long getElapsedTime() {
         return elapsedTime;
     }
 
-    public void setElapsedTime(Long elapsedTime) {
-        this.elapsedTime = elapsedTime;
+    public void setElapsedTime(Long elapsedTimeInMs) {
+        // converting time as done in the qe-core library. Reason not known
+        if (elapsedTimeInMs >= 0L) {
+            this.elapsedTime = (elapsedTimeInMs + 5000L) * 1000L * 1000L;
+        }
     }
 
     public Map<String, TestResult> getTestResultMap() {
         return testResultMap;
     }
 
-    public void setTestResultMap(Map<String, TestResult> testResultMap) {
+    public void setTestResultMap(SortedMap<String, TestResult> testResultMap) {
         this.testResultMap = testResultMap;
     }
 
@@ -77,6 +82,7 @@ public class TestResults {
               + ",                         \"endTime\":\"" + endTime + "\""
               + ",                         \"elapsedTime\":\"" + elapsedTime + "\""
               + ",                         \"testResultMap\":" + testResultMap
+              + ",                         \"testClassName\":\"" + testClassName + "\""
               + "}";
     }
 }

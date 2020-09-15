@@ -9,6 +9,7 @@ import com.sysco.rps.repository.TestUtilsRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -62,6 +63,7 @@ class CustomerPriceControllerTest extends BaseTest {
      * Testing PRCP-2078
      */
     @Test
+    @Tag("desc:PRCP-2078")
     void getCustomerPrices_PRCP_2078() {
 
         RefPriceAPIException opcoInvalidException = new RefPriceAPIException(HttpStatus.BAD_REQUEST, "102010", "Couldn't find a matching DB for the requested OpCo");
@@ -128,6 +130,7 @@ class CustomerPriceControllerTest extends BaseTest {
      * Testing PRCP-2079
      */
     @Test
+    @Tag("desc:PRCP-2079")
     void getCustomerPrices_PRCP_2079_invalid_customer() {
 
         RefPriceAPIException opCoEmptyException = new RefPriceAPIException(HttpStatus.BAD_REQUEST, "102030", "Customer ID should not be null/empty");
