@@ -9,7 +9,6 @@ import com.sysco.rps.dto.Product;
 import com.sysco.rps.entity.PAData;
 import com.sysco.rps.entity.PriceZoneData;
 import com.sysco.rps.exceptions.RefPriceAPIException;
-import com.sysco.rps.reporting.TestResultsLogger;
 import com.sysco.rps.repository.TestUtilsRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
