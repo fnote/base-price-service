@@ -17,7 +17,7 @@ public class TestConstants {
     public static final boolean UPDATE_DASHBOARD = Boolean.parseBoolean(System.getProperty("update.dashboard", "false"));
     public static final boolean WRITE_TO_FILE = Boolean.parseBoolean(System.getProperty("write.to.file", "false"));
     public static final String FILE_PATH = System.getProperty("file.path", "");
-    public static final String NODE_NAME = System.getProperty("jenkins.node", "stag_cl2122");
+    public static final String NODE_NAME = System.getProperty("jenkins.node", "local");
 
     public static final String FEATURE_NAME = "UNIT_TESTING - APIUnitTests";
 }
