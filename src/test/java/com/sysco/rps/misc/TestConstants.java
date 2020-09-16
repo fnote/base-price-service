@@ -7,6 +7,10 @@ package com.sysco.rps.misc;
  * @end Created : 16. Sep 2020 15:46
  */
 public class TestConstants {
+    private TestConstants() {
+        // default constructor
+    }
+
     public static final String TEST_ENV = System.getProperty("test.env", "EXE");
     public static final String TEST_RELEASE = System.getProperty("test.release", "INITIAL_BUILD");
     public static final String TEST_PROJECT = System.getProperty("test.project", "Reference Pricing");
