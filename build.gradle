@@ -4,6 +4,7 @@ plugins {
     id 'java'
     id 'org.sonarqube' version '2.7'
     id 'jacoco'
+    id "net.linguica.maven-settings" version "0.5"
 }
 
 group = 'com.sysco'
@@ -14,8 +15,14 @@ compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
 repositories {
-    mavenLocal()
     mavenCentral()
+    maven {
+        name = 'snapshots'
+        url = 'https://syscobt.jfrog.io/artifactory/mvn'
+        authentication {
+            basic(BasicAuthentication)
+        }
+    }
 }
 
 ext.getCurrentBranchName = {

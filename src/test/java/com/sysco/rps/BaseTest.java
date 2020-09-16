@@ -17,6 +17,15 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.r2dbc.connectionfactory.init.ResourceDatabasePopulator;
 import org.springframework.test.context.ContextConfiguration;
 
+import static com.sysco.rps.misc.TestConstants.FEATURE_NAME;
+import static com.sysco.rps.misc.TestConstants.FILE_PATH;
+import static com.sysco.rps.misc.TestConstants.NODE_NAME;
+import static com.sysco.rps.misc.TestConstants.TEST_ENV;
+import static com.sysco.rps.misc.TestConstants.TEST_PROJECT;
+import static com.sysco.rps.misc.TestConstants.TEST_RELEASE;
+import static com.sysco.rps.misc.TestConstants.UPDATE_DASHBOARD;
+import static com.sysco.rps.misc.TestConstants.WRITE_TO_FILE;
+
 /**
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
@@ -31,10 +40,11 @@ public abstract class BaseTest {
 
     @RegisterExtension
     TestResultsLogger testResultsLogger =
-          new TestResultsLogger.Builder("EXE", "INITIAL_BUILD", "Reference Pricing", "UNIT_TESTING - APIUnitTests",
-                true)
-                .setNode(System.getProperty("jenkins.node", "stag_cl2122"))
-                .setWriteToFile(false)
+          new TestResultsLogger.Builder(TEST_ENV, TEST_RELEASE, TEST_PROJECT, FEATURE_NAME,
+                UPDATE_DASHBOARD)
+                .setNode(NODE_NAME)
+                .setWriteToFile(WRITE_TO_FILE)
+                .setFilePath(FILE_PATH)
                 .build();
 
     private static final Logger logger = LoggerFactory.getLogger(BaseTest.class);
