@@ -1,10 +1,10 @@
 package com.sysco.rps;
 
-import com.sysco.rps.reporting.TestResultsLogger;
+import com.sysco.pricing.junitqcenterintegrator.TestResultsLogger;
 import com.sysco.rps.repository.common.RoutingConnectionFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +27,15 @@ import org.springframework.test.context.ContextConfiguration;
 @EnableConfigurationProperties
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ContextConfiguration(initializers = ConfigFileApplicationContextInitializer.class)
-@ExtendWith(TestResultsLogger.class)
 public abstract class BaseTest {
+
+    @RegisterExtension
+    TestResultsLogger testResultsLogger =
+          new TestResultsLogger.Builder("EXE", "INITIAL_BUILD", "Reference Pricing", "UNIT_TESTING - APIUnitTests",
+                true)
+                .setNode(System.getProperty("jenkins.node", "stag_cl2122"))
+                .setWriteToFile(false)
+                .build();
 
     private static final Logger logger = LoggerFactory.getLogger(BaseTest.class);
 
