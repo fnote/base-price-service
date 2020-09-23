@@ -9,13 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.r2dbc.connectionfactory.init.ResourceDatabasePopulator;
-import org.springframework.test.context.ContextConfiguration;
 
 import static com.sysco.rps.misc.TestConstants.FEATURE_NAME;
 import static com.sysco.rps.misc.TestConstants.FILE_PATH;
@@ -35,7 +33,6 @@ import static com.sysco.rps.misc.TestConstants.WRITE_TO_FILE;
 @SpringBootTest
 @EnableConfigurationProperties
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ContextConfiguration(initializers = ConfigFileApplicationContextInitializer.class)
 public abstract class BaseTest {
 
     @RegisterExtension
