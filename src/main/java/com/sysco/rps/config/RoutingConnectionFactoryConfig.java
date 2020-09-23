@@ -29,6 +29,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
 import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
 import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
+import static io.r2dbc.spi.ConnectionFactoryOptions.SSL;
 import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
 /**
@@ -116,6 +117,7 @@ public class RoutingConnectionFactoryConfig {
                         .option(USER, jdbcUser)
                         .option(PASSWORD, jdbcPassword)
                         .option(DATABASE, db)
+                        .option(SSL, false)
                         .build()
             );
 

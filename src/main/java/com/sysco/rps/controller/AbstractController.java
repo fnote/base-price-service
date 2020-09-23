@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -38,24 +39,26 @@ public abstract class AbstractController {
 
     @ExceptionHandler(RefPriceAPIException.class)
     ResponseEntity<Mono<ErrorDTO>> handleRefPriceApiException(RefPriceAPIException e) {
-        String traceId = UUID.randomUUID().toString();
+        Mono<ErrorDTO> errorDTOMono = Mono.defer(() -> {
+            String traceId = UUID.randomUUID().toString();
 
-        LOGGER.error("[{}] RefPriceAPIException occurred", traceId, e);
+            LOGGER.error("[{}] RefPriceAPIException occurred", traceId, e);
 
-        String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, (e.getErrorCode())), new Object[]{},
-              UNKNOWN_ERROR, Locale.getDefault());
-
-        ErrorDTO error;
-        if (e.getAdditionalInfo() != null) {
-            error = new ErrorDTO(e.getErrorCode(), message, e.getAdditionalInfo(), traceId);
-        } else {
-            error = new ErrorDTO(e.getErrorCode(), message, e.getMessage(), traceId);
-        }
+            String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, (e.getErrorCode())), new Object[]{},
+                  UNKNOWN_ERROR, Locale.getDefault());
+            ErrorDTO error;
+            if (e.getAdditionalInfo() != null) {
+                error = new ErrorDTO(e.getErrorCode(), message, e.getAdditionalInfo(), traceId);
+            } else {
+                error = new ErrorDTO(e.getErrorCode(), message, e.getMessage(), traceId);
+            }
+            return Mono.just(error);
+        }).subscribeOn(Schedulers.boundedElastic());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        return new ResponseEntity<>(Mono.just(error), headers, e.getHttpStatusCode());
+        return new ResponseEntity<>(errorDTOMono, headers, e.getHttpStatusCode());
     }
 
     /**
@@ -66,12 +69,17 @@ public abstract class AbstractController {
      */
     @ExceptionHandler(ResponseStatusException.class)
     ResponseEntity<Mono<ErrorDTO>> handleResponseStatusException(ResponseStatusException e) {
-        String traceId = UUID.randomUUID().toString();
-        LOGGER.error("[{}] ResponseStatusException occurred", traceId, e);
+        Mono<ErrorDTO> errorDTOMono = Mono.defer(() -> {
+            String traceId = UUID.randomUUID().toString();
+
+            LOGGER.error("[{}] ResponseStatusException occurred", traceId, e);
+
+            return Mono.just(new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, e.getStatus().getReasonPhrase(), traceId));
+        }).subscribeOn(Schedulers.boundedElastic());
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        ErrorDTO error = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, e.getStatus().getReasonPhrase(), traceId);
-        return new ResponseEntity<>(Mono.just(error), headers, e.getStatus());
+        return new ResponseEntity<>(errorDTOMono, headers, e.getStatus());
     }
 
 
@@ -83,15 +91,19 @@ public abstract class AbstractController {
      */
     @ExceptionHandler(Exception.class)
     ResponseEntity<Mono<ErrorDTO>> handleUnknownException(Exception e) {
-        String traceId = UUID.randomUUID().toString();
-        LOGGER.error("[{}] Unknown exception occurred", traceId, e);
+        Mono<ErrorDTO> errorDTOMono = Mono.defer(() -> {
+            String traceId = UUID.randomUUID().toString();
 
-        String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, Errors.Codes.UNEXPECTED_ERROR), new Object[]{}, UNKNOWN_ERROR,
-              Locale.getDefault());
+            LOGGER.error("[{}] Unknown exception occurred", traceId, e);
+
+            String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, Errors.Codes.UNEXPECTED_ERROR), new Object[]{}, UNKNOWN_ERROR,
+                  Locale.getDefault());
+            return Mono.just(new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, traceId));
+        }).subscribeOn(Schedulers.boundedElastic());
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        ErrorDTO error = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, traceId);
-        return new ResponseEntity<>(Mono.just(error), headers, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorDTOMono, headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
