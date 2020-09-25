@@ -17,7 +17,7 @@ public class Errors {
 
     public static class Messages {
 
-        public static final String MAPPING_NOT_FOUND = "Price not found for given SUPC/customer combination";
+        public static final String MAPPING_NOT_FOUND = "Price not found for given SUPC/customer combination. No default price found as well";
         public static final String MSG_CUSTOMER_INVALID = "Requested Customer is in invalid format";
         public static final String MSG_OPCO_NOT_FOUND = "Couldn't find a matching DB for the requested OpCo";
         public static final String CUSTOMER_NULL_OR_EMPTY = "Customer ID should not be null/empty";

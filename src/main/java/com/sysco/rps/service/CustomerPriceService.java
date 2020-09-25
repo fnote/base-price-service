@@ -8,6 +8,7 @@ import com.sysco.rps.dto.Product;
 import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.refpricing.CustomerPriceRepository;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.GenericValidator;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import static com.sysco.rps.common.Constants.DEFAULT_PRICE_ZONE;
 import static com.sysco.rps.common.Constants.PRICE_REQUEST_DATE_PATTERN;
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
 
@@ -81,17 +83,10 @@ public class CustomerPriceService {
               })
               .subscriberContext(Context.of(ROUTING_KEY, request.getBusinessUnitNumber()))
               .collectList()
-              .flatMap(v -> {
-                  Map<String, Product> productMap = new HashMap<>();
-                  v.forEach(p -> {
-                      String supc = p.getSupc();
-                      Product existingProduct = productMap.get(supc);
-                      if (existingProduct == null || (existingProduct.getPriceExportTimestamp() < p.getPriceExportTimestamp())) {
-                          productMap.put(supc, p);
-                      }
-                  });
+              .flatMap(productList -> {
+                  Map<String, Product> productMap = convertToUniqueProductMap(productList);
                   logger.info("TOTAL-DB-TIME : [{}]", timeConsumedForDbActivities.get());
-                  return Mono.just(formResponse(request, requestedSUPCs, productMap));
+                  return formResponseWithDefaultPriceProducts(request, requestedSUPCs, productMap);
               }).doOnError(e -> {
                   logger.error("Request Payload: [{}]", request);
                   logger.error(e.getMessage(), e);
@@ -125,27 +120,66 @@ public class CustomerPriceService {
         return null;
     }
 
-    private CustomerPriceResponse formResponse(CustomerPriceRequest request, List<String> requestedSUPCs, Map<String, Product> foundProductsMap) {
+    /**
+     * When there are requested products with missing mappings, uses price zone 3's price as the default price
+     */
+    private Mono<CustomerPriceResponse> formResponseWithDefaultPriceProducts(CustomerPriceRequest request, List<String> requestedSUPCs,
+                                                                             Map<String, Product> foundProductsMap) {
 
         List<MinorErrorDTO> errors = new ArrayList<>();
         List<Product> products = new ArrayList<>();
 
         if (foundProductsMap.size() == requestedSUPCs.size()) {
             products.addAll(foundProductsMap.values());
+            return Mono.just(new CustomerPriceResponse(request, products, errors));
         } else {
+            ArrayList<String> supcsToFindDefaults = new ArrayList<>(requestedSUPCs);
+            supcsToFindDefaults.removeAll(foundProductsMap.keySet());
 
-            for (String productId : requestedSUPCs) {
+            return getDefaultProducts(request, supcsToFindDefaults)
+                  .flatMap(defaultProducts -> {
 
-                Product product = foundProductsMap.get(productId);
-                if (product == null) {
-                    errors.add(new MinorErrorDTO(productId, Errors.Codes.MAPPING_NOT_FOUND, Errors.Messages.MAPPING_NOT_FOUND));
-                } else {
-                    products.add(product);
-                }
+                      if (!CollectionUtils.isEmpty(defaultProducts.values())) {
+                          logger.info("Using default prices for: {}", defaultProducts.values());
+                          foundProductsMap.putAll(defaultProducts);
+                      }
 
-            }
+                      for (String productId : requestedSUPCs) {
+
+                          Product product = foundProductsMap.get(productId);
+                          if (product == null) {
+                              errors.add(new MinorErrorDTO(productId, Errors.Codes.MAPPING_NOT_FOUND, Errors.Messages.MAPPING_NOT_FOUND));
+                          } else {
+                              products.add(product);
+                          }
+                      }
+                      return Mono.just(new CustomerPriceResponse(request, products, errors));
+                  });
         }
+    }
 
-        return new CustomerPriceResponse(request, products, errors);
+    private Mono<Map<String, Product>> getDefaultProducts(CustomerPriceRequest request, List<String> requestedSUPCs) {
+
+        return repository.getPricesForSpecificPriceZone(requestedSUPCs, request.getPriceRequestDate(), DEFAULT_PRICE_ZONE)
+              .subscriberContext(Context.of(ROUTING_KEY, request.getBusinessUnitNumber()))
+              .collectList()
+              .flatMap(result -> Mono.just(convertToUniqueProductMap(result)))
+              .doOnError(e -> {
+                  logger.error("Request Payload: [{}]", request);
+                  logger.error(e.getMessage(), e);
+              });
+    }
+
+    private Map<String, Product> convertToUniqueProductMap(List<Product> result) {
+        Map<String, Product> productMap = new HashMap<>();
+
+        result.forEach(defaultProduct -> {
+            String supc = defaultProduct.getSupc();
+            Product existingProduct = productMap.get(supc);
+            if (existingProduct == null || (existingProduct.getPriceExportTimestamp() < defaultProduct.getPriceExportTimestamp())) {
+                productMap.put(supc, defaultProduct);
+            }
+        });
+        return productMap;
     }
 }

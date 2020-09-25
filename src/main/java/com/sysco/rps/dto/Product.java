@@ -3,6 +3,7 @@ package com.sysco.rps.dto;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Product bean that contains information about customer supc mapping with price info
@@ -110,7 +111,7 @@ public class Product {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE)
               .append("supc", supc)
               .append("priceZoneId", priceZoneId)
               .append("referencePrice", referencePrice)
