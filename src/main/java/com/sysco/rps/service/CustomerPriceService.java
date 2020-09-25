@@ -88,6 +88,7 @@ public class CustomerPriceService {
                   logger.info("TOTAL-DB-TIME : [{}]", timeConsumedForDbActivities.get());
                   return formResponseWithDefaultPriceProducts(request, requestedSUPCs, productMap);
               }).doOnError(e -> {
+                  logger.error("Failed to fetch prices");
                   logger.error("Request Payload: [{}]", request);
                   logger.error(e.getMessage(), e);
               });
@@ -165,6 +166,7 @@ public class CustomerPriceService {
               .collectList()
               .flatMap(result -> Mono.just(convertToUniqueProductMap(result)))
               .doOnError(e -> {
+                  logger.error("Failed to fetch default prices");
                   logger.error("Request Payload: [{}]", request);
                   logger.error(e.getMessage(), e);
               });

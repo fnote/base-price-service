@@ -91,7 +91,7 @@ public class CustomerPriceRepository {
 
     CustomerPriceRepository(@Value("${query.get.price:}") String queryToOverride) {
         if (!StringUtils.isEmpty(queryToOverride)) {
-            this.query = queryToOverride;
+            query = queryToOverride;
         }
     }
 
@@ -148,7 +148,7 @@ public class CustomerPriceRepository {
 
                         if (stopWatch.isRunning()) {
                             stopWatch.stop();
-                            LOGGER.debug("PRICE QUERY-LATENCY : [{}]", stopWatch.getLastTaskTimeMillis());
+                            LOGGER.debug("DEFAULT-PRICE QUERY-LATENCY : [{}]", stopWatch.getLastTaskTimeMillis());
                         }
 
                         return new Product(row.get("SUPC", String.class),
