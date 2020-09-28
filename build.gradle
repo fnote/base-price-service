@@ -19,10 +19,13 @@ repositories {
     maven {
         name = 'snapshots'
         url = 'https://syscobt.jfrog.io/artifactory/mvn'
-        authentication {
+//        authentication {
 //            basic(BasicAuthentication)
+//        }
+
+        credentials {
             username = System.getenv('JFROG_USER')
-            password = System.getenv('JFROG_PASS')
+            password = System.getenv('JFROG_USER')
         }
     }
 }
