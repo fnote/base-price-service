@@ -21,8 +21,8 @@ repositories {
         url = 'https://syscobt.jfrog.io/artifactory/mvn'
         authentication {
 //            basic(BasicAuthentication)
-            username System.getenv('JFROG-USER')
-            password System.getenv('JFROG-PASS')
+            username System.getenv('JFROG_USER')
+            password System.getenv('JFROG_PASS')
         }
     }
 }
