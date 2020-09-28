@@ -1,5 +1,10 @@
 version: 0.2
 
+env:
+  parameter-store:
+    JFROG-USER: "/CP/COMMON/JFROG/USER"
+    JFROG-PASS: "/CP/COMMON/JFROG/PASS"
+
 phases:
   pre_build:
     commands:
