@@ -19,14 +19,14 @@ repositories {
     maven {
         name = 'snapshots'
         url = 'https://syscobt.jfrog.io/artifactory/mvn'
+
+//      Uncomment below authentication lines when using local basic auth (via settings.xml) and comment out the next credentials and authentication
+//      sections
+//
 //        authentication {
 //            basic(BasicAuthentication)
 //        }
 
-//        credentials {
-//            username = System.getenv('JFROG_USER')
-//            password = System.getenv('JFROG_USER')
-//        }
         credentials(HttpHeaderCredentials) {
             name = "X-JFrog-Art-Api"
             value = System.getenv('JFROG_API_KEY')
