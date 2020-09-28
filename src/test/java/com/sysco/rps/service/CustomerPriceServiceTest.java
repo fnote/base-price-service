@@ -39,6 +39,8 @@ class CustomerPriceServiceTest extends BaseTest {
     @Autowired
     TestUtilsRepository testUtilsRepository;
 
+    private static final String ERROR_MSG_MAPPING_NOT_FOUND = "Price not found for given SUPC/customer combination. No default price found as well";
+
     @BeforeEach
     void setUp() {
         testUtilsRepository.truncateTables();
@@ -64,6 +66,8 @@ class CustomerPriceServiceTest extends BaseTest {
     void pricesByOpCo() {
         List<String> products = new ArrayList<>(Arrays.asList("1000001", "1000002", "1000003", "1000004", "1000005"));
 
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 100.20, "20241212", 1595229000, 'N'));
+
         CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "20241212", products);
 
         Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
@@ -71,13 +75,13 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(result -> {
                   assertNotNull(result);
-                  assertEquals(0, result.getProducts().size());
-                  assertEquals(5, result.getFailedProducts().size());
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(4, result.getFailedProducts().size());
 
                   MinorErrorDTO errorDTO = result.getFailedProducts().get(0);
                   assertEquals("102020", errorDTO.getErrorCode());
-                  assertEquals("Price not found for given SUPC/customer combination", errorDTO.getMessage());
-                  assertEquals("1000001", errorDTO.getSupc());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, errorDTO.getMessage());
+                  assertEquals("1000002", errorDTO.getSupc());
 
               })
               .verifyComplete();
@@ -86,7 +90,7 @@ class CustomerPriceServiceTest extends BaseTest {
     @Test
     void testRequestingDuplicateProducts() {
 
-        testUtilsRepository.addPARecord(new PAData("1000001", 6, 100.20, "20241212", 1595229000, 'N'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 100.20, "20241212", 1595229000, 'N'));
         testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 6, "100001", "20241212"));
 
         List<String> products = new ArrayList<>(Arrays.asList("1000001", "1000001", "1000002", "1000002"));
@@ -147,7 +151,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(0, result.getProducts().size());
                   assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
+                  validateFirstMinorError(result, "1000001", "102020", ERROR_MSG_MAPPING_NOT_FOUND);
 
               })
               .verifyComplete();
@@ -239,7 +243,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(0, result.getProducts().size());
                   assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
+                  validateFirstMinorError(result, "1000001", "102020", ERROR_MSG_MAPPING_NOT_FOUND);
 
               })
               .verifyComplete();
@@ -254,7 +258,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(0, result.getProducts().size());
                   assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
+                  validateFirstMinorError(result, "1000001", "102020", ERROR_MSG_MAPPING_NOT_FOUND);
               })
               .verifyComplete();
 
@@ -315,7 +319,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(0, result.getProducts().size());
                   assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
+                  validateFirstMinorError(result, "1000001", "102020", ERROR_MSG_MAPPING_NOT_FOUND);
 
               })
               .verifyComplete();
@@ -330,7 +334,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(0, result.getProducts().size());
                   assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
+                  validateFirstMinorError(result, "1000001", "102020", ERROR_MSG_MAPPING_NOT_FOUND);
               })
               .verifyComplete();
 
@@ -344,7 +348,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(0, result.getProducts().size());
                   assertEquals(1, result.getFailedProducts().size());
 
-                  validateFirstMinorError(result, "1000001", "102020", "Price not found for given SUPC/customer combination");
+                  validateFirstMinorError(result, "1000001", "102020", ERROR_MSG_MAPPING_NOT_FOUND);
               })
               .verifyComplete();
 
@@ -414,15 +418,15 @@ class CustomerPriceServiceTest extends BaseTest {
               .consumeNextWith(response -> {
                   assertEquals(0, response.getProducts().size());
                   assertEquals(9, response.getFailedProducts().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(1).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(2).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(3).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(4).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(5).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(6).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(7).getMessage());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(8).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(1).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(2).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(3).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(4).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(5).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(6).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(7).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(8).getMessage());
               })
               .verifyComplete();
 
@@ -433,7 +437,7 @@ class CustomerPriceServiceTest extends BaseTest {
               .consumeNextWith(response -> {
                   assertEquals(1, response.getProducts().size());
                   assertEquals(1, response.getFailedProducts().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
                   validateFirstSuccessItem(response, "2512527", "1", 1.00, "20200201", 1578960300L, Boolean.TRUE);
               })
               .verifyComplete();
@@ -479,8 +483,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(3, response.getProducts().size());
                   assertEquals(1, response.getFailedProducts().size());
 
-                  String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new MinorErrorDTO("2000000", "102020", errorMsg), response.getFailedProducts().get(0));
+                  assertEquals(new MinorErrorDTO("2000000", "102020", ERROR_MSG_MAPPING_NOT_FOUND), response.getFailedProducts().get(0));
               })
               .verifyComplete();
 
@@ -491,9 +494,7 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(3, response.getProducts().size());
                   assertEquals(1, response.getFailedProducts().size());
 
-                  String errorData = "Price not found for SUPC: %s Customer: %s";
-                  String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new MinorErrorDTO("2000002", "102020", errorMsg),
+                  assertEquals(new MinorErrorDTO("2000002", "102020", ERROR_MSG_MAPPING_NOT_FOUND),
                         response.getFailedProducts().get(0));
 
               })
@@ -506,12 +507,11 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(3, response.getProducts().size());
                   assertEquals(1, response.getFailedProducts().size());
 
-                  String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new MinorErrorDTO("$20001.47", "102020", errorMsg), response.getFailedProducts().get(0));
+                  assertEquals(new MinorErrorDTO("$20001.47", "102020", ERROR_MSG_MAPPING_NOT_FOUND),
+                        response.getFailedProducts().get(0));
               })
               .verifyComplete();
     }
-
 
     /**
      * Testing invalid SUPC scenarios
@@ -533,10 +533,8 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(0, response.getProducts().size());
                   assertEquals(2, response.getFailedProducts().size());
 
-                  String errorData = "Price not found for SUPC: %s Customer: %s";
-                  String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new MinorErrorDTO("7565088", "102020", errorMsg), response.getFailedProducts().get(0));
-                  assertEquals(new MinorErrorDTO("3982205", "102020", errorMsg), response.getFailedProducts().get(1));
+                  assertEquals(new MinorErrorDTO("7565088", "102020", ERROR_MSG_MAPPING_NOT_FOUND), response.getFailedProducts().get(0));
+                  assertEquals(new MinorErrorDTO("3982205", "102020", ERROR_MSG_MAPPING_NOT_FOUND), response.getFailedProducts().get(1));
               })
               .verifyComplete();
 
@@ -547,12 +545,12 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals(0, response.getProducts().size());
                   assertEquals(3, response.getFailedProducts().size());
 
-                  String errorData = "Price not found for SUPC: %s Customer: %s";
-                  String errorMsg = "Price not found for given SUPC/customer combination";
-                  assertEquals(new MinorErrorDTO("test", "102020", errorMsg),
+                  assertEquals(new MinorErrorDTO("test", "102020", ERROR_MSG_MAPPING_NOT_FOUND),
                         response.getFailedProducts().get(0));
-                  assertEquals(new MinorErrorDTO("$20001.47", "102020", errorMsg), response.getFailedProducts().get(1));
-                  assertEquals(new MinorErrorDTO("A2000002", "102020", errorMsg), response.getFailedProducts().get(2));
+                  assertEquals(new MinorErrorDTO("$20001.47", "102020", ERROR_MSG_MAPPING_NOT_FOUND),
+                        response.getFailedProducts().get(1));
+                  assertEquals(new MinorErrorDTO("A2000002", "102020", ERROR_MSG_MAPPING_NOT_FOUND),
+                        response.getFailedProducts().get(2));
 
               })
               .verifyComplete();
@@ -577,7 +575,7 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(3, response.getFailedProducts().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
               })
               .verifyComplete();
 
@@ -586,7 +584,7 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(3, response.getFailedProducts().size());
-                  assertEquals(Errors.Messages.MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, response.getFailedProducts().get(0).getMessage());
               })
               .verifyComplete();
 
@@ -702,6 +700,164 @@ class CustomerPriceServiceTest extends BaseTest {
               })
               .verifyComplete();
 
+    }
+
+    /**
+     * Testing out the default prices
+     */
+    @Test
+    void testDefaultPrices() {
+
+        List<String> products = new ArrayList<>(Arrays.asList("1000001", "1000002"));
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "20241212", products);
+        Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        // with no data, should receive minor errors for both SUPCs
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(0, result.getProducts().size());
+                  assertEquals(2, result.getFailedProducts().size());
+
+                  MinorErrorDTO errorDTO = result.getFailedProducts().get(0);
+                  assertEquals("102020", errorDTO.getErrorCode());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, errorDTO.getMessage());
+                  assertEquals("1000001", errorDTO.getSupc());
+              })
+              .verifyComplete();
+
+        // Adding a PA record only with a price zone other than 3 should return minor errors for both SUPCs
+        testUtilsRepository.addPARecord(new PAData("1000001", 2, 200.20, "20241212", 1595229000, 'N'));
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(0, result.getProducts().size());
+                  assertEquals(2, result.getFailedProducts().size());
+
+                  MinorErrorDTO errorDTO = result.getFailedProducts().get(0);
+                  assertEquals("102020", errorDTO.getErrorCode());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, errorDTO.getMessage());
+                  assertEquals("1000001", errorDTO.getSupc());
+              })
+              .verifyComplete();
+
+        // Adding a PA record only with a price for price zone 3 should return the default price
+        testUtilsRepository.addPARecord(new PAData("1000002", 3, 100.20, "20201212", 1595229000, 'N'));
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
+
+                  Product product = result.getProducts().get(0);
+                  assertEquals("1000002", product.getSupc());
+                  assertEquals("3", product.getPriceZoneId());
+                  assertEquals(100.20, product.getReferencePrice());
+                  assertEquals("20201212", product.getEffectiveFromDate());
+
+                  MinorErrorDTO errorDTO = result.getFailedProducts().get(0);
+                  assertEquals("102020", errorDTO.getErrorCode());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, errorDTO.getMessage());
+                  assertEquals("1000001", errorDTO.getSupc());
+              })
+              .verifyComplete();
+
+        // Adding another PA record with a price for price zone 3 should return the default price of the largest effective date
+        testUtilsRepository.addPARecord(new PAData("1000002", 3, 200.20, "20221212", 1595229000, 'N'));
+
+        // with no data, should receive minor errors for both SUPCs
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
+
+                  Product product = result.getProducts().get(0);
+                  assertEquals("1000002", product.getSupc());
+                  assertEquals("3", product.getPriceZoneId());
+                  assertEquals(200.20, product.getReferencePrice());
+                  assertEquals("20221212", product.getEffectiveFromDate());
+                  assertEquals(1595229000L, product.getPriceExportTimestamp());
+
+                  MinorErrorDTO errorDTO = result.getFailedProducts().get(0);
+                  assertEquals("102020", errorDTO.getErrorCode());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, errorDTO.getMessage());
+                  assertEquals("1000001", errorDTO.getSupc());
+              })
+              .verifyComplete();
+
+        // Adding another PA record with a price for price zone 3 should return the default price of the largest effective date AND largest
+        // exported date
+        testUtilsRepository.addPARecord(new PAData("1000002", 3, 300.20, "20221212", 1595249000, 'N'));
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
+
+                  Product product = result.getProducts().get(0);
+                  assertEquals("1000002", product.getSupc());
+                  assertEquals("3", product.getPriceZoneId());
+                  assertEquals(300.20, product.getReferencePrice());
+                  assertEquals("20221212", product.getEffectiveFromDate());
+                  assertEquals(1595249000L, product.getPriceExportTimestamp());
+
+                  MinorErrorDTO errorDTO = result.getFailedProducts().get(0);
+                  assertEquals("102020", errorDTO.getErrorCode());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, errorDTO.getMessage());
+                  assertEquals("1000001", errorDTO.getSupc());
+              })
+              .verifyComplete();
+
+        // Adding a PRICE_ZONE record with a price zone that is non existing, should return the default price (price of price zone 3)
+        testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000002", 1, "100001", "20201212"));
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
+
+                  Product product = result.getProducts().get(0);
+                  assertEquals("1000002", product.getSupc());
+                  assertEquals("3", product.getPriceZoneId());
+                  assertEquals(300.20, product.getReferencePrice());
+                  assertEquals("20221212", product.getEffectiveFromDate());
+                  assertEquals(1595249000L, product.getPriceExportTimestamp());
+
+                  MinorErrorDTO errorDTO = result.getFailedProducts().get(0);
+                  assertEquals("102020", errorDTO.getErrorCode());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, errorDTO.getMessage());
+                  assertEquals("1000001", errorDTO.getSupc());
+              })
+              .verifyComplete();
+
+        // having both PRICE and PRICE_ZONE data should return correct results
+        testUtilsRepository.addPARecord(new PAData("1000002", 2, 400.20, "20221212", 1595249000, 'N'));
+        testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000002", 2, "100001", "20221212"));
+
+        StepVerifier.create(customerPriceResponseMono)
+              .consumeNextWith(result -> {
+                  assertNotNull(result);
+                  assertEquals(1, result.getProducts().size());
+                  assertEquals(1, result.getFailedProducts().size());
+
+                  Product product = result.getProducts().get(0);
+                  assertEquals("1000002", product.getSupc());
+                  assertEquals("2", product.getPriceZoneId());
+                  assertEquals(400.20, product.getReferencePrice());
+                  assertEquals("20221212", product.getEffectiveFromDate());
+                  assertEquals(1595249000L, product.getPriceExportTimestamp());
+
+                  MinorErrorDTO errorDTO = result.getFailedProducts().get(0);
+                  assertEquals("102020", errorDTO.getErrorCode());
+                  assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, errorDTO.getMessage());
+                  assertEquals("1000001", errorDTO.getSupc());
+              })
+              .verifyComplete();
     }
 
 }

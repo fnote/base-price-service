@@ -38,6 +38,8 @@ class CustomerPriceControllerTest extends BaseTest {
     @Autowired
     TestUtilsRepository testUtilsRepository;
 
+    private static final String ERROR_MSG_MAPPING_NOT_FOUND = "Price not found for given SUPC/customer combination. No default price found as well";
+
     @BeforeAll
     void initialSetup() {
         testUtilsRepository.truncateTables();
@@ -185,11 +187,9 @@ class CustomerPriceControllerTest extends BaseTest {
                   assertEquals(0, result.getProducts().size());
                   assertEquals(3, result.getFailedProducts().size());
 
-                  String errorMsg = "Price not found for given SUPC/customer combination";
-
-                  assertEquals(new MinorErrorDTO("2512527", "102020", errorMsg), result.getFailedProducts().get(0));
-                  assertEquals(new MinorErrorDTO("3325677", "102020", errorMsg), result.getFailedProducts().get(1));
-                  assertEquals(new MinorErrorDTO("8328971", "102020", errorMsg), result.getFailedProducts().get(2));
+                  assertEquals(new MinorErrorDTO("2512527", "102020", ERROR_MSG_MAPPING_NOT_FOUND), result.getFailedProducts().get(0));
+                  assertEquals(new MinorErrorDTO("3325677", "102020", ERROR_MSG_MAPPING_NOT_FOUND), result.getFailedProducts().get(1));
+                  assertEquals(new MinorErrorDTO("8328971", "102020", ERROR_MSG_MAPPING_NOT_FOUND), result.getFailedProducts().get(2));
               })
               .verifyComplete();
     }
