@@ -14,25 +14,27 @@ targetCompatibility = JavaVersion.VERSION_11
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
+// You may use the following env variable while building in cloud, and a server defined in the local maven settings.xml while building locally
+def jFrogAPIKey = System.getenv('JFROG_API_KEY')
+
 repositories {
     mavenCentral()
     maven {
-        name = 'snapshots'
         url = 'https://syscobt.jfrog.io/artifactory/mvn'
 
-//      Uncomment below authentication lines when using local basic auth (via settings.xml) and comment out the next credentials and authentication
-//      sections
-//
-//        authentication {
-//            basic(BasicAuthentication)
-//        }
-
-        credentials(HttpHeaderCredentials) {
-            name = "X-JFrog-Art-Api"
-            value = System.getenv('JFROG_API_KEY')
-        }
-        authentication {
-            header(HttpHeaderAuthentication)
+        if (jFrogAPIKey?.trim()) {
+            credentials(HttpHeaderCredentials) {
+                name = "X-JFrog-Art-Api"
+                value = jFrogAPIKey
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        } else {
+            name = 'snapshots'
+            authentication {
+                basic(BasicAuthentication)
+            }
         }
     }
 }
@@ -62,8 +64,8 @@ sonarqube {
         }
         property "sonar.host.url", "https://cloudpricing-sonar-dev.prcp-np.us-east-1.aws.sysco.net/"
         property "sonar.login", "2bd4c258b4109a08739b27b76f512af1c1dc17fe"
-		property "sonar.scm.forceReloadAll", "true"
-		property 'sonar.core.codeCoveragePlugin', 'jacoco'
+        property "sonar.scm.forceReloadAll", "true"
+        property 'sonar.core.codeCoveragePlugin', 'jacoco'
         property 'sonar.coverage.jacoco.xmlReportPaths', "${buildDir}/reports/jacoco.xml"
         if (!(getCurrentBranchName().equals("develop") || getCurrentBranchName().equals("master") || project.hasProperty('pullrequest'))) {
             property "sonar.branch.name", getCurrentBranchName()
