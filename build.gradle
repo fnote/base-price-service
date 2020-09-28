@@ -23,9 +23,16 @@ repositories {
 //            basic(BasicAuthentication)
 //        }
 
-        credentials {
-            username = System.getenv('JFROG_USER')
-            password = System.getenv('JFROG_USER')
+//        credentials {
+//            username = System.getenv('JFROG_USER')
+//            password = System.getenv('JFROG_USER')
+//        }
+        credentials(HttpHeaderCredentials) {
+            name = "X-JFrog-Art-Api"
+            value = "AKCp8hyQ1NV521rYpsEy5jpPpa687Zutt6qaMxgifSSPU3nKHtTT5e13gmyzrKmS2pJzf4sds"
+        }
+        authentication {
+            header(HttpHeaderAuthentication)
         }
     }
 }
