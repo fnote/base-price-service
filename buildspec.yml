@@ -2,12 +2,9 @@ version: 0.2
 
 env:
   parameter-store:
-    JFROG_USER: "/CP/COMMON/JFROG/USER"
-    JFROG_PASS: "/CP/COMMON/JFROG/PASS"
+    JFROG_API_KEY: "/CP/COMMON/JFROG/APIKEY"
   exported-variables:
-    - JFROG_USER
-    - JFROG_PASS
-
+    - JFROG_API_KEY
 
 phases:
   pre_build:

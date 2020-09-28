@@ -29,7 +29,7 @@ repositories {
 //        }
         credentials(HttpHeaderCredentials) {
             name = "X-JFrog-Art-Api"
-            value = "AKCp8hyQ1NV521rYpsEy5jpPpa687Zutt6qaMxgifSSPU3nKHtTT5e13gmyzrKmS2pJzf4sds"
+            value = System.getenv('JFROG_API_KEY')
         }
         authentication {
             header(HttpHeaderAuthentication)
