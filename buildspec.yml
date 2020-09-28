@@ -3,8 +3,6 @@ version: 0.2
 env:
   parameter-store:
     JFROG_API_KEY: "/CP/COMMON/JFROG/APIKEY"
-  exported-variables:
-    - JFROG_API_KEY
 
 phases:
   pre_build:
