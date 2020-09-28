@@ -4,10 +4,16 @@ env:
   parameter-store:
     JFROG-USER: "/CP/COMMON/JFROG/USER"
     JFROG-PASS: "/CP/COMMON/JFROG/PASS"
+  exported-variables:
+    - JFROG-USER
+    - JFROG-PASS
+
 
 phases:
   pre_build:
     commands:
+      - echo JFROG-USER $JFROG-USER
+      - echo JFROG-PASS $JFROG-PASS
       - chmod +x gradlew
       - echo Logging in to Amazon ECR...
       - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
