@@ -12,8 +12,8 @@ env:
 phases:
   pre_build:
     commands:
-      - echo JFROG-USER $JFROG-USER
-      - echo JFROG-PASS $JFROG-PASS
+      - echo $JFROG-USER
+      - echo $JFROG-PASS
       - chmod +x gradlew
       - echo Logging in to Amazon ECR...
       - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
