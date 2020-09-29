@@ -4,6 +4,7 @@ plugins {
     id 'java'
     id 'org.sonarqube' version '2.7'
     id 'jacoco'
+    id "net.linguica.maven-settings" version "0.5"
 }
 
 group = 'com.sysco'
@@ -13,8 +14,29 @@ targetCompatibility = JavaVersion.VERSION_11
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"
 
+// You may use the following env variable while building in cloud, and a server defined in the local maven settings.xml while building locally
+def jFrogAPIKey = System.getenv('JFROG_API_KEY')
+
 repositories {
     mavenCentral()
+    maven {
+        url = 'https://syscobt.jfrog.io/artifactory/mvn'
+
+        if (jFrogAPIKey?.trim()) {
+            credentials(HttpHeaderCredentials) {
+                name = "X-JFrog-Art-Api"
+                value = jFrogAPIKey
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        } else {
+            name = 'https://syscobt.jfrog.io/syscobt'
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
 }
 
 ext.getCurrentBranchName = {
@@ -42,8 +64,8 @@ sonarqube {
         }
         property "sonar.host.url", "https://cloudpricing-sonar-dev.prcp-np.us-east-1.aws.sysco.net/"
         property "sonar.login", "2bd4c258b4109a08739b27b76f512af1c1dc17fe"
-		property "sonar.scm.forceReloadAll", "true"
-		property 'sonar.core.codeCoveragePlugin', 'jacoco'
+        property "sonar.scm.forceReloadAll", "true"
+        property 'sonar.core.codeCoveragePlugin', 'jacoco'
         property 'sonar.coverage.jacoco.xmlReportPaths', "${buildDir}/reports/jacoco.xml"
         if (!(getCurrentBranchName().equals("develop") || getCurrentBranchName().equals("master") || project.hasProperty('pullrequest'))) {
             property "sonar.branch.name", getCurrentBranchName()
@@ -116,6 +138,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.aspectj/aspectjweaver
     implementation group: 'org.aspectj', name: 'aspectjweaver', version: '1.9.5'
 
+    testImplementation group: 'com.sysco.pricing', name: 'junit-qcenter-integrator', version: '1.0-SNAPSHOT'
+
 }
 
 test {
@@ -128,6 +152,7 @@ test {
         exceptionFormat "full"
         showCauses true
         showStackTraces true
+        showStandardStreams true
     }
 
 }

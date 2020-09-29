@@ -12,7 +12,11 @@ import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.TestUtilsRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -31,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @doc
  * @end Created : 20. Jul 2020 10:16
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CustomerPriceServiceTest extends BaseTest {
 
     @Autowired
@@ -61,8 +66,8 @@ class CustomerPriceServiceTest extends BaseTest {
         assertEquals(result.getFailedProducts().get(0), error);
     }
 
-
     @Test
+    @Order(1)
     void pricesByOpCo() {
         List<String> products = new ArrayList<>(Arrays.asList("1000001", "1000002", "1000003", "1000004", "1000005"));
 
@@ -404,6 +409,7 @@ class CustomerPriceServiceTest extends BaseTest {
      * Jira task: PRCP-2080
      */
     @Test
+    @Tag("desc:PRCP-2080")
     void testInvalidSUPCScenarios() {
         testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
         testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
@@ -468,6 +474,7 @@ class CustomerPriceServiceTest extends BaseTest {
      * Jira task: PRCP-2085
      */
     @Test
+    @Tag("desc:PRCP-2085")
     void testInvalidSUPCWithValidSUPCList() {
         testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
         testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
@@ -518,6 +525,7 @@ class CustomerPriceServiceTest extends BaseTest {
      * Jira task: PRCP-2086
      */
     @Test
+    @Tag("desc:PRCP-2086")
     void testAllSUPCsInvalid() {
         testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
         testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
@@ -560,8 +568,8 @@ class CustomerPriceServiceTest extends BaseTest {
      * Testing invalid Date scenarios
      * Jira task: PRCP-2083
      */
-
     @Test
+    @Tag("desc:PRCP-2083")
     void testInvalidDateScenarios() {
         testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
         testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
@@ -643,6 +651,7 @@ class CustomerPriceServiceTest extends BaseTest {
      * Jira task: PRCP-2093
      */
     @Test
+    @Tag("desc:PRCP-2093")
     void testMultipleEffectiveDates() {
         testUtilsRepository.addPARecordsFromCsv("PA_BulkData.csv", true);
         testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
