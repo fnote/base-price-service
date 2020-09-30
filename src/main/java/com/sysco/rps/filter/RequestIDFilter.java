@@ -14,8 +14,8 @@ import reactor.util.context.Context;
 import java.util.List;
 import java.util.UUID;
 
-import static com.sysco.rps.common.Constants.CLIENT_ID;
-import static com.sysco.rps.common.Constants.CORRELATION_ID_HEADER;
+import static com.sysco.rps.common.Constants.CLIENT_ID_HEADER_KEY;
+import static com.sysco.rps.common.Constants.CORRELATION_ID_HEADER_KEY;
 import static com.sysco.rps.common.Constants.CORRELATION_ID_KEY;
 
 /**
@@ -33,7 +33,7 @@ public class RequestIDFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain) {
 
-        List<String> correlationIds = serverWebExchange.getRequest().getHeaders().get(CORRELATION_ID_HEADER);
+        List<String> correlationIds = serverWebExchange.getRequest().getHeaders().get(CORRELATION_ID_HEADER_KEY);
 
         if (CollectionUtils.isEmpty(correlationIds)) {
             return Mono.defer(() -> Mono.just(UUID.randomUUID().toString()))
@@ -45,13 +45,13 @@ public class RequestIDFilter implements WebFilter {
     }
 
     private Mono<Void> updateContextWithRequestIdentifiers(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain, String correlationId) {
-        List<String> clientIds = serverWebExchange.getRequest().getHeaders().get(CLIENT_ID);
+        List<String> clientIds = serverWebExchange.getRequest().getHeaders().get(CLIENT_ID_HEADER_KEY);
         final String clientId = CollectionUtils.isEmpty(clientIds) ? "" : clientIds.get(0);
 
         LOGGER.info("setting correlation ID: [{}], client ID: [{}]", correlationId, clientId);
 
         return webFilterChain
               .filter(serverWebExchange)
-              .subscriberContext((Context context) -> context.put(CORRELATION_ID_KEY, correlationId).put(CLIENT_ID, clientId));
+              .subscriberContext((Context context) -> context.put(CORRELATION_ID_KEY, correlationId).put(CLIENT_ID_HEADER_KEY, clientId));
     }
 }
