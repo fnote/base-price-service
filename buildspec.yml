@@ -1,5 +1,11 @@
 version: 0.2
 
+# REQUIRED ENVIRONMENT VARIABLES
+# AWS_DEFAULT_REGION      - AWS default region            (e.g. us-east-1)
+# IMAGE_REPO_NAME         - Name of the image repo        (e.g. my-app)
+# AWS_ACCOUNT_ID_PRCP     - Production AWS account id     (e.g. 555555555555)
+# AWS_ACCOUNT_ID_PRCP_NP  - Non production AWS account id (e.g. 666666666666)
+
 env:
   parameter-store:
     JFROG_API_KEY: "/CP/COMMON/JFROG/APIKEY"
@@ -10,6 +16,7 @@ phases:
       - chmod +x gradlew
       - echo Logging in to Amazon ECR...
       - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION --registry-ids $AWS_ACCOUNT_ID_PRCP)
   build:
     commands:
       - echo Build started on `date`
@@ -19,9 +26,12 @@ phases:
       - code_build_id=$(echo $CODEBUILD_BUILD_ID | sed -e "s/^reference-price-service-build://")
       - echo Building the Docker image...
       - docker build -t $IMAGE_REPO_NAME:$code_build_id .
-      - docker tag $IMAGE_REPO_NAME:$code_build_id $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$code_build_id
+      - docker tag $IMAGE_REPO_NAME:$code_build_id $AWS_ACCOUNT_ID_PRCP_NP.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$code_build_id
+      - docker tag $IMAGE_REPO_NAME:$code_build_id $AWS_ACCOUNT_ID_PRCP.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$code_build_id
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$code_build_id
+      - docker push $AWS_ACCOUNT_ID_PRCP_NP.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$code_build_id
+      - echo Pushing the Docker image to production ecr...
+      - docker push $AWS_ACCOUNT_ID_PRCP.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$code_build_id
