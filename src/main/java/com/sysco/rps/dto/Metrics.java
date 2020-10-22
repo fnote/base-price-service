@@ -6,7 +6,6 @@ package com.sysco.rps.dto;
  * Created: 10/21/20. Wed 2020 18:50
  */
 public class Metrics {
-
     private String poolId;
     private int acquiredSize;
     private int allocatedSize;
@@ -15,6 +14,11 @@ public class Metrics {
     private int maxAllocatedSize;
     private int maxPendingAcquireSize;
     private boolean isDisposed;
+
+    public Metrics(String poolId, boolean isDisposed) {
+        this.poolId = poolId;
+        this.isDisposed = isDisposed;
+    }
 
     public String getPoolId() {
         return poolId;
@@ -78,5 +82,63 @@ public class Metrics {
 
     public void setDisposed(boolean disposed) {
         isDisposed = disposed;
+    }
+
+    public static class Builder {
+        private String poolId;
+        private int acquiredSize;
+        private int allocatedSize;
+        private int idleSize;
+        private int pendingAcquireSize;
+        private int maxAllocatedSize;
+        private int maxPendingAcquireSize;
+        private boolean isDisposed;
+
+        public Builder(String poolId, boolean isDisposed) {
+            this.poolId = poolId;
+            this.isDisposed = isDisposed;
+        }
+
+        public Builder acquiredSize(int acquiredSize) {
+            this.acquiredSize = acquiredSize;
+            return this;
+        }
+
+        public Builder allocatedSize(int allocatedSize) {
+            this.allocatedSize = allocatedSize;
+            return this;
+        }
+
+        public Builder idleSize(int idleSize) {
+            this.idleSize = idleSize;
+            return this;
+        }
+
+        public Builder pendingAcquireSize(int pendingAcquireSize) {
+            this.pendingAcquireSize = pendingAcquireSize;
+            return this;
+        }
+
+        public Builder maxAllocatedSize(int maxAllocatedSize) {
+            this.maxAllocatedSize = maxAllocatedSize;
+            return this;
+        }
+
+        public Builder maxPendingAcquireSize(int maxPendingAcquireSize) {
+            this.maxPendingAcquireSize = maxPendingAcquireSize;
+            return this;
+        }
+
+        public Metrics build() {
+            Metrics metrics = new Metrics(this.poolId, this.isDisposed);
+            metrics.setAcquiredSize(this.acquiredSize);
+            metrics.setAllocatedSize(this.allocatedSize);
+            metrics.setIdleSize(this.idleSize);
+            metrics.setPendingAcquireSize(this.pendingAcquireSize);
+            metrics.setMaxAllocatedSize(this.maxAllocatedSize);
+            metrics.setMaxPendingAcquireSize(this.maxPendingAcquireSize);
+            return metrics;
+        }
+
     }
 }

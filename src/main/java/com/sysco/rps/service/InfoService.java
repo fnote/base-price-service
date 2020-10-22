@@ -2,6 +2,7 @@ package com.sysco.rps.service;
 
 import com.sysco.rps.dto.Metrics;
 import io.r2dbc.pool.ConnectionPool;
+import io.r2dbc.pool.PoolMetrics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -9,6 +10,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Tharuka Jayalath
@@ -27,20 +29,23 @@ public class InfoService {
 
     public Mono<List<Metrics>> getConnectionPoolInfo() {
         return Flux.fromIterable(this.connectionPoolMap.entrySet())
-              .map( connectionPoolEntry -> {
-                  Metrics metrics = new Metrics();
-                  connectionPoolEntry.getValue().getMetrics().ifPresent(poolMetrics -> {
-                      metrics.setPoolId(connectionPoolEntry.getKey());
-                      metrics.setAcquiredSize(poolMetrics.acquiredSize());
-                      metrics.setAllocatedSize(poolMetrics.allocatedSize());
-                      metrics.setIdleSize(poolMetrics.idleSize());
-                      metrics.setPendingAcquireSize(poolMetrics.pendingAcquireSize());
-                      metrics.setMaxAllocatedSize(poolMetrics.getMaxAllocatedSize());
-                      metrics.setMaxPendingAcquireSize(poolMetrics.getMaxPendingAcquireSize());
-                      metrics.setDisposed(connectionPoolEntry.getValue().isDisposed());
-                  });
-                  return metrics;
-              }).collectList();
+              .map(connectionPoolEntry -> {
+                  ConnectionPool connectionPool = connectionPoolEntry.getValue();
+                  Optional<PoolMetrics> optionalPoolMetrics = connectionPool.getMetrics();
+                  if (optionalPoolMetrics.isPresent()) {
+                      PoolMetrics poolMetrics = optionalPoolMetrics.get();
+                      return new Metrics.Builder(connectionPoolEntry.getKey(), connectionPool.isDisposed())
+                            .allocatedSize(poolMetrics.allocatedSize())
+                            .acquiredSize(poolMetrics.acquiredSize())
+                            .idleSize(poolMetrics.idleSize())
+                            .pendingAcquireSize(poolMetrics.pendingAcquireSize())
+                            .maxAllocatedSize(poolMetrics.getMaxAllocatedSize())
+                            .maxPendingAcquireSize(poolMetrics.getMaxPendingAcquireSize())
+                            .build();
+                  }
+                  return new Metrics(connectionPoolEntry.getKey(), connectionPool.isDisposed());
+              })
+              .collectList();
     }
 
 }
