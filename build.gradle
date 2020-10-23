@@ -4,10 +4,11 @@ plugins {
     id 'java'
     id 'org.sonarqube' version '2.7'
     id 'jacoco'
+    id "com.gorylenko.gradle-git-properties" version "1.4.17"
 }
 
 group = 'com.sysco'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0'
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 compileJava.options.encoding = "UTF-8"
@@ -48,6 +49,12 @@ sonarqube {
         if (!(getCurrentBranchName().equals("develop") || getCurrentBranchName().equals("master") || project.hasProperty('pullrequest'))) {
             property "sonar.branch.name", getCurrentBranchName()
         }
+    }
+}
+
+processResources {
+    filesMatching('application.properties') {
+        expand(project.properties)
     }
 }
 
