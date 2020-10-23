@@ -11,6 +11,8 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 /**
+ * Controller class that exposes the application status endpoints
+ *
  * @author Tharuka Jayalath
  * (C) 2020, Sysco Corporation
  * Created: 10/21/20. Wed 2020 16:43
@@ -19,13 +21,18 @@ import java.util.List;
 @RequestMapping("/info")
 public class InfoController {
 
-    private InfoService infoService;
+    private final InfoService infoService;
 
     @Autowired
     public InfoController(InfoService infoService) {
         this.infoService = infoService;
     }
 
+    /**
+     * Exposes database connection-pool information
+     *
+     * @return {@link Mono} of list of Metrics
+     */
     @GetMapping("/connection-pool")
     public Mono<List<Metrics>> getConnectionPoolInfo() {
         return infoService.getConnectionPoolInfo();
