@@ -1,6 +1,8 @@
 package com.sysco.rps.dto;
 
 /**
+ * DTO for holding the database connection-pool metrics
+ *
  * @author Tharuka Jayalath
  * (C) 2020, Sysco Corporation
  * Created: 10/21/20. Wed 2020 18:50
