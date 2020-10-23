@@ -18,7 +18,7 @@ import java.util.List;
  * Created: 10/21/20. Wed 2020 16:43
  */
 @RestController
-@RequestMapping("/info")
+@RequestMapping("/support")
 public class InfoController {
 
     private final InfoService infoService;
@@ -33,7 +33,7 @@ public class InfoController {
      *
      * @return {@link Mono} of list of Metrics
      */
-    @GetMapping("/connection-pool")
+    @GetMapping("/connection-pool-metrics")
     public Mono<List<Metrics>> getConnectionPoolInfo() {
         return infoService.getConnectionPoolInfo();
     }
