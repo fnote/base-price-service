@@ -41,6 +41,12 @@ public class RoutingConnectionFactoryTestConfig {
     private BusinessUnitLoaderService businessUnitLoaderService;
     private final Map<String, ConnectionPool> connectionPoolMap = new HashMap<>();
 
+    @Value("${pricing.db.h2.file.path}")
+    private String dbFilePath;
+
+    @Value("${pricing.db.h2.file.path.windows}")
+    private String dbFilePathWindows;
+
     /***
      * Allows setting a business loader service
      * @param businessUnitLoaderService
@@ -54,14 +60,12 @@ public class RoutingConnectionFactoryTestConfig {
      * Method to create RoutingConnectionFactory bean.
      * @param jdbcUser
      * @param jdbcPassword
-     * @param dbFilePath
      * @return RoutingConnectionFactory
      */
     @Bean
     public RoutingConnectionFactory routingConnectionFactory(
           @Value("${pricing.db.username}") String jdbcUser,
-          @Value("${pricing.db.password}") String jdbcPassword,
-          @Value("${pricing.db.h2.file.path}") String dbFilePath) {
+          @Value("${pricing.db.password}") String jdbcPassword) {
         RoutingConnectionFactory router = new RoutingConnectionFactory();
 
         ConnectionFactory defaultConnectionFactory = null;
@@ -79,7 +83,7 @@ public class RoutingConnectionFactoryTestConfig {
                   H2ConnectionConfiguration.builder()
                         .username(jdbcUser)
                         .password(jdbcPassword)
-                        .file(dbFilePath)
+                        .file(getDbFilePath())
                         .property(H2ConnectionOption.MODE, MYSQL)
                         .build()
             );
@@ -100,6 +104,13 @@ public class RoutingConnectionFactoryTestConfig {
         router.setTargetConnectionFactories(factories);
         router.setDefaultTargetConnectionFactory(defaultConnectionFactory);
         return router;
+    }
+
+    private String getDbFilePath() {
+        if (System.getProperty("os.name").contains("Windows")) {
+            return dbFilePathWindows;
+        }
+        return dbFilePath;
     }
 
     private Set<String> loadActiveBusinessUnits() {
