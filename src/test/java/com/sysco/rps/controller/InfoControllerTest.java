@@ -27,7 +27,7 @@ public class InfoControllerTest extends BaseTest {
         StepVerifier.create(infoController.getConnectionPoolInfo())
                 .consumeNextWith(result -> {
                     assertNotNull(result);
-                    assertEquals(0, result.size());
+                    assertEquals(1, result.size());
                 })
                 .verifyComplete();
     }
