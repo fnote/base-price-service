@@ -35,6 +35,16 @@ resolved.db.jdbcUrl=jdbc:postgresql://localhost:5432/ref_price_dev?characterEnco
 resolved.db.username=ref_price_user
 resolved.db.password=password
 ```
+* Add a server entry to the local maven settings.xml file similar to the following
+```dtd
+    <server>
+      <username>username</username>
+      <password>password</password>
+      <id>https://syscobt.jfrog.io/syscobt</id>
+    </server>
+
+```
+
 * Run the unit tests
 ```dtd
 gradle test

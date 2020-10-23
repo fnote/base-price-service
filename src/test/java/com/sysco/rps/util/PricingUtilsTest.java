@@ -49,7 +49,7 @@ class PricingUtilsTest extends BaseTest {
     @Test
     void formatDate() {
         assertTrue(PricingUtils.formatDate(null).isEmpty());
-        assertEquals("20200827", PricingUtils.formatDate( LocalDateTime.of(2020, 8, 27, 15, 56)));
+        assertEquals("20200827", PricingUtils.formatDate(LocalDateTime.of(2020, 8, 27, 15, 56)));
     }
 
 }

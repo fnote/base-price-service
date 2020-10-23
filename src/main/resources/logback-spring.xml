@@ -9,12 +9,12 @@
             </Pattern>
         </layout>
     </appender>
+    <!-- LOG "com.sysco" at TRACE level -->
     <logger additivity="false" level="trace" name="com.sysco">
         <appender-ref ref="Console"/>
     </logger>
     <!-- LOG everything at INFO level -->
     <property name="LOGS" value="./logs"/>
-    <!-- LOG "com.sysco" at TRACE level -->
     <root level="info">
         <appender-ref ref="Console"/>
     </root>

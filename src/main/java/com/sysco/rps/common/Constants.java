@@ -7,12 +7,13 @@ package com.sysco.rps.common;
  */
 public class Constants {
 
-    public static final String CORRELATION_ID_HEADER = "X-Syy-Correlation-ID";
-    public static final String CLIENT_ID = "clientId";
+    public static final String CORRELATION_ID_HEADER_KEY = "X-Syy-Correlation-Id";
+    public static final String CLIENT_ID_HEADER_KEY = "client-id";
     public static final String CORRELATION_ID_KEY = "Correlation-Id";
     public static final String ROUTING_KEY = "businessUnitId";
     public static final String PRICE_REQUEST_DATE_PATTERN = "yyyyMMdd";
     public static final String IS_CATCH_WEIGHT = "Y";
+    public static final String DEFAULT_PRICE_ZONE = "3";
 
     private Constants() {
         // default constructor
