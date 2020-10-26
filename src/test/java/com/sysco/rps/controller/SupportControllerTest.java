@@ -9,13 +9,13 @@ import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class InfoControllerTest extends BaseTest {
+public class SupportControllerTest extends BaseTest {
 
-    InfoController infoController;
+    SupportController supportController;
 
     @Autowired
-    public InfoControllerTest(InfoController infoController) {
-        this.infoController = infoController;
+    public SupportControllerTest(SupportController infoController) {
+        this.supportController = infoController;
     }
 
     /***
@@ -24,7 +24,7 @@ public class InfoControllerTest extends BaseTest {
     @Test
     @Tag("desc:PRCP-2487")
     void getConnectionPoolInfo() {
-        StepVerifier.create(infoController.getConnectionPoolInfo())
+        StepVerifier.create(supportController.getConnectionPoolInfo())
                 .consumeNextWith(result -> {
                     assertNotNull(result);
                     assertEquals(1, result.size());

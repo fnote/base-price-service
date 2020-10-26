@@ -20,12 +20,12 @@ import java.util.Optional;
  * Created: 10/21/20. Wed 2020 16:44
  */
 @Service
-public class InfoService {
+public class SupportService {
 
     private final Map<String, ConnectionPool> connectionPoolMap;
 
     @Autowired
-    public InfoService(Map<String, ConnectionPool> connectionPoolMap) {
+    public SupportService(Map<String, ConnectionPool> connectionPoolMap) {
         this.connectionPoolMap = connectionPoolMap;
     }
 

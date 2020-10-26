@@ -1,7 +1,7 @@
 package com.sysco.rps.controller;
 
 import com.sysco.rps.dto.Metrics;
-import com.sysco.rps.service.InfoService;
+import com.sysco.rps.service.SupportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,13 +19,13 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/support")
-public class InfoController {
+public class SupportController {
 
-    private final InfoService infoService;
+    private final SupportService supportService;
 
     @Autowired
-    public InfoController(InfoService infoService) {
-        this.infoService = infoService;
+    public SupportController(SupportService supportService) {
+        this.supportService = supportService;
     }
 
     /**
@@ -35,7 +35,7 @@ public class InfoController {
      */
     @GetMapping("/connection-pool-metrics")
     public Mono<List<Metrics>> getConnectionPoolInfo() {
-        return infoService.getConnectionPoolInfo();
+        return supportService.getConnectionPoolInfo();
     }
 
 }
