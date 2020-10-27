@@ -6,6 +6,8 @@ import com.sysco.rps.service.loader.BusinessUnitLoaderService;
 import io.r2dbc.h2.H2ConnectionConfiguration;
 import io.r2dbc.h2.H2ConnectionFactory;
 import io.r2dbc.h2.H2ConnectionOption;
+import io.r2dbc.pool.ConnectionPool;
+import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,7 @@ public class RoutingConnectionFactoryTestConfig {
     private static final String MYSQL = "MySQL";
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutingConnectionFactoryTestConfig.class);
     private BusinessUnitLoaderService businessUnitLoaderService;
+    private final Map<String, ConnectionPool> connectionPoolMap = new HashMap<>();
 
     @Value("${pricing.db.h2.file.path}")
     private String dbFilePath;
@@ -85,11 +88,15 @@ public class RoutingConnectionFactoryTestConfig {
                         .build()
             );
 
+            ConnectionPoolConfiguration configuration = ConnectionPoolConfiguration.builder(connectionFactory).build();
+            ConnectionPool connectionPool = new ConnectionPool(configuration);
+
             if (defaultConnectionFactory == null) {
                 defaultConnectionFactory = connectionFactory;
             }
 
             factories.put(businessUnitId, connectionFactory);
+            connectionPoolMap.put(businessUnitId, connectionPool);
 
             LOGGER.info("Created connection factory for DB [{}]", businessUnitId);
         }
@@ -111,6 +118,11 @@ public class RoutingConnectionFactoryTestConfig {
               .stream()
               .map(BusinessUnit::getBusinessUnitNumber)
               .collect(Collectors.toSet());
+    }
+
+    @Bean
+    public Map<String, ConnectionPool> getConnectionPoolMap() {
+        return this.connectionPoolMap;
     }
 
 }

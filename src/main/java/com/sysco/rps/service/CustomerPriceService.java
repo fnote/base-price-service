@@ -81,7 +81,6 @@ public class CustomerPriceService {
                   timeConsumedForDbActivities.addAndGet(t.getT1());
                   return t.getT2();
               })
-              .subscriberContext(Context.of(ROUTING_KEY, request.getBusinessUnitNumber()))
               .collectList()
               .flatMap(productList -> {
                   Map<String, Product> productMap = convertToUniqueProductMap(productList);
@@ -91,7 +90,8 @@ public class CustomerPriceService {
                   logger.error("Failed to fetch prices");
                   logger.error("Request Payload: [{}]", request);
                   logger.error(e.getMessage(), e);
-              });
+              })
+              .subscriberContext(Context.of(ROUTING_KEY, request.getBusinessUnitNumber()));
 
     }
 

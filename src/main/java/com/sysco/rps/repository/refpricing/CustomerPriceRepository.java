@@ -33,7 +33,7 @@ public class CustomerPriceRepository {
     @Autowired
     private DatabaseClient databaseClient;
 
-    private static String query =
+    private String query =
           "SELECT paOuter.SUPC," +
                 "       paOuter.PRICE_ZONE," +
                 "       paOuter.PRICE," +
@@ -91,7 +91,7 @@ public class CustomerPriceRepository {
 
     CustomerPriceRepository(@Value("${query.get.price:}") String queryToOverride) {
         if (!StringUtils.isEmpty(queryToOverride)) {
-            query = queryToOverride;
+            this.query = queryToOverride;
         }
     }
 
