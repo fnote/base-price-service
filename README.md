@@ -7,8 +7,8 @@ Reference Price Service consumes periodically provided files by PA and EATs, pro
 * [Software Analysis and Design](https://syscobt.atlassian.net/wiki/spaces/PRCP/pages/1449168081/Reference+Pricing+-+Software+Analysis+and+Design)
 
 # How to start up 
-Do the below steps to get the API up and running entirely in a local developer workstation
-* The API requires a mysql database
+Do the below steps to get the Reference Price API up and running entirely in a local developer workstation
+* This requires a mysql database
 
 Run the following [mysql-deploy](https://github.aws.na.sysco.net/pricing-platform/mysql-deploy/tree/reference-price-db-deploy) to create the
  databases locally or in the required environment
@@ -24,11 +24,11 @@ gradle test
 
 ##Application properties
 
-API reads all its profile specific properties from AWS parameter store so that all the application properties 
+Reference Price API reads all its profile specific properties from AWS parameter store so that all the application properties 
 are managed centrally in a secured environment.All the sensitive parameters are store encrypted.
 
 ###AWS Spring Cloud
-API uses Spring Cloud framework based configuration management. The defaults ```bootstrap.properties``` file 
+This uses Spring Cloud framework based configuration management. The defaults ```bootstrap.properties``` file 
 has the default configuration required for Spring Cloud.
 ```dtd
 cloud.aws.credentials.instanceProfile=false
@@ -48,7 +48,7 @@ Note that by default ```aws.paramstore.enabled``` is enabled. So that under defa
 Above configuration assumes that application will run in ```cloud.aws.region.static=us-east-1``` region.
 
 ###AWS Credentials
-API requires an AWS connection to read the parameters. So store the AWS token in the file ``` ~/.aws/credentials```.
+It requires an AWS connection to read the parameters. So store the AWS token in the file ``` ~/.aws/credentials```.
 In Sysco AWS, credentials get expired every one hour so its required to refresh this file in sufficient a frequency.
 ```dtd
 [default]
