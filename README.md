@@ -1,4 +1,4 @@
-#Reference Price Service
+# Reference Price Service
 
 [![Quality Gate Status](https://cloudpricing-sonar-dev.prcp-np.us-east-1.aws.sysco.net/api/project_badges/measure?project=com.sysco%3Aref-price-service&metric=alert_status)](https://cloudpricing-sonar-dev.prcp-np.us-east-1.aws.sysco.net/dashboard?id=com.sysco%3Aref-price-service)
 
