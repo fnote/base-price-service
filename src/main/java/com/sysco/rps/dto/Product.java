@@ -1,5 +1,6 @@
 package com.sysco.rps.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -22,6 +23,9 @@ public class Product {
     private Long priceExportTimestamp;
     private Boolean catchWeightIndicator;
 
+    @JsonIgnore
+    private Boolean isDefaultPriced = false;
+
     public Product(String supc, String priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportTimestamp, Boolean catchWeightIndicator) {
         this.supc = supc;
         this.priceZoneId = priceZoneId;
@@ -29,6 +33,12 @@ public class Product {
         this.effectiveFromDate = effectiveFromDate;
         this.priceExportTimestamp = priceExportTimestamp;
         this.catchWeightIndicator = catchWeightIndicator;
+    }
+
+    public Product(String supc, String priceZoneId, Double referencePrice, String effectiveFromDate, Long priceExportTimestamp,
+                   Boolean catchWeightIndicator, Boolean isDefaultPriced) {
+        this(supc, priceZoneId, referencePrice, effectiveFromDate, priceExportTimestamp, catchWeightIndicator);
+        this.isDefaultPriced = isDefaultPriced;
     }
 
     public String getSupc() {
@@ -77,6 +87,14 @@ public class Product {
 
     public void setCatchWeightIndicator(Boolean catchWeightIndicator) {
         this.catchWeightIndicator = catchWeightIndicator;
+    }
+
+    public Boolean getDefaultPriced() {
+        return isDefaultPriced;
+    }
+
+    public void setDefaultPriced(Boolean defaultPriced) {
+        isDefaultPriced = defaultPriced;
     }
 
     @Override
