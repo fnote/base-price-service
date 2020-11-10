@@ -89,7 +89,7 @@ public class Product {
         this.catchWeightIndicator = catchWeightIndicator;
     }
 
-    public Boolean getDefaultPriced() {
+    Boolean getDefaultPriced() {
         return isDefaultPriced;
     }
 

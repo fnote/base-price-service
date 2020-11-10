@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import static com.sysco.rps.common.Constants.LOGGER_NAME;
 
 /**
+ * Util class that contains methods for logging metrics logs
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -19,11 +20,16 @@ public class MetricsLoggerUtils {
         // default constructor
     }
 
+    /**
+     * Log the metrics with info log level
+     * */
     public static void logInfo(MetricsEvent metricsEvent) {
         logger.info("{}", metricsEvent);
     }
 
-
+    /**
+     * Log the metrics with error log level
+     * */
     public static void logError(MetricsEvent metricsEvent) {
         logger.error("{}", metricsEvent);
     }

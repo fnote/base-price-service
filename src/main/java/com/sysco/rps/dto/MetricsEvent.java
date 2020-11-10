@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
+ * Model class to store metrics log attributes
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -81,7 +82,7 @@ public class MetricsEvent {
 
     @Override
     public String toString() {
-        Object[] objs = new Object[]{
+        Object[] attributes = new Object[]{
               functionName,
               customerId,
               requestDate,
@@ -95,7 +96,7 @@ public class MetricsEvent {
               supcsPerQuery
         };
 
-        return StringUtils.join(objs, "/t");
+        return StringUtils.join(attributes, "/t");
     }
 }
 
