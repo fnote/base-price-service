@@ -15,9 +15,9 @@ public class MetricsEvent {
     private String functionName;
     private String customerId;
     private String requestDate;
-    private long requestedProductCount;
-    private long queryTime;
-    private long totalTime;
+    private Integer requestedProductCount;
+    private Long queryTime;
+    private Long totalTime;
     private Integer successfullyPricedProductCount = 0;
     private Integer defaultPricedProductCount = 0;
     private Integer productCountWithNoPrices = 0;
@@ -25,7 +25,7 @@ public class MetricsEvent {
     private String clientAddress;
 
     public MetricsEvent(String functionName, CustomerPriceRequest request, @Nullable CustomerPriceResponse response,
-                        long queryTime, long totalTime, Integer supcsPerQuery, String clientAddress) {
+                        Long queryTime, Long totalTime, Integer supcsPerQuery, String clientAddress) {
         this.functionName = functionName;
         this.customerId = request.getCustomerAccount();
         this.requestDate = request.getPriceRequestDate();
@@ -38,7 +38,7 @@ public class MetricsEvent {
 
             if (products != null) {
                 this.successfullyPricedProductCount = products.size();
-                this.defaultPricedProductCount = Long.valueOf(products.stream().filter(Product::getDefaultPriced).count()).intValue();
+                this.defaultPricedProductCount = (int) products.stream().filter(Product::getDefaultPriced).count();
             }
 
             List<MinorErrorDTO> failedProducts = response.getFailedProducts();

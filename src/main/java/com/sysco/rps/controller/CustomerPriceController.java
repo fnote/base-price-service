@@ -58,7 +58,7 @@ public class CustomerPriceController extends AbstractController {
     Mono<CustomerPriceResponse> getCustomerPrices(@RequestBody CustomerPriceRequest request, @RequestParam(required = false) Integer supcsPerQuery) {
         return customerPriceService.pricesByOpCo(request, supcsPerQuery)
               .doOnError(e -> {
-                  MetricsEvent metricsEvent = new MetricsEvent("customer-prices", request, null, 0L, 0L, supcsPerQuery, null);
+                  MetricsEvent metricsEvent = new MetricsEvent("customer-prices", request, null, null, null, supcsPerQuery, null);
                   MetricsLoggerUtils.logError(metricsEvent);
               });
     }

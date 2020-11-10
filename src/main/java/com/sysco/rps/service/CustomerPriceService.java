@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
@@ -62,6 +63,7 @@ public class CustomerPriceService {
     private BusinessUnitLoaderService businessUnitLoaderService;
 
     public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
+        StopWatch stopWatch = new StopWatch();
 
         RefPriceAPIException validationException = validateRequest(request);
 
@@ -91,18 +93,27 @@ public class CustomerPriceService {
                   return formResponseWithDefaultPriceProducts(request, requestedSUPCs, productMap);
               })
               .doOnSuccess(resp -> {
-                  MetricsEvent metricsEvent = new MetricsEvent("customer-prices", request, resp, 0L, 0L, supcsPerQuery, null);
-                  MetricsLoggerUtils.logInfo(metricsEvent);
+                  stopStopWatch(stopWatch);
+                  MetricsLoggerUtils.logInfo(new MetricsEvent("customer-prices", request, resp, timeConsumedForDbActivities.get(), stopWatch.getTotalTimeMillis(),
+                        supcsPerQuery, null));
               })
               .doOnError(e -> {
+                  stopStopWatch(stopWatch);
+
                   logger.error("Failed to fetch prices");
                   logger.error("Request Payload: [{}]", request);
                   logger.error(e.getMessage(), e);
 
-                  MetricsEvent metricsEvent = new MetricsEvent("customer-prices", request, null, 0L, 0L, supcsPerQuery, null);
-                  MetricsLoggerUtils.logError(metricsEvent);
+                  MetricsLoggerUtils.logError(new MetricsEvent("customer-prices", request, null, timeConsumedForDbActivities.get(), stopWatch.getTotalTimeMillis(),
+                        supcsPerQuery, null));
               })
               .subscriberContext(Context.of(ROUTING_KEY, request.getBusinessUnitNumber()));
+    }
+
+    private void stopStopWatch(StopWatch stopWatch) {
+        if (stopWatch.isRunning()) {
+            stopWatch.stop();
+        }
     }
 
     private RefPriceAPIException validateRequest(CustomerPriceRequest request) {
