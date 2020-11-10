@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import static com.sysco.rps.common.Constants.DEFAULT_PRICE_ZONE;
 import static com.sysco.rps.common.Constants.PRICE_REQUEST_DATE_PATTERN;
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
+import static com.sysco.rps.common.Constants.LOGGER_NAME;
 
 /**
  * Contains logic on processing the price request by calling repositories
@@ -46,6 +47,8 @@ import static com.sysco.rps.common.Constants.ROUTING_KEY;
 public class CustomerPriceService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerPriceService.class);
+    private static Logger eventsLogger = LoggerFactory.getLogger(LOGGER_NAME);
+
     private final Integer configuredSUPCsPerQuery;
 
     CustomerPriceService(@Value("${supcs.per.query:5}") Integer configuredSUPCsPerQuery) {
@@ -66,6 +69,7 @@ public class CustomerPriceService {
             return Mono.error(validationException);
         }
 
+        eventsLogger.info("sample_test\t{}\tblah", requestedSupcsPerQuery);
         List<String> requestedSUPCs = request.getProducts().stream().distinct().collect(Collectors.toList());
 
         int supcsPerQuery = (requestedSupcsPerQuery == null || requestedSupcsPerQuery == 0) ? configuredSUPCsPerQuery : requestedSupcsPerQuery;
