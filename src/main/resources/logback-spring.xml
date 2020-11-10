@@ -10,7 +10,7 @@
         </layout>
     </appender>
 
-    <appender name="APP_EVENTS" class="ch.qos.logback.core.ConsoleAppender">​
+    <appender name="APP_EVENTS" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
                 %d{YYYY-MM-dd-HH:mm:ss.SSS}-APP_EVENTS-%(%level)\t[%(%replace(%X{Correlation-Id}){'^$',
@@ -29,7 +29,7 @@
         <appender-ref ref="Console"/>
     </root>
 
-    <logger name="LoggerForEvents" level="INFO" additivity="false">
+    <logger name="metricsLogger" level="INFO" additivity="false">
         <appender-ref ref="APP_EVENTS"/>
     </logger>
 

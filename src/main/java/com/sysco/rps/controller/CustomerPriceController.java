@@ -3,7 +3,9 @@ package com.sysco.rps.controller;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
 import com.sysco.rps.dto.ErrorDTO;
+import com.sysco.rps.dto.MetricsEvent;
 import com.sysco.rps.service.CustomerPriceService;
+import com.sysco.rps.util.MetricsLoggerUtils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -54,6 +56,10 @@ public class CustomerPriceController extends AbstractController {
     })
     public @ResponseBody
     Mono<CustomerPriceResponse> getCustomerPrices(@RequestBody CustomerPriceRequest request, @RequestParam(required = false) Integer supcsPerQuery) {
-        return customerPriceService.pricesByOpCo(request, supcsPerQuery);
+        return customerPriceService.pricesByOpCo(request, supcsPerQuery)
+              .doOnError(e -> {
+                  MetricsEvent metricsEvent = new MetricsEvent("customer-prices", request, null, 0L, 0L, supcsPerQuery, null);
+                  MetricsLoggerUtils.logError(metricsEvent);
+              });
     }
 }
