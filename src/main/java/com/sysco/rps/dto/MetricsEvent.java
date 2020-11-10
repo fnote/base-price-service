@@ -96,7 +96,7 @@ public class MetricsEvent {
               supcsPerQuery
         };
 
-        return StringUtils.join(attributes, "/t");
+        return StringUtils.join(attributes, "\t");
     }
 }
 
