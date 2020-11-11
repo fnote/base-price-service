@@ -62,7 +62,7 @@ public class CustomerPriceService {
     @Autowired
     private BusinessUnitLoaderService businessUnitLoaderService;
 
-    public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
+    public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery, String clientIP) {
         StopWatch stopWatch = new StopWatch();
 
         RefPriceAPIException validationException = validateRequest(request);
@@ -95,7 +95,7 @@ public class CustomerPriceService {
               .doOnSuccess(resp -> {
                   stopStopWatch(stopWatch);
                   MetricsLoggerUtils.logInfo(new MetricsEvent("customer-prices", request, resp, timeConsumedForDbActivities.get(), stopWatch.getTotalTimeMillis(),
-                        supcsPerQuery, null));
+                        supcsPerQuery, clientIP));
               })
               .doOnError(e -> {
                   stopStopWatch(stopWatch);
@@ -105,9 +105,13 @@ public class CustomerPriceService {
                   logger.error(e.getMessage(), e);
 
                   MetricsLoggerUtils.logError(new MetricsEvent("customer-prices", request, null, timeConsumedForDbActivities.get(), stopWatch.getTotalTimeMillis(),
-                        supcsPerQuery, null));
+                        supcsPerQuery, clientIP));
               })
               .subscriberContext(Context.of(ROUTING_KEY, request.getBusinessUnitNumber()));
+    }
+
+    public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
+        return pricesByOpCo(request, requestedSupcsPerQuery, null);
     }
 
     private void stopStopWatch(StopWatch stopWatch) {

@@ -15,6 +15,7 @@ public class Constants {
     public static final String IS_CATCH_WEIGHT = "Y";
     public static final String DEFAULT_PRICE_ZONE = "3";
     public static final String LOGGER_NAME = "metricsLogger";
+    public static final String ALB_SOURCE_IP_HEADER_KEY = "x-forwarded-for";
 
     private Constants() {
         // default constructor
