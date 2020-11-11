@@ -4,7 +4,7 @@ import com.sysco.rps.dto.MetricsEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.sysco.rps.common.Constants.LOGGER_NAME;
+import static com.sysco.rps.common.Constants.METRICS_LOGGER;
 
 /**
  * Util class that contains methods for logging metrics logs
@@ -14,7 +14,7 @@ import static com.sysco.rps.common.Constants.LOGGER_NAME;
  * @end Created : 10. Nov 2020 06:41
  */
 public class MetricsLoggerUtils {
-    private static final Logger logger = LoggerFactory.getLogger(LOGGER_NAME);
+    private static final Logger logger = LoggerFactory.getLogger(METRICS_LOGGER);
 
     private MetricsLoggerUtils() {
         // default constructor
