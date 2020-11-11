@@ -64,6 +64,7 @@ public class CustomerPriceService {
 
     public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery, String clientIP) {
         StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
 
         RefPriceAPIException validationException = validateRequest(request);
 
