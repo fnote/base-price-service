@@ -1,12 +1,11 @@
 package com.sysco.rps.dto;
 
-import org.apache.commons.lang3.StringUtils;
-
 import javax.annotation.Nullable;
 import java.util.List;
 
 /**
  * Model class to store metrics log attributes
+ *
  * @author Sanjaya Amarasinghe
  * @copyright (C) 2020, Sysco Corporation
  * @doc
@@ -52,51 +51,21 @@ public class MetricsEvent {
         this.clientAddress = clientAddress;
     }
 
-    public void setClientAddress(String clientAddress) {
-        this.clientAddress = clientAddress;
-    }
-
-    public void setQueryTime(long queryTime) {
-        this.queryTime = queryTime;
-    }
-
-    public void setTotalTime(long totalTime) {
-        this.totalTime = totalTime;
-    }
-
-    public void setSuccessfullyPricedProductCount(Integer successfullyPricedProductCount) {
-        this.successfullyPricedProductCount = successfullyPricedProductCount;
-    }
-
-    public void setDefaultPricedProductCount(Integer defaultPricedProductCount) {
-        this.defaultPricedProductCount = defaultPricedProductCount;
-    }
-
-    public void setProductCountWithNoPrices(Integer productCountWithNoPrices) {
-        this.productCountWithNoPrices = productCountWithNoPrices;
-    }
-
-    public void setSupcsPerQuery(Integer supcsPerQuery) {
-        this.supcsPerQuery = supcsPerQuery;
-    }
-
     @Override
     public String toString() {
-        Object[] attributes = new Object[]{
+        return String.join("\t",
               functionName,
               customerId,
               requestDate,
-              requestedProductCount,
+              Integer.toString(requestedProductCount),
               clientAddress,
-              queryTime,
-              totalTime,
-              successfullyPricedProductCount,
-              defaultPricedProductCount,
-              productCountWithNoPrices,
-              supcsPerQuery
-        };
-
-        return StringUtils.join(attributes, "\t");
+              Long.toString(queryTime),
+              Long.toString(totalTime),
+              Integer.toString(successfullyPricedProductCount),
+              Integer.toString(defaultPricedProductCount),
+              Integer.toString(productCountWithNoPrices),
+              Integer.toString(supcsPerQuery)
+        );
     }
 }
 
