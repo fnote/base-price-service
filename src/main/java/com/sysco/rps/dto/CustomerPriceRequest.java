@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.List;
 
@@ -105,7 +106,7 @@ public class CustomerPriceRequest {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        return new ToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE)
               .append("businessUnitNumber", businessUnitNumber)
               .append("customerAccount", customerAccount)
               .append("priceRequestDate", priceRequestDate)

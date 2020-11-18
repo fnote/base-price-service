@@ -25,7 +25,7 @@ public class LatencyFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         long start = System.currentTimeMillis();
         return chain.filter(exchange)
-              .doFinally(aVoid -> LOGGER.info("LATENCY [{}] Status [{}] Path [{}]", System.currentTimeMillis() - start,
+              .doFinally(aVoid -> LOGGER.info("LATENCY [{}], Status: [{}], Path: [{}]", System.currentTimeMillis() - start,
                     exchange.getResponse().getStatusCode(), exchange.getRequest().getPath())
               );
     }
