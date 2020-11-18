@@ -9,12 +9,12 @@ import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class SupportControllerTest extends BaseTest {
+class SupportControllerTest extends BaseTest {
 
-    SupportController supportController;
+    private SupportController supportController;
 
     @Autowired
-    public SupportControllerTest(SupportController infoController) {
+    SupportControllerTest(SupportController infoController) {
         this.supportController = infoController;
     }
 
