@@ -50,7 +50,7 @@ public class RequestIDFilter implements WebFilter {
         List<String> clientIds = request.getHeaders().get(CLIENT_ID_HEADER_KEY);
         final String clientId = CollectionUtils.isEmpty(clientIds) ? "" : clientIds.get(0);
 
-        LOGGER.info("Setting correlation ID: [{}] Client ID: [{}] Path: [{}]", correlationId, clientId, request.getPath());
+        LOGGER.info("Setting correlation ID: [{}] Path: [{}]", correlationId, request.getPath());
 
         return webFilterChain
               .filter(serverWebExchange)
