@@ -57,15 +57,23 @@ public class MetricsEvent {
               functionName,
               customerId,
               requestDate,
-              Integer.toString(requestedProductCount),
+              intToString(requestedProductCount),
               clientAddress,
-              Long.toString(queryTime),
-              Long.toString(totalTime),
-              Integer.toString(successfullyPricedProductCount),
-              Integer.toString(defaultPricedProductCount),
-              Integer.toString(productCountWithNoPrices),
-              Integer.toString(supcsPerQuery)
+              longToString(queryTime),
+              longToString(totalTime),
+              intToString(successfullyPricedProductCount),
+              intToString(defaultPricedProductCount),
+              intToString(productCountWithNoPrices),
+              intToString(supcsPerQuery)
         );
+    }
+
+    private String intToString(Integer val){
+        return val == null ? null : Integer.toString(val);
+    }
+
+    private String longToString(Long val) {
+        return val == null ? null : Long.toString(val);
     }
 }
 
