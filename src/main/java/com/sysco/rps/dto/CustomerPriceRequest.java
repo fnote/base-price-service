@@ -27,7 +27,7 @@ public class CustomerPriceRequest {
     /**
      * Specifies the date which the reference price is required for
      * Format:yyyyMMdd (e.g. 20200818)
-     * */
+     */
     @ApiModelProperty(example = "20200531")
     private String priceRequestDate;
 
