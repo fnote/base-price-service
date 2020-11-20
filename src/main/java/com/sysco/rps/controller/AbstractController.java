@@ -39,7 +39,7 @@ public abstract class AbstractController {
 
     @ExceptionHandler(RefPriceAPIException.class)
     ResponseEntity<Mono<ErrorDTO>> handleRefPriceApiException(RefPriceAPIException e) {
-        String traceId = MDC.get(CORRELATION_ID_KEY);
+        String correlationId = MDC.get(CORRELATION_ID_KEY);
 
         LOGGER.error("RefPriceAPIException occurred", e);
 
@@ -48,9 +48,9 @@ public abstract class AbstractController {
 
         ErrorDTO error;
         if (e.getAdditionalInfo() != null) {
-            error = new ErrorDTO(e.getErrorCode(), message, e.getAdditionalInfo(), traceId);
+            error = new ErrorDTO(e.getErrorCode(), message, e.getAdditionalInfo(), correlationId);
         } else {
-            error = new ErrorDTO(e.getErrorCode(), message, e.getMessage(), traceId);
+            error = new ErrorDTO(e.getErrorCode(), message, e.getMessage(), correlationId);
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -67,11 +67,11 @@ public abstract class AbstractController {
      */
     @ExceptionHandler(ResponseStatusException.class)
     ResponseEntity<Mono<ErrorDTO>> handleResponseStatusException(ResponseStatusException e) {
-        String traceId = MDC.get(CORRELATION_ID_KEY);
+        String correlationId = MDC.get(CORRELATION_ID_KEY);
 
         LOGGER.error("ResponseStatusException occurred", e);
 
-        ErrorDTO errorDTO = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, e.getStatus().getReasonPhrase(), traceId);
+        ErrorDTO errorDTO = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, e.getStatus().getReasonPhrase(), correlationId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -87,13 +87,13 @@ public abstract class AbstractController {
      */
     @ExceptionHandler(Exception.class)
     ResponseEntity<Mono<ErrorDTO>> handleUnknownException(Exception e) {
-        String traceId = MDC.get(CORRELATION_ID_KEY);
+        String correlationId = MDC.get(CORRELATION_ID_KEY);
 
         LOGGER.error("Unknown exception occurred", e);
 
         String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, Errors.Codes.UNEXPECTED_ERROR), new Object[]{}, UNKNOWN_ERROR,
               Locale.getDefault());
-        Mono<ErrorDTO> errorDTOMono = Mono.just(new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, traceId));
+        Mono<ErrorDTO> errorDTOMono = Mono.just(new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, correlationId));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
