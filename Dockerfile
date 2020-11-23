@@ -10,4 +10,4 @@ RUN wget -O dd-java-agent.jar https://dtdg.co/latest-java-tracer
 #Expose port
 EXPOSE 8081
 
-CMD java -javaagent:/dd-java-agent.jar -jar app/ref-price-service-*.jar
+CMD if [ "$CP_APM_ENABLED" = "true" ] ; then java -javaagent:/dd-java-agent.jar -jar app/ref-price-service-*.jar ; else java -jar app/ref-price-service-*.jar ; fi
