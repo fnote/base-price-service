@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Locale;
 
@@ -40,23 +41,22 @@ public abstract class AbstractController {
     @ExceptionHandler(RefPriceAPIException.class)
     ResponseEntity<Mono<ErrorDTO>> handleRefPriceApiException(RefPriceAPIException e) {
         String correlationId = MDC.get(CORRELATION_ID_KEY);
-
         LOGGER.error("RefPriceAPIException occurred", e);
-
-        String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, (e.getErrorCode())), new Object[]{},
-              UNKNOWN_ERROR, Locale.getDefault());
-
-        ErrorDTO error;
-        if (e.getAdditionalInfo() != null) {
-            error = new ErrorDTO(e.getErrorCode(), message, e.getAdditionalInfo(), correlationId);
-        } else {
-            error = new ErrorDTO(e.getErrorCode(), message, e.getMessage(), correlationId);
-        }
+        Mono<ErrorDTO> errorDTOMono = Mono.defer(() -> {
+            String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, (e.getErrorCode())), new Object[]{},
+                    UNKNOWN_ERROR, Locale.getDefault());
+            ErrorDTO error;
+            if (e.getAdditionalInfo() != null) {
+                error = new ErrorDTO(e.getErrorCode(), message, e.getAdditionalInfo(), correlationId);
+            } else {
+                error = new ErrorDTO(e.getErrorCode(), message, e.getMessage(), correlationId);
+            }
+            return Mono.just(error);
+        }).subscribeOn(Schedulers.boundedElastic());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
-        return new ResponseEntity<>(Mono.just(error), headers, e.getHttpStatusCode());
+        return new ResponseEntity<>(errorDTOMono, headers, e.getHttpStatusCode());
     }
 
     /**
@@ -88,12 +88,12 @@ public abstract class AbstractController {
     @ExceptionHandler(Exception.class)
     ResponseEntity<Mono<ErrorDTO>> handleUnknownException(Exception e) {
         String correlationId = MDC.get(CORRELATION_ID_KEY);
-
         LOGGER.error("Unknown exception occurred", e);
-
-        String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, Errors.Codes.UNEXPECTED_ERROR), new Object[]{}, UNKNOWN_ERROR,
-              Locale.getDefault());
-        Mono<ErrorDTO> errorDTOMono = Mono.just(new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, correlationId));
+        Mono<ErrorDTO> errorDTOMono = Mono.defer(() -> {
+            String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, Errors.Codes.UNEXPECTED_ERROR), new Object[]{}, UNKNOWN_ERROR,
+                    Locale.getDefault());
+            return Mono.just(new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, correlationId));
+        }).subscribeOn(Schedulers.boundedElastic());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
