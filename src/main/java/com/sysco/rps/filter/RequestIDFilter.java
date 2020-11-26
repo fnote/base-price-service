@@ -3,6 +3,7 @@ package com.sysco.rps.filter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -45,10 +46,11 @@ public class RequestIDFilter implements WebFilter {
     }
 
     private Mono<Void> updateContextWithRequestIdentifiers(ServerWebExchange serverWebExchange, WebFilterChain webFilterChain, String correlationId) {
-        List<String> clientIds = serverWebExchange.getRequest().getHeaders().get(CLIENT_ID_HEADER_KEY);
+        ServerHttpRequest request = serverWebExchange.getRequest();
+        List<String> clientIds = request.getHeaders().get(CLIENT_ID_HEADER_KEY);
         final String clientId = CollectionUtils.isEmpty(clientIds) ? "" : clientIds.get(0);
 
-        LOGGER.info("setting correlation ID: [{}], client ID: [{}]", correlationId, clientId);
+        LOGGER.info("Setting correlationId: [{}], clientId: [{}], Path: [{}]", correlationId, clientId, request.getPath());
 
         return webFilterChain
               .filter(serverWebExchange)

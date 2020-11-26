@@ -14,7 +14,7 @@
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
                 APP_EVENTS%d{YYYY-MM-dd-HH:mm:ss.SSS}\t%(%level)\t%(%replace(%X{Correlation-Id}){'^$',
-                'system'})\t%X{client-id}\t%X{businessUnitId}\t%msg%n
+                'system'})\t%(%replace(%X{client-id}){'^$','null'})\t%(%replace(%X{businessUnitId}){'^$','null'})\t%msg%n
             </Pattern>
         </layout>
     </appender>

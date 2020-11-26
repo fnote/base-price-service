@@ -9,6 +9,8 @@ import com.sysco.rps.util.MetricsLoggerUtils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +34,8 @@ import static com.sysco.rps.common.Constants.ALB_SOURCE_IP_HEADER_KEY;
 @RestController
 @RequestMapping("/ref-price/")
 public class CustomerPriceController extends AbstractController {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomerPriceController.class);
 
     @Autowired
     private CustomerPriceService customerPriceService;
@@ -64,6 +68,7 @@ public class CustomerPriceController extends AbstractController {
               .doOnError(e -> {
                   MetricsEvent metricsEvent = new MetricsEvent("customer-prices", request, null, null, null, supcsPerQuery, clientIP);
                   MetricsLoggerUtils.logError(metricsEvent);
+                  logger.error("Failed in getting customer prices for the request: [{}]", request);
               });
     }
 }
