@@ -3,18 +3,25 @@ package com.sysco.rps.controller;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
 import com.sysco.rps.dto.ErrorDTO;
+import com.sysco.rps.dto.MetricsEvent;
 import com.sysco.rps.service.CustomerPriceService;
+import com.sysco.rps.util.MetricsLoggerUtils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+
+import static com.sysco.rps.common.Constants.ALB_SOURCE_IP_HEADER_KEY;
 
 /**
  * Controller class that defines the Customer Price endpoints
@@ -27,6 +34,8 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/ref-price/")
 public class CustomerPriceController extends AbstractController {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomerPriceController.class);
 
     @Autowired
     private CustomerPriceService customerPriceService;
@@ -53,7 +62,13 @@ public class CustomerPriceController extends AbstractController {
                       "</table>"),
     })
     public @ResponseBody
-    Mono<CustomerPriceResponse> getCustomerPrices(@RequestBody CustomerPriceRequest request, @RequestParam(required = false) Integer supcsPerQuery) {
-        return customerPriceService.pricesByOpCo(request, supcsPerQuery);
+    Mono<CustomerPriceResponse> getCustomerPrices(@RequestBody CustomerPriceRequest request, @RequestParam(required = false) Integer supcsPerQuery,
+                                                  @RequestHeader(value = ALB_SOURCE_IP_HEADER_KEY, required = false) String clientIP) {
+        return customerPriceService.pricesByOpCo(request, supcsPerQuery, clientIP)
+              .doOnError(e -> {
+                  MetricsEvent metricsEvent = new MetricsEvent("customer-prices", request, null, null, null, supcsPerQuery, clientIP);
+                  MetricsLoggerUtils.logError(metricsEvent);
+                  logger.error("Failed in getting customer prices for the request: [{}]", request);
+              });
     }
 }

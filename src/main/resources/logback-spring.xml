@@ -5,10 +5,20 @@
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
                 %d{YYYY-MM-dd-HH:mm:ss.SSS}-%(%level)-[%(%t)]-[%(%replace(%X{Correlation-Id}){'^$',
-                'system'})]-[%X{client-id}]-[%X{businessUnitId}]-%(%C{1.})-%msg%n%throwable
+                'system'})]-[%X{client-id}]-[%X{businessUnitId}]-%(%C{1.})-%X{dd.trace_id:-0} %X{dd.span_id:-0}-%msg%throwable%n
             </Pattern>
         </layout>
     </appender>
+
+    <appender name="APP_EVENTS" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                APP_EVENTS%d{YYYY-MM-dd-HH:mm:ss.SSS}\t%(%level)\t%(%replace(%X{Correlation-Id}){'^$',
+                'system'})\t%(%replace(%X{client-id}){'^$','null'})\t%(%replace(%X{businessUnitId}){'^$','null'})\t%msg%n
+            </Pattern>
+        </layout>
+    </appender>
+
     <!-- LOG "com.sysco" at TRACE level -->
     <logger additivity="false" level="trace" name="com.sysco">
         <appender-ref ref="Console"/>
@@ -18,4 +28,9 @@
     <root level="info">
         <appender-ref ref="Console"/>
     </root>
+
+    <logger name="metricsLogger" level="INFO" additivity="false">
+        <appender-ref ref="APP_EVENTS"/>
+    </logger>
+
 </configuration>

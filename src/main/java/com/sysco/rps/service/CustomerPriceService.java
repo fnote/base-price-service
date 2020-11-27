@@ -3,11 +3,13 @@ package com.sysco.rps.service;
 import com.sysco.rps.common.Errors;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
+import com.sysco.rps.dto.MetricsEvent;
 import com.sysco.rps.dto.MinorErrorDTO;
 import com.sysco.rps.dto.Product;
 import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.refpricing.CustomerPriceRepository;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
+import com.sysco.rps.util.MetricsLoggerUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
@@ -46,6 +49,7 @@ import static com.sysco.rps.common.Constants.ROUTING_KEY;
 public class CustomerPriceService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerPriceService.class);
+
     private final Integer configuredSUPCsPerQuery;
 
     CustomerPriceService(@Value("${supcs.per.query:5}") Integer configuredSUPCsPerQuery) {
@@ -58,7 +62,9 @@ public class CustomerPriceService {
     @Autowired
     private BusinessUnitLoaderService businessUnitLoaderService;
 
-    public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
+    public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery, String clientIP) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
 
         RefPriceAPIException validationException = validateRequest(request);
 
@@ -86,13 +92,33 @@ public class CustomerPriceService {
                   Map<String, Product> productMap = convertToUniqueProductMap(productList);
                   logger.info("TOTAL-DB-TIME : [{}]", timeConsumedForDbActivities.get());
                   return formResponseWithDefaultPriceProducts(request, requestedSUPCs, productMap);
-              }).doOnError(e -> {
+              })
+              .doOnSuccess(resp -> {
+                  stopStopWatch(stopWatch);
+                  MetricsLoggerUtils.logInfo(new MetricsEvent("customer-prices", request, resp, timeConsumedForDbActivities.get(), stopWatch.getTotalTimeMillis(),
+                        supcsPerQuery, clientIP));
+              })
+              .doOnError(e -> {
+                  stopStopWatch(stopWatch);
+
                   logger.error("Failed to fetch prices");
                   logger.error("Request Payload: [{}]", request);
                   logger.error(e.getMessage(), e);
+
+                  MetricsLoggerUtils.logError(new MetricsEvent("customer-prices", request, null, timeConsumedForDbActivities.get(), stopWatch.getTotalTimeMillis(),
+                        supcsPerQuery, clientIP));
               })
               .subscriberContext(Context.of(ROUTING_KEY, request.getBusinessUnitNumber()));
+    }
 
+    public Mono<CustomerPriceResponse> pricesByOpCo(CustomerPriceRequest request, Integer requestedSupcsPerQuery) {
+        return pricesByOpCo(request, requestedSupcsPerQuery, null);
+    }
+
+    private void stopStopWatch(StopWatch stopWatch) {
+        if (stopWatch.isRunning()) {
+            stopWatch.stop();
+        }
     }
 
     private RefPriceAPIException validateRequest(CustomerPriceRequest request) {
@@ -161,7 +187,7 @@ public class CustomerPriceService {
 
     private Mono<Map<String, Product>> getDefaultProducts(CustomerPriceRequest request, List<String> requestedSUPCs) {
 
-        return repository.getPricesForSpecificPriceZone(requestedSUPCs, request.getPriceRequestDate(), DEFAULT_PRICE_ZONE)
+        return repository.getPricesForSpecificPriceZone(requestedSUPCs, request.getPriceRequestDate(), DEFAULT_PRICE_ZONE, true)
               .subscriberContext(Context.of(ROUTING_KEY, request.getBusinessUnitNumber()))
               .collectList()
               .flatMap(result -> Mono.just(convertToUniqueProductMap(result)))

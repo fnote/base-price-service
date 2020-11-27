@@ -135,7 +135,7 @@ public class CustomerPriceRepository {
      * The requested effectiveDate is in yyyMMdd format, since MySql accepts that as a valid format, we will be doing no format changes
      * Ref: https://dev.mysql.com/doc/refman/5.7/en/date-and-time-literals.html
      */
-    public Flux<Product> getPricesForSpecificPriceZone(List<String> supcsPartition, String effectiveDate, String priceZone) {
+    public Flux<Product> getPricesForSpecificPriceZone(List<String> supcsPartition, String effectiveDate, String priceZone, Boolean isDefaultPrice) {
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -156,7 +156,8 @@ public class CustomerPriceRepository {
                               row.get("PRICE", Double.class),
                               formatDate(row.get("EFFECTIVE_DATE", LocalDateTime.class)),
                               row.get("EXPORTED_DATE", Long.class),
-                              getCatchWeightIndicator(row.get("CATCH_WEIGHT_INDICATOR", String.class))
+                              getCatchWeightIndicator(row.get("CATCH_WEIGHT_INDICATOR", String.class)),
+                              isDefaultPrice
                         );
 
                     }
