@@ -3,7 +3,6 @@ package com.sysco.rps.controller;
 import com.sysco.rps.common.Errors;
 import com.sysco.rps.dto.ErrorDTO;
 import com.sysco.rps.exceptions.RefPriceAPIException;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,7 @@ public abstract class AbstractController {
         LOGGER.error("RefPriceAPIException occurred", e);
         Mono<ErrorDTO> errorDTOMono = Mono.defer(() -> {
             String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, (e.getErrorCode())), new Object[]{},
-                    UNKNOWN_ERROR, Locale.getDefault());
+                  UNKNOWN_ERROR, Locale.getDefault());
             ErrorDTO error;
             if (e.getAdditionalInfo() != null) {
                 error = new ErrorDTO(e.getErrorCode(), message, e.getAdditionalInfo(), correlationId);
@@ -71,9 +70,7 @@ public abstract class AbstractController {
     ResponseEntity<Mono<ErrorDTO>> handleResponseStatusException(ResponseStatusException e) {
         String correlationId = MDC.get(CORRELATION_ID_KEY);
 
-        LOGGER.error("ResponseStatusException occurred {} {}",
-              ExceptionUtils.getMessage(e),
-              ExceptionUtils.getStackTrace(e));
+        LOGGER.error("ResponseStatusException occurred {} {}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e));
 
         ErrorDTO errorDTO = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, e.getStatus().getReasonPhrase(), correlationId);
 
@@ -92,12 +89,12 @@ public abstract class AbstractController {
     @ExceptionHandler(Exception.class)
     ResponseEntity<Mono<ErrorDTO>> handleUnknownException(Exception e) {
         String correlationId = MDC.get(CORRELATION_ID_KEY);
-        LOGGER.error("Unknown exception occurred {} {}",
-              ExceptionUtils.getMessage(e),
-              ExceptionUtils.getStackTrace(e));
+        
+        LOGGER.error("Unknown exception occurred {} {}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e));
+
         Mono<ErrorDTO> errorDTOMono = Mono.defer(() -> {
             String message = this.messages.getMessage(format(ERROR_PLACEHOLDER, Errors.Codes.UNEXPECTED_ERROR), new Object[]{}, UNKNOWN_ERROR,
-                    Locale.getDefault());
+                  Locale.getDefault());
             return Mono.just(new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, message, correlationId));
         }).subscribeOn(Schedulers.boundedElastic());
 
