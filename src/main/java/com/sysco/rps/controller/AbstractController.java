@@ -70,7 +70,7 @@ public abstract class AbstractController {
     ResponseEntity<Mono<ErrorDTO>> handleResponseStatusException(ResponseStatusException e) {
         String correlationId = MDC.get(CORRELATION_ID_KEY);
 
-        LOGGER.error("ResponseStatusException occurred {} {}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e));
+        LOGGER.error("[{}] ResponseStatusException occurred {} {}", correlationId, ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e));
 
         ErrorDTO errorDTO = new ErrorDTO(Errors.Codes.UNEXPECTED_ERROR, e.getStatus().getReasonPhrase(), correlationId);
 
@@ -89,7 +89,7 @@ public abstract class AbstractController {
     @ExceptionHandler(Exception.class)
     ResponseEntity<Mono<ErrorDTO>> handleUnknownException(Exception e) {
         String correlationId = MDC.get(CORRELATION_ID_KEY);
-        
+
         LOGGER.error("Unknown exception occurred {} {}", ExceptionUtils.getMessage(e), ExceptionUtils.getStackTrace(e));
 
         Mono<ErrorDTO> errorDTOMono = Mono.defer(() -> {
