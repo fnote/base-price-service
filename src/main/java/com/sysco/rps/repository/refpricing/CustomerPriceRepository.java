@@ -33,30 +33,65 @@ public class CustomerPriceRepository {
     @Autowired
     private DatabaseClient databaseClient;
 
-    private String query =
-          "SELECT paOuter.SUPC," +
-                "       paOuter.PRICE_ZONE," +
-                "       paOuter.PRICE," +
-                "       paOuter.EFFECTIVE_DATE," +
-                "       paOuter.EXPORTED_DATE," +
-                "       paOuter.CATCH_WEIGHT_INDICATOR" +
-                " FROM PRICE paOuter force index (`PRIMARY`)" +
-                "         INNER JOIN (SELECT Max(paInner.EFFECTIVE_DATE) max_eff_date," +
-                "                            paInner.SUPC," +
-                "                            paInner.PRICE_ZONE" +
-                "                     FROM (SELECT e.SUPC," +
-                "                                  e.PRICE_ZONE," +
-                "                                  e.CUSTOMER_ID" +
-                "                           FROM PRICE_ZONE_01 e force index (`PRIMARY`)" +
-                "                           WHERE e.CUSTOMER_ID = :customerId " +
-                "                             AND SUPC IN ( :supcs )) pz" +
-                "                              INNER JOIN PRICE paInner force index (`PRIMARY`)" +
-                "                                         ON pz.SUPC = paInner.SUPC" +
-                "                                             AND pz.PRICE_ZONE = paInner.PRICE_ZONE" +
-                "                                             AND paInner.EFFECTIVE_DATE <=:effectiveDate" +
-                "                     GROUP BY paInner.SUPC, paInner.PRICE_ZONE) c" +
-                "                    ON c.SUPC = paOuter.SUPC AND c.PRICE_ZONE = paOuter.PRICE_ZONE AND" +
-                "                       c.MAX_EFF_DATE = paOuter.EFFECTIVE_DATE";
+    private String query = "SELECT" +
+            "   paOuter.SUPC," +
+            "   paOuter.PRICE_ZONE," +
+            "   paOuter.PRICE," +
+            "   paOuter.EFFECTIVE_DATE," +
+            "   paOuter.EXPORTED_DATE," +
+            "   paOuter.CATCH_WEIGHT_INDICATOR " +
+            "FROM" +
+            "   PRICE paOuter force index (`PRIMARY`) " +
+            "   INNER JOIN" +
+            "      (" +
+            "         SELECT" +
+            "            Max(paInner.EFFECTIVE_DATE) max_eff_date," +
+            "            paInner.SUPC," +
+            "            paInner.PRICE_ZONE " +
+            "         FROM" +
+            "            (" +
+            "               SELECT" +
+            "                  kk.SUPC," +
+            "                  kk.PRICE_ZONE," +
+            "                  kk.CUSTOMER_ID," +
+            "                  kk.EFFECTIVE_DATE " +
+            "               FROM" +
+            "                  PRICE_ZONE_01 kk " +
+            "                  INNER JOIN" +
+            "                     (" +
+            "                        SELECT" +
+            "                           e.SUPC," +
+            "                           e.PRICE_ZONE," +
+            "                           e.CUSTOMER_ID," +
+            "                           MAX(e.EFFECTIVE_DATE) AS MAX_EFFECTIVE_DATE " +
+            "                        FROM" +
+            "                           PRICE_ZONE_01 e force index (`PRIMARY`) " +
+            "                        WHERE" +
+            "                           e.CUSTOMER_ID = :customerId " +
+            "                           AND e.EFFECTIVE_DATE <= :effectiveDate" +
+            "                           AND SUPC IN :supcs" +
+            "                        GROUP BY" +
+            "                           e.SUPC" +
+            "                     )" +
+            "                     t " +
+            "                     ON t.SUPC = kk.SUPC " +
+            "                     and t.MAX_EFFECTIVE_DATE = kk.EFFECTIVE_DATE " +
+            "                     and t.CUSTOMER_ID = kk.CUSTOMER_ID" +
+            "            )" +
+            "            pz " +
+            "            INNER JOIN" +
+            "               PRICE paInner force index (`PRIMARY`) " +
+            "               ON pz.SUPC = paInner.SUPC " +
+            "               AND pz.PRICE_ZONE = paInner.PRICE_ZONE " +
+            "               AND paInner.EFFECTIVE_DATE <= :effectiveDate" +
+            "         GROUP BY" +
+            "            paInner.SUPC," +
+            "            paInner.PRICE_ZONE" +
+            "      )" +
+            "      c " +
+            "      ON c.SUPC = paOuter.SUPC " +
+            "      AND c.PRICE_ZONE = paOuter.PRICE_ZONE " +
+            "      AND c.MAX_EFF_DATE = paOuter.EFFECTIVE_DATE";
 
     private static final String QUERY_TO_FETCH_PRICE_FOR_PRICE_ZONE =
           "SELECT " +
