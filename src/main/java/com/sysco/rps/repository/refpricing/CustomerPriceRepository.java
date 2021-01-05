@@ -69,7 +69,7 @@ public class CustomerPriceRepository {
             "                        WHERE" +
             "                           e.CUSTOMER_ID = :customerId " +
             "                           AND e.EFFECTIVE_DATE <= :effectiveDate" +
-            "                           AND SUPC IN :supcs" +
+            "                           AND SUPC IN (:supcs)" +
             "                        GROUP BY" +
             "                           e.SUPC" +
             "                     )" +
