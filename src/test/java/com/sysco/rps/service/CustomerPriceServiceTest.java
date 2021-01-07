@@ -657,7 +657,7 @@ class CustomerPriceServiceTest extends BaseTest {
         testUtilsRepository.addPriceZoneRecordsFromCsv("EATS_BulkData.csv");
 
         CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020",
-              "68579367", "20200201",
+              "68579367", "20200210",
               Collections.singletonList("3982206")
         );
 
@@ -665,7 +665,7 @@ class CustomerPriceServiceTest extends BaseTest {
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(
-                        new Product("3982206", "4", 28.00,
+                        new Product("3982206", "5", 50.00,
                               "20200201", 1580947560L, Boolean.TRUE),
                         response.getProducts().get(0)
                   );
@@ -673,19 +673,19 @@ class CustomerPriceServiceTest extends BaseTest {
               .verifyComplete();
 
 
-        customerPriceRequest.setPriceRequestDate("20200202");
+        customerPriceRequest.setPriceRequestDate("20200211");
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
                   assertEquals(
-                        new Product("3982206", "4", 28.00,
+                        new Product("3982206", "5", 50.00,
                               "20200201", 1580947560L, Boolean.TRUE),
                         response.getProducts().get(0)
                   );
               })
               .verifyComplete();
 
-        customerPriceRequest.setPriceRequestDate("20200205");
+        customerPriceRequest.setPriceRequestDate("20200220");
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
@@ -697,7 +697,7 @@ class CustomerPriceServiceTest extends BaseTest {
               })
               .verifyComplete();
 
-        customerPriceRequest.setPriceRequestDate("20200206");
+        customerPriceRequest.setPriceRequestDate("20200221");
         customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
         StepVerifier.create(customerPriceResponseMono)
               .consumeNextWith(response -> {
@@ -708,6 +708,18 @@ class CustomerPriceServiceTest extends BaseTest {
                   );
               })
               .verifyComplete();
+
+        customerPriceRequest.setPriceRequestDate("20200209");
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, null);
+        StepVerifier.create(customerPriceResponseMono)
+                .consumeNextWith(response -> {
+                    assertEquals(
+                            new Product("3982206", "3", 23.00,
+                                    "20200201", 1580947560L, Boolean.TRUE),
+                            response.getProducts().get(0)
+                    );
+                })
+                .verifyComplete();
 
     }
 
