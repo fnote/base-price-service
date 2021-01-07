@@ -61,7 +61,6 @@ public class CustomerPriceRepository {
             "                     (" +
             "                        SELECT" +
             "                           e.SUPC," +
-            "                           e.PRICE_ZONE," +
             "                           e.CUSTOMER_ID," +
             "                           MAX(e.EFFECTIVE_DATE) AS MAX_EFFECTIVE_DATE " +
             "                        FROM" +
