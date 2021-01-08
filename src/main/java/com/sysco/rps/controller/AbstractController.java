@@ -79,7 +79,6 @@ public abstract class AbstractController {
         return new ResponseEntity<>(Mono.just(errorDTO), headers, e.getStatus());
     }
 
-
     /**
      * Handle Unknown Exceptions
      *
