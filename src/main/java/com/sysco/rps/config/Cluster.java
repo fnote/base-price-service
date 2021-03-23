@@ -1,7 +1,7 @@
 package com.sysco.rps.config;
 
 /**
- * Bean for holding Cluster information.
+ * Bean for holding Database Cluster information.
  *
  * @author Tharuka Jayalath
  * (C) 2021, Sysco Corporation
