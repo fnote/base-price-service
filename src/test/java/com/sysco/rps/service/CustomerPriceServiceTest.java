@@ -1,6 +1,7 @@
 package com.sysco.rps.service;
 
 import com.sysco.rps.BaseTest;
+import com.sysco.rps.common.Constants;
 import com.sysco.rps.common.Errors;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.CustomerPriceResponse;
@@ -879,6 +880,134 @@ class CustomerPriceServiceTest extends BaseTest {
                   assertEquals("1000001", errorDTO.getSupc());
               })
               .verifyComplete();
+    }
+
+    /**
+     * Testing whether the price zone is picking from correct table based on the price request date
+     * PRICE_ZONE_MASTER_DATE table contained these records
+     *         ('ACTIVE', 'PRICE_ZONE_01', '2020-01-01')
+     *         ('HISTORY', 'PRICE_ZONE_02', '2019-01-01')
+     */
+    @Test
+    void testMultiplePriceZoneTables() {
+
+
+        testUtilsRepository.addPARecord(new PAData("1000001", 1, 100.00, "20180101", 1514764800, 'N'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 2, 200.00, "20180101", 1514764800, 'N'));
+        testUtilsRepository.addPARecord(new PAData("1000001", 3, 300.00, "20180101", 1514764800, 'N'));
+        testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 2, "100001", "20190101"), Constants.DBNames.PRICE_ZONE_02);
+        testUtilsRepository.addPriceZoneRecord(new PriceZoneData("1000001", 1, "100001", "20200101"));
+
+        List<String> products = new ArrayList<>(Collections.singletonList("1000001"));
+
+        // price request date is after the active table's effective date (should query the ACTIVE table)
+        CustomerPriceRequest customerPriceRequest = new CustomerPriceRequest("020", "100001", "20200323", products);
+
+        Mono<CustomerPriceResponse> customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+                .consumeNextWith(result -> {
+                    assertNotNull(result);
+                    assertEquals(1, result.getProducts().size());
+                    assertEquals(0, result.getFailedProducts().size());
+                    assertEquals(100.00, result.getProducts().get(0).getReferencePrice());
+                })
+                .verifyComplete();
+
+        // price request date is on the active table's effective date (should query the ACTIVE table)
+        customerPriceRequest = new CustomerPriceRequest("020", "100001", "20200101", products);
+
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+                .consumeNextWith(result -> {
+                    assertNotNull(result);
+                    assertEquals(1, result.getProducts().size());
+                    assertEquals(0, result.getFailedProducts().size());
+                    assertEquals(100.00, result.getProducts().get(0).getReferencePrice());
+
+                })
+                .verifyComplete();
+
+        // price request date is before the active table's effective date (should query the HISTORY table)
+        customerPriceRequest = new CustomerPriceRequest("020", "100001", "20191231", products);
+
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+                .consumeNextWith(result -> {
+                    assertNotNull(result);
+                    assertEquals(1, result.getProducts().size());
+                    assertEquals(0, result.getFailedProducts().size());
+                    assertEquals(200.00, result.getProducts().get(0).getReferencePrice());
+
+                })
+                .verifyComplete();
+
+        // price request date is on the history table's effective date (should query the HISTORY table)
+        customerPriceRequest = new CustomerPriceRequest("020", "100001", "20190101", products);
+
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+                .consumeNextWith(result -> {
+                    assertNotNull(result);
+                    assertEquals(1, result.getProducts().size());
+                    assertEquals(0, result.getFailedProducts().size());
+                    assertEquals(200.00, result.getProducts().get(0).getReferencePrice());
+
+                })
+                .verifyComplete();
+
+        // price request date is before the history table's effective date (should use the default price zone which is 3)
+        customerPriceRequest = new CustomerPriceRequest("020", "100001", "20181231", products);
+
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+                .consumeNextWith(result -> {
+                    assertNotNull(result);
+                    assertEquals(1, result.getProducts().size());
+                    assertEquals(0, result.getFailedProducts().size());
+                    assertEquals(300.00, result.getProducts().get(0).getReferencePrice());
+
+                })
+                .verifyComplete();
+
+        // price request date is on default price record's effective date (should use the default price zone which is 3)
+        customerPriceRequest = new CustomerPriceRequest("020", "100001", "20180101", products);
+
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+                .consumeNextWith(result -> {
+                    assertNotNull(result);
+                    assertEquals(1, result.getProducts().size());
+                    assertEquals(0, result.getFailedProducts().size());
+                    assertEquals(300.00, result.getProducts().get(0).getReferencePrice());
+
+                })
+                .verifyComplete();
+
+        // price request date is before default price record's effective date (a price should not be returned since there isn't valid price record for default price zone)
+        customerPriceRequest = new CustomerPriceRequest("020", "100001", "20171231", products);
+
+        customerPriceResponseMono = customerPriceService.pricesByOpCo(customerPriceRequest, 10);
+
+        StepVerifier.create(customerPriceResponseMono)
+                .consumeNextWith(result -> {
+                    assertNotNull(result);
+                    assertEquals(0, result.getProducts().size());
+                    assertEquals(1, result.getFailedProducts().size());
+
+                    MinorErrorDTO errorDTO = result.getFailedProducts().get(0);
+                    assertEquals("102020", errorDTO.getErrorCode());
+                    assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, errorDTO.getMessage());
+                    assertEquals("1000001", errorDTO.getSupc());
+
+                })
+                .verifyComplete();
+
     }
 
 }

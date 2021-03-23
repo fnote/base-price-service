@@ -61,7 +61,14 @@ public class Constants {
 
     public static class DBNames {
         public static final String PA = "PRICE";
+        public static final String PRICE_ZONE_MASTER_DATA = "PRICE_ZONE_MASTER_DATA";
         public static final String PRICE_ZONE_01 = "PRICE_ZONE_01";
+        public static final String PRICE_ZONE_02 = "PRICE_ZONE_02";
+        public static final String COLUMN_TABLE_TYPE = "TABLE_TYPE";
+        public static final String COLUMN_TABLE_NAME = "TABLE_NAME";
+        public static final String COLUMN_TABLE_EFFECTIVE_DATE = "EFFECTIVE_DATE";
+        public static final String PRICE_ZONE_TABLE_TYPE_ACTIVE = "ACTIVE";
+        public static final String PRICE_ZONE_TABLE_TYPE_HISTORY = "HISTORY";
 
         private DBNames() {
             // default constructor

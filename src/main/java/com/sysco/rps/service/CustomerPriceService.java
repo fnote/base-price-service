@@ -81,7 +81,7 @@ public class CustomerPriceService {
         AtomicLong timeConsumedForDbActivities = new AtomicLong(0);
 
         return Flux.fromIterable(supcsPartitions)
-              .flatMap(supcPartition -> repository.getPricesByOpCo(request, supcPartition))
+              .flatMap(supcPartition -> repository.getPricesByOpCo(request, supcPartition, request.getBusinessUnitNumber()))
               .elapsed()
               .map(t -> {
                   timeConsumedForDbActivities.addAndGet(t.getT1());

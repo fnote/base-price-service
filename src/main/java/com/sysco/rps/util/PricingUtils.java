@@ -3,6 +3,7 @@ package com.sysco.rps.util;
 import com.sysco.rps.common.Constants;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -17,6 +18,8 @@ import static com.sysco.rps.common.Constants.PRICE_REQUEST_DATE_PATTERN;
  * @doc
  */
 public class PricingUtils {
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PRICE_REQUEST_DATE_PATTERN);
 
     private PricingUtils() {
         // default constructor
@@ -47,9 +50,16 @@ public class PricingUtils {
         if (date == null) {
             return "";
         }
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PRICE_REQUEST_DATE_PATTERN);
         return formatter.format(date);
+    }
+
+    /**
+     * Convert date string to a LocalDateTime instance
+     * @param dateStr Date string in the format of yyyyMMdd Ex: 20200322
+     * @return LocalDateTime
+     */
+    public static LocalDateTime convertToDate(String dateStr) {
+        return LocalDate.parse(dateStr, formatter).atStartOfDay();
     }
 
 }
