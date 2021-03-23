@@ -56,11 +56,11 @@ public class RoutingConnectionFactoryConfig {
     @Value("${pricing.db.max.connection.acquire.time}")
     private Long pricingDbMaxConnectionAcquireTime;
 
-    private BusinessUnitLoaderService businessUnitLoaderService;
+    private final BusinessUnitLoaderService businessUnitLoaderService;
 
-    private ClusterInfo clusterInfo;
+    private final ClusterInfo clusterInfo;
 
-    private Map<String, ConnectionPool> connectionPoolMap = new HashMap<>();
+    private final Map<String, ConnectionPool> connectionPoolMap = new HashMap<>();
 
     /***
      * Allows setting a business loader service
