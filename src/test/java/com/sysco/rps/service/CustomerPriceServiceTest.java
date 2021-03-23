@@ -883,15 +883,14 @@ class CustomerPriceServiceTest extends BaseTest {
     }
 
     /**
-     * Testing whether the price zone is picking from correct table based on the price request date
-     * PRICE_ZONE_MASTER_DATE table contained these records
+     * Testing correct price zone table selecting logic
+     * PRICE_ZONE_MASTER_DATE table contains these table activation details
+     *          TABLE_TYPE, TABLE_NAME, EFFECTIVE_DATE
      *         ('ACTIVE', 'PRICE_ZONE_01', '2020-01-01')
      *         ('HISTORY', 'PRICE_ZONE_02', '2019-01-01')
      */
     @Test
     void testMultiplePriceZoneTables() {
-
-
         testUtilsRepository.addPARecord(new PAData("1000001", 1, 100.00, "20180101", 1514764800, 'N'));
         testUtilsRepository.addPARecord(new PAData("1000001", 2, 200.00, "20180101", 1514764800, 'N'));
         testUtilsRepository.addPARecord(new PAData("1000001", 3, 300.00, "20180101", 1514764800, 'N'));
