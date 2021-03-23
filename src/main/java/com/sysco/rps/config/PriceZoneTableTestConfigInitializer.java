@@ -46,7 +46,7 @@ public class PriceZoneTableTestConfigInitializer {
     @Autowired
     public PriceZoneTableTestConfigInitializer(DatabaseClient databaseClient,
                                                RoutingConnectionFactory routingConnectionFactory,
-                                           BusinessUnitLoaderService businessUnitLoaderService) {
+                                               BusinessUnitLoaderService businessUnitLoaderService) {
         this.databaseClient = databaseClient;
         this.routingConnectionFactory = routingConnectionFactory;
         this.businessUnitLoaderService = businessUnitLoaderService;
