@@ -924,7 +924,6 @@ class CustomerPriceServiceTest extends BaseTest {
                     assertEquals(1, result.getProducts().size());
                     assertEquals(0, result.getFailedProducts().size());
                     assertEquals(100.00, result.getProducts().get(0).getReferencePrice());
-
                 })
                 .verifyComplete();
 
@@ -954,7 +953,6 @@ class CustomerPriceServiceTest extends BaseTest {
                     assertEquals(1, result.getProducts().size());
                     assertEquals(0, result.getFailedProducts().size());
                     assertEquals(200.00, result.getProducts().get(0).getReferencePrice());
-
                 })
                 .verifyComplete();
 
@@ -969,7 +967,6 @@ class CustomerPriceServiceTest extends BaseTest {
                     assertEquals(1, result.getProducts().size());
                     assertEquals(0, result.getFailedProducts().size());
                     assertEquals(300.00, result.getProducts().get(0).getReferencePrice());
-
                 })
                 .verifyComplete();
 
@@ -984,7 +981,6 @@ class CustomerPriceServiceTest extends BaseTest {
                     assertEquals(1, result.getProducts().size());
                     assertEquals(0, result.getFailedProducts().size());
                     assertEquals(300.00, result.getProducts().get(0).getReferencePrice());
-
                 })
                 .verifyComplete();
 
@@ -1003,7 +999,6 @@ class CustomerPriceServiceTest extends BaseTest {
                     assertEquals("102020", errorDTO.getErrorCode());
                     assertEquals(ERROR_MSG_MAPPING_NOT_FOUND, errorDTO.getMessage());
                     assertEquals("1000001", errorDTO.getSupc());
-
                 })
                 .verifyComplete();
 
