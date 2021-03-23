@@ -46,7 +46,7 @@ public class PriceZoneTableConfigInitializer {
                     Map<String, PriceZoneMasterDataRecord> masterDataRecordMap = databaseClient.execute(MASTER_DATE_FETCHING_QUERY)
                             .map(row -> new PriceZoneMasterDataRecord(row.get(Constants.DBNames.COLUMN_TABLE_TYPE, String.class),
                                     row.get(Constants.DBNames.COLUMN_TABLE_NAME, String.class),
-                                    row.get(Constants.DBNames.COLUMN_TABLE_EFFECTIVE_DATE, LocalDateTime.class)
+                                    row.get(Constants.DBNames.COLUMN_EFFECTIVE_DATE, LocalDateTime.class)
                                     ))
                             .all()
                             .subscriberContext(Context.of(ROUTING_KEY, businessUnit.getBusinessUnitNumber()))
