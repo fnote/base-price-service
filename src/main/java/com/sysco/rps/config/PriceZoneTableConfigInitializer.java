@@ -26,7 +26,7 @@ import static com.sysco.rps.common.Constants.ROUTING_KEY;
 @Configuration
 public class PriceZoneTableConfigInitializer {
 
-    private static final String MASTER_DATE_FETCHING_QUERY = "SELECT * FROM " + Constants.DBNames.PRICE_ZONE_MASTER_DATA;
+    private static final String MASTER_DATA_FETCHING_QUERY = "SELECT * FROM " + Constants.DBNames.PRICE_ZONE_MASTER_DATA;
 
     private final DatabaseClient databaseClient;
 
@@ -43,7 +43,7 @@ public class PriceZoneTableConfigInitializer {
     public Map<String, PriceZoneTableConfig> initPriceZoneTableConfig() {
         return Flux.fromIterable(businessUnitLoaderService.loadBusinessUnitList())
                 .map(businessUnit -> {
-                    Map<String, PriceZoneMasterDataRecord> masterDataRecordMap = databaseClient.execute(MASTER_DATE_FETCHING_QUERY)
+                    Map<String, PriceZoneMasterDataRecord> masterDataRecordMap = databaseClient.execute(MASTER_DATA_FETCHING_QUERY)
                             .map(row -> new PriceZoneMasterDataRecord(row.get(Constants.DBNames.COLUMN_TABLE_TYPE, String.class),
                                     row.get(Constants.DBNames.COLUMN_TABLE_NAME, String.class),
                                     row.get(Constants.DBNames.COLUMN_EFFECTIVE_DATE, LocalDateTime.class)
