@@ -34,7 +34,7 @@ public class CommonDBClientConfig {
                                 @Value("${pricing.db.username}") String username,
                                 @Value("${pricing.db.password}") String password) {
 
-        databaseClient = DatabaseClient.create(
+        this.databaseClient = DatabaseClient.create(
                 ConnectionFactories.get(
                         ConnectionFactoryOptions.builder()
                                 .option(DRIVER, "mysql")
