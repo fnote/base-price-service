@@ -1,7 +1,9 @@
 package com.sysco.rps.repository.refpricing;
 
+import com.sysco.rps.config.PriceZoneTableConfig;
 import com.sysco.rps.dto.CustomerPriceRequest;
 import com.sysco.rps.dto.Product;
+import com.sysco.rps.util.PricingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static com.sysco.rps.util.PricingUtils.formatDate;
 import static com.sysco.rps.util.PricingUtils.getCatchWeightIndicator;
@@ -29,9 +32,12 @@ import static com.sysco.rps.util.PricingUtils.intToString;
 public class CustomerPriceRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerPriceRepository.class);
+    
+    private static final String PRICE_ZONE_TABLE_NAME_PLACEHOLDER = ":PZ_TABLE";
 
-    @Autowired
-    private DatabaseClient databaseClient;
+    private final DatabaseClient databaseClient;
+
+    private final Map<String, PriceZoneTableConfig> priceZoneTableConfigMap;
 
     private String query = "SELECT" +
             "   paOuter.SUPC," +
@@ -56,7 +62,7 @@ public class CustomerPriceRepository {
             "                  priceZoneOuter.CUSTOMER_ID," +
             "                  priceZoneOuter.EFFECTIVE_DATE " +
             "               FROM" +
-            "                  PRICE_ZONE_01 priceZoneOuter " +
+            "                  :PZ_TABLE priceZoneOuter " +
             "                  INNER JOIN" +
             "                     (" +
             "                        SELECT" +
@@ -64,7 +70,7 @@ public class CustomerPriceRepository {
             "                           priceZoneInner.CUSTOMER_ID," +
             "                           MAX(priceZoneInner.EFFECTIVE_DATE) AS MAX_EFFECTIVE_DATE " +
             "                        FROM" +
-            "                           PRICE_ZONE_01 priceZoneInner force index (`PRIMARY`) " +
+            "                           :PZ_TABLE priceZoneInner force index (`PRIMARY`) " +
             "                        WHERE" +
             "                           priceZoneInner.CUSTOMER_ID = :customerId " +
             "                           AND priceZoneInner.EFFECTIVE_DATE <= :effectiveDate" +
@@ -122,11 +128,35 @@ public class CustomerPriceRepository {
                 "WHERE " +
                 "   P_OUTER.PRICE_ZONE = :priceZone";
 
+    @Autowired
+    public CustomerPriceRepository(DatabaseClient databaseClient,
+                                   Map<String, PriceZoneTableConfig> priceZoneTableConfigMap,
+                                   @Value("${query.get.price:}") String queryToOverride) {
+        this.databaseClient = databaseClient;
+        this.priceZoneTableConfigMap = priceZoneTableConfigMap;
 
-    CustomerPriceRepository(@Value("${query.get.price:}") String queryToOverride) {
         if (!StringUtils.isEmpty(queryToOverride)) {
             this.query = queryToOverride;
         }
+    }
+
+    /**
+     * Decides the price zone table name to be queried based on the price request date and
+     * the effective date of the active price zone table for a given business unit
+     * @param businessUnitNumber Business unit number in the price request
+     * @param requestDate Price request date in the price request
+     * @return either one of these PRICE_ZONE_01, PRICE_ZONE_02, PRICE_ZONE_03
+     */
+    private String getPriceZoneTableName(String businessUnitNumber, LocalDateTime requestDate) {
+        PriceZoneTableConfig priceZoneTableConfig = priceZoneTableConfigMap.get(businessUnitNumber);
+        if (requestDate.isBefore(priceZoneTableConfig.getActiveTableEffectiveDate())) {
+            return priceZoneTableConfig.getHistoryTable();
+        }
+        return priceZoneTableConfig.getActiveTable();
+    }
+
+    private String prepareQuery(String priceZoneTableName) {
+        return query.replace(PRICE_ZONE_TABLE_NAME_PLACEHOLDER, priceZoneTableName);
     }
 
     /**
@@ -134,10 +164,15 @@ public class CustomerPriceRepository {
      * The requested effectiveDate is in yyyMMdd format, since MySql accepts that as a valid format, we will be doing no format changes
      * Ref: https://dev.mysql.com/doc/refman/5.7/en/date-and-time-literals.html
      */
-    public Flux<Product> getPricesByOpCo(CustomerPriceRequest customerPriceRequest, List<String> supcsPartition) {
+    public Flux<Product> getPricesByOpCo(CustomerPriceRequest customerPriceRequest, List<String> supcsPartition,
+                                         String businessUnitNumber) {
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
+
+        String priceZoneTableName = getPriceZoneTableName(businessUnitNumber,
+                PricingUtils.convertToDate(customerPriceRequest.getPriceRequestDate()));
+        String query = prepareQuery(priceZoneTableName);
 
         return databaseClient.execute(query)
               .bind("customerId", customerPriceRequest.getCustomerAccount())

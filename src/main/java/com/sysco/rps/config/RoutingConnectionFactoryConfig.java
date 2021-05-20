@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Profile;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
  * (C) 2020, Sysco Corporation
  * Created: 7/6/20. Mon 2020 09:50
  */
+@Profile("!test")
 @Configuration
 public class RoutingConnectionFactoryConfig {
 
@@ -54,17 +56,20 @@ public class RoutingConnectionFactoryConfig {
     @Value("${pricing.db.max.connection.acquire.time}")
     private Long pricingDbMaxConnectionAcquireTime;
 
-    private BusinessUnitLoaderService businessUnitLoaderService;
+    private final BusinessUnitLoaderService businessUnitLoaderService;
 
-    private Map<String, ConnectionPool> connectionPoolMap = new HashMap<>();
+    private final ClusterInfo clusterInfo;
+
+    private final Map<String, ConnectionPool> connectionPoolMap = new HashMap<>();
 
     /***
      * Allows setting a business loader service
      * @param businessUnitLoaderService
      */
     @Autowired
-    public RoutingConnectionFactoryConfig(BusinessUnitLoaderService businessUnitLoaderService) {
+    public RoutingConnectionFactoryConfig(BusinessUnitLoaderService businessUnitLoaderService, ClusterInfo clusterInfo) {
         this.businessUnitLoaderService = businessUnitLoaderService;
+        this.clusterInfo = clusterInfo;
     }
 
     /***
@@ -73,7 +78,6 @@ public class RoutingConnectionFactoryConfig {
      * businessUnitId is used as the key when adding factories to the RoutingConnectionFactory.
      * See RoutingConnectionFactory's determineCurrentLookupKey implementation where it is defined how to determine this business unit ID as the
      * lookup key
-     * @param jdbcHost
      * @param jdbcUser
      * @param jdbcPassword
      * @param maxPoolSize
@@ -82,8 +86,7 @@ public class RoutingConnectionFactoryConfig {
      * @return RoutingConnectionFactory
      */
     @Bean("routingConnectionFactory")
-    public RoutingConnectionFactory routingConnectionFactory(@Value("${pricing.db.host}") String jdbcHost,
-                                                             @Value("${pricing.db.username}") String jdbcUser,
+    public RoutingConnectionFactory routingConnectionFactory(@Value("${pricing.db.username}") String jdbcUser,
                                                              @Value("${pricing.db.password}") String jdbcPassword,
                                                              @Value("${pricing.db.max.pool.size}") String maxPoolSize,
                                                              @Value("${pricing.db.initial.pool.size}") String initialPoolSize,
@@ -103,6 +106,9 @@ public class RoutingConnectionFactoryConfig {
         for (String businessUnitId : activeBusinessUnitIds) {
 
             String db = PRICINGDB + businessUnitId;
+
+            Cluster cluster = clusterInfo.getClusterByBusinessUnitId(businessUnitId);
+            String jdbcHost = cluster.getReaderEndpoint();
 
             Duration maxLife = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
             Duration maxIdle = Duration.ofMillis(getMaxLifeTimeRandomlyBasedOnLimits());
