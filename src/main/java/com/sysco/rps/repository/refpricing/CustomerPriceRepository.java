@@ -172,9 +172,9 @@ public class CustomerPriceRepository {
 
         String priceZoneTableName = getPriceZoneTableName(businessUnitNumber,
                 PricingUtils.convertToDate(customerPriceRequest.getPriceRequestDate()));
-        String query = prepareQuery(priceZoneTableName);
+        String preparedQuery = prepareQuery(priceZoneTableName);
 
-        return databaseClient.execute(query)
+        return databaseClient.execute(preparedQuery)
               .bind("customerId", customerPriceRequest.getCustomerAccount())
               .bind("supcs", supcsPartition)
               .bind("effectiveDate", customerPriceRequest.getPriceRequestDate())
