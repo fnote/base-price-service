@@ -88,25 +88,29 @@ public class TestUtilsRepository {
     }
 
     public boolean addPriceZoneRecord(PriceZoneData priceZoneData) {
-        String query = INSERT_INTO + Constants.DBNames.PRICE_ZONE_01 + "` VALUES (:supc, :priceZone, :customerId, :effectiveDate);";
+        return addPriceZoneRecord(priceZoneData, Constants.DBNames.PRICE_ZONE_01);
+    }
+
+    public boolean addPriceZoneRecord(PriceZoneData priceZoneData, String tableName) {
+        String query = INSERT_INTO + tableName + "` VALUES (:supc, :priceZone, :customerId, :effectiveDate);";
 
         AtomicBoolean isSuccess = new AtomicBoolean(false);
 
         databaseClient.execute(query)
-              .bind("supc", priceZoneData.getSupc())
-              .bind("priceZone", priceZoneData.getPriceZone())
-              .bind("customerId", priceZoneData.getCustomerId())
-              .bind("effectiveDate", priceZoneData.getEffectiveDate())
-              .map((row, rowMetaData) -> {
-                  LOGGER.debug(RESULT_ROW, row);
-                  return row;
-              })
-              .all()
-              .doOnError(r -> {
-                  LOGGER.error(FAILED_TO_EXECUTE_QUERY, query, r);
-                  isSuccess.set(false);
-              })
-              .subscribe();
+                .bind("supc", priceZoneData.getSupc())
+                .bind("priceZone", priceZoneData.getPriceZone())
+                .bind("customerId", priceZoneData.getCustomerId())
+                .bind("effectiveDate", priceZoneData.getEffectiveDate())
+                .map((row, rowMetaData) -> {
+                    LOGGER.debug(RESULT_ROW, row);
+                    return row;
+                })
+                .all()
+                .doOnError(r -> {
+                    LOGGER.error(FAILED_TO_EXECUTE_QUERY, query, r);
+                    isSuccess.set(false);
+                })
+                .subscribe();
         return isSuccess.get();
     }
 
