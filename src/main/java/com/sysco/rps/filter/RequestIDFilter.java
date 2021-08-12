@@ -18,6 +18,7 @@ import java.util.UUID;
 import static com.sysco.rps.common.Constants.CLIENT_ID_HEADER_KEY;
 import static com.sysco.rps.common.Constants.CORRELATION_ID_HEADER_KEY;
 import static com.sysco.rps.common.Constants.CORRELATION_ID_KEY;
+import static com.sysco.rps.common.Constants.ALB_SOURCE_IP_HEADER_KEY;
 
 /**
  * Web Filter to extract and add IDs from the requests like correlation id and client ID  to the required contexts.
@@ -49,11 +50,20 @@ public class RequestIDFilter implements WebFilter {
         ServerHttpRequest request = serverWebExchange.getRequest();
         List<String> clientIds = request.getHeaders().get(CLIENT_ID_HEADER_KEY);
         final String clientId = CollectionUtils.isEmpty(clientIds) ? "" : clientIds.get(0);
+        String ipAddress = extractIPAddress(serverWebExchange);
 
-        LOGGER.info("Setting correlationId: [{}], clientId: [{}], Path: [{}]", correlationId, clientId, request.getPath());
+        LOGGER.info("Setting correlationId: [{}], clientId: [{}], Path: [{}], clientIP[{}]", correlationId, clientId, request.getPath(), ipAddress);
 
         return webFilterChain
               .filter(serverWebExchange)
               .subscriberContext((Context context) -> context.put(CORRELATION_ID_KEY, correlationId).put(CLIENT_ID_HEADER_KEY, clientId));
+    }
+
+    private String extractIPAddress(ServerWebExchange exchange) {
+        String ipAddress = null;
+        if (exchange.getRequest().getHeaders().containsKey(ALB_SOURCE_IP_HEADER_KEY) && !exchange.getRequest().getHeaders().get(ALB_SOURCE_IP_HEADER_KEY).isEmpty()) {
+            ipAddress = exchange.getRequest().getHeaders().get(ALB_SOURCE_IP_HEADER_KEY).get(0);
+        }
+        return ipAddress;
     }
 }
