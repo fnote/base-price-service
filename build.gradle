@@ -63,8 +63,6 @@ sonarqube {
         props.each { prop ->
             property "${prop.key}", "${prop.value}"
         }
-        property "sonar.host.url", "https://cqc.cloud.sysco.net/"
-        property "sonar.login", "cf4cad31a4dca0479b1bc384d0c1a4e7e8e588d7"
         property "sonar.scm.forceReloadAll", "true"
         property 'sonar.core.codeCoveragePlugin', 'jacoco'
         property 'sonar.coverage.jacoco.xmlReportPaths', "${buildDir}/reports/jacoco.xml"
