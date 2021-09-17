@@ -13,6 +13,7 @@ import reactor.core.scheduler.Schedulers;
 import reactor.util.context.Context;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.sysco.rps.common.Constants.CLIENT_ID_HEADER_KEY;
@@ -61,8 +62,9 @@ public class RequestIDFilter implements WebFilter {
 
     private String extractIPAddress(ServerWebExchange exchange) {
         String ipAddress = null;
-        if (exchange.getRequest().getHeaders().containsKey(ALB_SOURCE_IP_HEADER_KEY) && !exchange.getRequest().getHeaders().get(ALB_SOURCE_IP_HEADER_KEY).isEmpty()) {
-            ipAddress = exchange.getRequest().getHeaders().get(ALB_SOURCE_IP_HEADER_KEY).get(0);
+        Optional<List<String>> optionalSourceIpList = Optional.ofNullable(exchange.getRequest().getHeaders().get(ALB_SOURCE_IP_HEADER_KEY));
+        if (optionalSourceIpList.isPresent() && !optionalSourceIpList.get().isEmpty()) {
+            ipAddress = optionalSourceIpList.get().get(0);
         }
         return ipAddress;
     }
