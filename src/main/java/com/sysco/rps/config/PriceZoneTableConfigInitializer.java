@@ -56,9 +56,11 @@ public class PriceZoneTableConfigInitializer {
                     assert masterDataRecordMap != null;
                     PriceZoneMasterDataRecord active = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_ACTIVE);
                     PriceZoneMasterDataRecord history = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_HISTORY);
+                    PriceZoneMasterDataRecord future = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_FUTURE);
                     String historyTableName = history != null ? history.getTableName() : active.getTableName();
+                    String futureTableName = future != null ? future.getTableName() : active.getTableName();
                     return new PriceZoneTableConfig(businessUnit.getBusinessUnitNumber(), active.getTableName(),
-                            historyTableName, active.getEffectiveDate());
+                            historyTableName, futureTableName, active.getEffectiveDate());
 
                 })
                 .collectMap(PriceZoneTableConfig::getBusinessUnitNumber)

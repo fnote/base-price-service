@@ -1,5 +1,6 @@
 package com.sysco.rps.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.info.Info;
 import org.springframework.boot.actuate.info.InfoContributor;
@@ -21,6 +22,9 @@ public class RPSInfoContributor implements InfoContributor {
 
     private Environment env;
 
+    @Autowired
+    private Map<String, PriceZoneTableConfig> initPriceZoneTableConfig;
+
     public RPSInfoContributor(Environment env) {
         this.env = env;
     }
@@ -32,5 +36,6 @@ public class RPSInfoContributor implements InfoContributor {
         infoAttributes.put("activeProfile", Arrays.toString(env.getActiveProfiles()));
 
         builder.withDetail("configs", infoAttributes);
+        builder.withDetail("priceZoneMasterData", initPriceZoneTableConfig.values());
     }
 }
