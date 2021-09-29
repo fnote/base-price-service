@@ -23,7 +23,7 @@ public class RPSInfoContributor implements InfoContributor {
     private Environment env;
 
     @Autowired
-    private Map<String, PriceZoneTableConfig> initPriceZoneTableConfig;
+    private Map<String, PriceZoneTableConfig> priceZoneMasterData;
 
     public RPSInfoContributor(Environment env) {
         this.env = env;
@@ -36,6 +36,6 @@ public class RPSInfoContributor implements InfoContributor {
         infoAttributes.put("activeProfile", Arrays.toString(env.getActiveProfiles()));
 
         builder.withDetail("configs", infoAttributes);
-        builder.withDetail("priceZoneMasterData", initPriceZoneTableConfig.values());
+        builder.withDetail("priceZoneMasterData", priceZoneMasterData.values());
     }
 }
