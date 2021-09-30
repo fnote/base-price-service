@@ -1,6 +1,7 @@
 package com.sysco.rps.config;
 
 import com.sysco.rps.common.Constants;
+import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.repository.common.RoutingConnectionFactory;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
 import org.slf4j.Logger;
@@ -80,8 +81,11 @@ public class PriceZoneTableTestConfigInitializer {
                     PriceZoneMasterDataRecord active = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_ACTIVE);
                     PriceZoneMasterDataRecord history = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_HISTORY);
                     PriceZoneMasterDataRecord future = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_FUTURE);
-                    String historyTableName = history != null ? history.getTableName() : active.getTableName();
-                    String futureTableName = future != null ? future.getTableName() : active.getTableName();
+                    String historyTableName = history != null ? history.getTableName() : null;
+                    String futureTableName = future != null ? future.getTableName() : null;
+                    if (historyTableName == null || futureTableName == null) {
+                        throw new RefPriceAPIException(null, "", "HistoryTable and FutureTable info is not present in the PriceZoneMasterDataTable.");
+                    }
                     return new PriceZoneTableConfig(businessUnit.getBusinessUnitNumber(), active.getTableName(),
                           historyTableName, futureTableName, active.getEffectiveDate());
 
