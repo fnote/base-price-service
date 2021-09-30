@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Main class to bootstrap the app
@@ -14,6 +15,7 @@ import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
  */
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @EnableR2dbcRepositories
+@EnableScheduling
 public class ReferencePriceService {
 
     public static void main(String[] args) {

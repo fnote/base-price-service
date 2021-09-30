@@ -16,6 +16,7 @@ public class Constants {
     public static final String DEFAULT_PRICE_ZONE = "3";
     public static final String METRICS_LOGGER = "metricsLogger";
     public static final String ALB_SOURCE_IP_HEADER_KEY = "x-forwarded-for";
+    public static final Long SCHEDULER_REFRESH_INTERVAL = 30000L;
 
     private Constants() {
         // default constructor
