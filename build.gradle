@@ -94,7 +94,6 @@ jacocoTestReport {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'junit:junit:4.12'
     runtimeOnly 'dev.miku:r2dbc-mysql'
     runtimeOnly 'mysql:mysql-connector-java'
 
