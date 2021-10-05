@@ -7,19 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import static com.sysco.rps.common.Constants.SCHEDULER_REFRESH_INTERVAL;
-
 @Component
 public class PriceZoneTableConfigReloader {
 
     private static Logger logger = LoggerFactory.getLogger(PriceZoneTableConfigReloader.class);
 
-    @Autowired
     private MasterDataService masterDataService;
 
-    @Scheduled(fixedRate = SCHEDULER_REFRESH_INTERVAL)
+    @Autowired
+    public PriceZoneTableConfigReloader(MasterDataService masterDataService) {
+        this.masterDataService = masterDataService;
+    }
+
+    @Scheduled(fixedRate = 1800000)
     public void reloadPriceZoneTableConfig() {
         masterDataService.refreshPriceZoneMasterData().block();
         logger.info("PriceZoneMasterData has been reloaded.");
     }
+
 }
