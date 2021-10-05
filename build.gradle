@@ -94,6 +94,7 @@ jacocoTestReport {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'junit:junit:4.12'
     runtimeOnly 'dev.miku:r2dbc-mysql'
     runtimeOnly 'mysql:mysql-connector-java'
 
@@ -145,6 +146,8 @@ dependencies {
     implementation group: 'org.aspectj', name: 'aspectjweaver', version: '1.9.5'
 
     testImplementation group: 'com.sysco.pricing', name: 'junit-qcenter-integrator', version: '1.0-SNAPSHOT'
+
+    testImplementation group: 'org.awaitility', name: 'awaitility', version: '3.1.6'
 }
 
 test {
