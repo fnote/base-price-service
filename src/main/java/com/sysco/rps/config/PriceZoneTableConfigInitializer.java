@@ -13,6 +13,7 @@ import reactor.util.context.Context;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
 
@@ -58,18 +59,21 @@ public class PriceZoneTableConfigInitializer {
                     PriceZoneMasterDataRecord active = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_ACTIVE);
                     PriceZoneMasterDataRecord history = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_HISTORY);
                     PriceZoneMasterDataRecord future = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_FUTURE);
-                    String historyTableName = history != null ? history.getTableName() : null;
-                    String futureTableName = future != null ? future.getTableName() : null;
-                    if (historyTableName == null || futureTableName == null) {
-                        throw new RefPriceAPIException(null, "", "HistoryTable and FutureTable info is not present in the PriceZoneMasterDataTable.");
-                    }
+                    checkIsPriceZoneTableDataNull(active, history, future);
+
                     return new PriceZoneTableConfig(businessUnit.getBusinessUnitNumber(), active.getTableName(),
-                          historyTableName, futureTableName, active.getEffectiveDate());
+                          history.getTableName(), future.getTableName(), active.getEffectiveDate());
 
                 })
                 .collectMap(PriceZoneTableConfig::getBusinessUnitNumber)
                 .block();
 
+    }
+
+    private void checkIsPriceZoneTableDataNull(Object... tables ) {
+        for (Object table : tables) {
+            Objects.requireNonNull(table, "Active/Future/History Table info is not present in the PriceZoneMasterDataTable");
+        }
     }
 
 }
