@@ -69,6 +69,7 @@ public class Constants {
         public static final String COLUMN_EFFECTIVE_DATE = "EFFECTIVE_DATE";
         public static final String PRICE_ZONE_TABLE_TYPE_ACTIVE = "ACTIVE";
         public static final String PRICE_ZONE_TABLE_TYPE_HISTORY = "HISTORY";
+        public static final String PRICE_ZONE_TABLE_TYPE_FUTURE = "FUTURE";
 
         private DBNames() {
             // default constructor

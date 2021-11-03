@@ -1,6 +1,7 @@
 package com.sysco.rps.config;
 
 import com.sysco.rps.common.Constants;
+import com.sysco.rps.exceptions.RefPriceAPIException;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,7 @@ import reactor.util.context.Context;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.sysco.rps.common.Constants.ROUTING_KEY;
 
@@ -56,14 +58,22 @@ public class PriceZoneTableConfigInitializer {
                     assert masterDataRecordMap != null;
                     PriceZoneMasterDataRecord active = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_ACTIVE);
                     PriceZoneMasterDataRecord history = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_HISTORY);
-                    String historyTableName = history != null ? history.getTableName() : active.getTableName();
+                    PriceZoneMasterDataRecord future = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_FUTURE);
+                    checkIsPriceZoneTableDataNull(active, history, future);
+
                     return new PriceZoneTableConfig(businessUnit.getBusinessUnitNumber(), active.getTableName(),
-                            historyTableName, active.getEffectiveDate());
+                          history.getTableName(), future.getTableName(), active.getEffectiveDate());
 
                 })
                 .collectMap(PriceZoneTableConfig::getBusinessUnitNumber)
                 .block();
 
+    }
+
+    private void checkIsPriceZoneTableDataNull(Object... tables ) {
+        for (Object table : tables) {
+            Objects.requireNonNull(table, "Active/Future/History Table info is not present in the PriceZoneMasterDataTable");
+        }
     }
 
 }

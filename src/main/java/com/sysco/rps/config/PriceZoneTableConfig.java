@@ -14,13 +14,15 @@ public class PriceZoneTableConfig {
     private String businessUnitNumber;
     private String activeTable;
     private String historyTable;
+    private String futureTable;
     private LocalDateTime activeTableEffectiveDate;
 
     public PriceZoneTableConfig(String businessUnitNumber, String activeTable, String historyTable,
-                                LocalDateTime activeTableEffectiveDate) {
+                                String futureTable, LocalDateTime activeTableEffectiveDate) {
         this.businessUnitNumber = businessUnitNumber;
         this.activeTable = activeTable;
         this.historyTable = historyTable;
+        this.futureTable = futureTable;
         this.activeTableEffectiveDate = activeTableEffectiveDate;
     }
 
@@ -47,6 +49,10 @@ public class PriceZoneTableConfig {
     public void setHistoryTable(String historyTable) {
         this.historyTable = historyTable;
     }
+
+    public String getFutureTable() { return futureTable; }
+
+    public void setFutureTable(String futureTable) { this.futureTable = futureTable; }
 
     public LocalDateTime getActiveTableEffectiveDate() {
         return activeTableEffectiveDate;
