@@ -29,7 +29,7 @@ public class MasterDataUtils {
                 history.getTableName(), future.getTableName(), active.getEffectiveDate());
     }
 
-    private static void checkIsPriceZoneTableDataNull(Object... tables ) {
+    private static void checkIsPriceZoneTableDataNull(Object... tables) {
         for (Object table : tables) {
             Objects.requireNonNull(table, "Active/Future/History Table info is not present in the PriceZoneMasterDataTable");
         }
