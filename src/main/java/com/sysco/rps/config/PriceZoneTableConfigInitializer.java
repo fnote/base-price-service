@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Profile;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Configuration class for initializing Map<String, PriceZoneTableConfig> bean.
@@ -45,6 +46,12 @@ public class PriceZoneTableConfigInitializer {
                 .collectMap(PriceZoneTableConfig::getBusinessUnitNumber)
                 .block();
 
+    }
+
+    private void checkIsPriceZoneTableDataNull(Object... tables ) {
+        for (Object table : tables) {
+            Objects.requireNonNull(table, "Active/Future/History Table info is not present in the PriceZoneMasterDataTable");
+        }
     }
 
 }
