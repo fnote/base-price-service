@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class PriceZoneTableConfigReloader {
 
-    private static Logger logger = LoggerFactory.getLogger(PriceZoneTableConfigReloader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PriceZoneTableConfigReloader.class);
 
-    private MasterDataService masterDataService;
+    private final MasterDataService masterDataService;
 
     @Autowired
     public PriceZoneTableConfigReloader(MasterDataService masterDataService) {
@@ -22,7 +22,7 @@ public class PriceZoneTableConfigReloader {
     @Scheduled(fixedRate = 1800000)
     public void reloadPriceZoneTableConfig() {
         masterDataService.refreshPriceZoneMasterData().block();
-        logger.info("PriceZoneMasterData has been reloaded.");
+        LOGGER.info("PriceZoneMasterData has been reloaded.");
     }
 
 }
