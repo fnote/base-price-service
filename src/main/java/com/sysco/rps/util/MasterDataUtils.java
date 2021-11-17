@@ -22,8 +22,17 @@ public class MasterDataUtils {
         Objects.requireNonNull(masterDataRecordMap);
         PriceZoneMasterDataRecord active = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_ACTIVE);
         PriceZoneMasterDataRecord history = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_HISTORY);
-        String historyTableName = history != null ? history.getTableName() : active.getTableName();
-        return new PriceZoneTableConfig(businessUnit.getBusinessUnitNumber(), active.getTableName(), historyTableName,
-                active.getEffectiveDate());
+        PriceZoneMasterDataRecord future = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_FUTURE);
+        checkIsPriceZoneTableDataNull(active, history, future);
+
+        return new PriceZoneTableConfig(businessUnit.getBusinessUnitNumber(), active.getTableName(),
+                history.getTableName(), future.getTableName(), active.getEffectiveDate());
     }
+
+    private static void checkIsPriceZoneTableDataNull(Object... tables ) {
+        for (Object table : tables) {
+            Objects.requireNonNull(table, "Active/Future/History Table info is not present in the PriceZoneMasterDataTable");
+        }
+    }
+
 }
