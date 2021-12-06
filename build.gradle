@@ -143,6 +143,8 @@ dependencies {
     implementation group: 'org.aspectj', name: 'aspectjweaver', version: '1.9.5'
 
     testImplementation group: 'com.sysco.pricing', name: 'junit-qcenter-integrator', version: '1.0-SNAPSHOT'
+
+    testImplementation group: 'org.awaitility', name: 'awaitility', version: '3.1.6'
 }
 
 test {

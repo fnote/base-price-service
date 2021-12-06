@@ -1,21 +1,15 @@
 package com.sysco.rps.config;
 
-import com.sysco.rps.common.Constants;
-import com.sysco.rps.exceptions.RefPriceAPIException;
+import com.sysco.rps.repository.refpricing.MasterDataRepository;
 import com.sysco.rps.service.loader.BusinessUnitLoaderService;
+import com.sysco.rps.util.MasterDataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.r2dbc.core.DatabaseClient;
 import reactor.core.publisher.Flux;
-import reactor.util.context.Context;
 
-import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Objects;
-
-import static com.sysco.rps.common.Constants.ROUTING_KEY;
 
 /**
  * Configuration class for initializing Map<String, PriceZoneTableConfig> bean.
@@ -28,16 +22,14 @@ import static com.sysco.rps.common.Constants.ROUTING_KEY;
 @Configuration
 public class PriceZoneTableConfigInitializer {
 
-    private static final String MASTER_DATA_FETCHING_QUERY = "SELECT * FROM " + Constants.DBNames.PRICE_ZONE_MASTER_DATA;
-
-    private final DatabaseClient databaseClient;
+    private final MasterDataRepository masterDataRepository;
 
     private final BusinessUnitLoaderService businessUnitLoaderService;
 
     @Autowired
-    public PriceZoneTableConfigInitializer(DatabaseClient databaseClient,
+    public PriceZoneTableConfigInitializer(MasterDataRepository masterDataRepository,
                                            BusinessUnitLoaderService businessUnitLoaderService) {
-        this.databaseClient = databaseClient;
+        this.masterDataRepository = masterDataRepository;
         this.businessUnitLoaderService = businessUnitLoaderService;
     }
 
@@ -45,35 +37,14 @@ public class PriceZoneTableConfigInitializer {
     public Map<String, PriceZoneTableConfig> initPriceZoneTableConfig() {
         return Flux.fromIterable(businessUnitLoaderService.loadBusinessUnitList())
                 .map(businessUnit -> {
-                    Map<String, PriceZoneMasterDataRecord> masterDataRecordMap = databaseClient.execute(MASTER_DATA_FETCHING_QUERY)
-                            .map(row -> new PriceZoneMasterDataRecord(row.get(Constants.DBNames.COLUMN_TABLE_TYPE, String.class),
-                                    row.get(Constants.DBNames.COLUMN_TABLE_NAME, String.class),
-                                    row.get(Constants.DBNames.COLUMN_EFFECTIVE_DATE, LocalDateTime.class)
-                                    ))
-                            .all()
-                            .subscriberContext(Context.of(ROUTING_KEY, businessUnit.getBusinessUnitNumber()))
-                            .collectMap(PriceZoneMasterDataRecord::getTableType)
+                    Map<String, PriceZoneMasterDataRecord> masterDataRecordMap = masterDataRepository
+                            .getPZMasterDataByOpCo(businessUnit)
                             .block();
-
-                    assert masterDataRecordMap != null;
-                    PriceZoneMasterDataRecord active = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_ACTIVE);
-                    PriceZoneMasterDataRecord history = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_HISTORY);
-                    PriceZoneMasterDataRecord future = masterDataRecordMap.get(Constants.DBNames.PRICE_ZONE_TABLE_TYPE_FUTURE);
-                    checkIsPriceZoneTableDataNull(active, history, future);
-
-                    return new PriceZoneTableConfig(businessUnit.getBusinessUnitNumber(), active.getTableName(),
-                          history.getTableName(), future.getTableName(), active.getEffectiveDate());
-
+                    return MasterDataUtils.constructPriceZoneTableConfig(businessUnit, masterDataRecordMap);
                 })
                 .collectMap(PriceZoneTableConfig::getBusinessUnitNumber)
                 .block();
 
-    }
-
-    private void checkIsPriceZoneTableDataNull(Object... tables ) {
-        for (Object table : tables) {
-            Objects.requireNonNull(table, "Active/Future/History Table info is not present in the PriceZoneMasterDataTable");
-        }
     }
 
 }
